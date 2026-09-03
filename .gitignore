@@ -1,0 +1,186 @@
+# ==============================================================================
+# .gitignore - Stake Engine Monorepo Template
+# Stack: Svelte 5 + PixiJS 8 (Frontend) | Python + Rust (Math SDK) | Playwright (QA)
+# Arquitectura: Monorepo multijuego (Kash Smash, Kash Rampage Extreme, etc.)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. MONOREPO ROOT & PACKAGE MANAGERS (pnpm / Node / Turbo)
+# ------------------------------------------------------------------------------
+node_modules/
+**/node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+
+# Turborepo & Build Cache
+.turbo/
+
+# ------------------------------------------------------------------------------
+# 2. FRONTEND (Svelte 5, SvelteKit, Vite, PixiJS 8)
+# ------------------------------------------------------------------------------
+# SvelteKit & Vite outputs
+.svelte-kit/
+build/
+**/build/
+dist/
+**/dist/
+out/
+**/out/
+
+# Storybook
+storybook-static/
+build-storybook.log
+
+# Raw audio/dev resources before compilation/spritesheet packing (Stake SDK)
+stake-web-sdk/apps/**/src/game/resources/
+stake-web-sdk/apps/**/src/game/sounds/
+
+# Deployment provider previews
+.vercel/
+
+# ------------------------------------------------------------------------------
+# 3. MATH SDK & OPTIMIZER (Python & Rust)
+# ------------------------------------------------------------------------------
+# Python Virtual Environments
+.venv/
+**/.venv/
+venv/
+**/venv/
+env/
+**/env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python Bytecode & Caches
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+.eggs/
+
+# Rust Optimizer Compilation Artifacts
+target/
+**/target/
+**/*.rs.bk
+
+# ------------------------------------------------------------------------------
+# 4. CASINO MATH RUNS, LOGS & INTERMEDIATE SIMULATIONS
+# (Solo los artefactos finales certificados en publish_files/ se trackean con LFS)
+# ------------------------------------------------------------------------------
+# Math simulation logs & run outputs
+*.log
+run_*.log
+**/run_*.log
+**/library/**/*.log
+
+# Math optimizer intermediate iterations & scratch trials
+**/library/optimization_files/
+**/library/trial_results/
+**/library/forces/scratch/
+**/library/scratch/
+
+# Excel temporary lock files (generados durante edición)
+~$*.xlsx
+~$*.xls
+
+# Profiler & memory dumps
+*.prof
+*.pstats
+
+# ------------------------------------------------------------------------------
+# 5. ADMIN CONTROL PANEL (ACP) & PACKAGING ARTIFACTS
+# ------------------------------------------------------------------------------
+# Frontend ZIP packages prepared for Stake ACP upload
+frontend_*.zip
+frontend.zip
+**/frontend_*.zip
+**/acp_builds/
+release_packages/
+
+# Local HTTP zipserve temporary testing directories
+/tmp/zipserve/
+tmp/zipserve/
+**/tmp/zipserve/
+
+# ------------------------------------------------------------------------------
+# 6. QA SCRIPTS, PLAYWRIGHT & LOCAL MOCK RGS (.scripts/)
+# ------------------------------------------------------------------------------
+# Playwright test outputs
+test-results/
+**/test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+**/test-videos/
+**/test-report/
+
+# Allure Reports
+allure-results/
+allure-report/
+**/allure-results/
+**/allure-report/
+
+# Local Mock RGS & Smoke Test Local Logs
+mock_rgs.log
+.scripts/*.log
+qa_artifacts/
+
+# ------------------------------------------------------------------------------
+# 7. SECRETS, ENVIRONMENT VARIABLES & COMPLIANCE
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+secrets.json
+credentials.json
+
+# ------------------------------------------------------------------------------
+# 8. OPERATING SYSTEMS & IDES
+# ------------------------------------------------------------------------------
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# IDEs: VS Code & JetBrains
+.idea/
+*.iml
+*.iws
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# System crash dumps
+core
+sysinfo.txt

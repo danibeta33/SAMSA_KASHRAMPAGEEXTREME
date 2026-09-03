@@ -1,0 +1,130 @@
+# ==============================================================================
+# .gitattributes - Stake Engine Monorepo Template
+# Normalización de saltos de línea (LF) y Git LFS para Math SDK y PixiJS Assets
+# Stack: Svelte 5 + PixiJS 8 (Frontend) | Python + Rust (Math SDK) | Playwright (QA)
+# Arquitectura: Monorepo multijuego (Kash Smash, Kash Rampage Extreme, etc.)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. NORMALIZACIÓN DE SALTOS DE LÍNEA (LF obligatorio para Pipelines y Linux RGS)
+# ------------------------------------------------------------------------------
+# Configuración global por defecto: Git detecta texto y normaliza a LF en repo
+* text=auto eol=lf
+
+# Scripts ejecutables en Linux / CI / Docker (CRÍTICO: CRLF rompe shebangs)
+*.sh                    text eol=lf
+*.bash                  text eol=lf
+
+# Código fuente del Frontend y QA
+*.svelte                text eol=lf
+*.ts                    text eol=lf
+*.js                    text eol=lf
+*.cjs                   text eol=lf
+*.mjs                   text eol=lf
+*.html                  text eol=lf
+*.css                   text eol=lf
+*.scss                  text eol=lf
+
+# Código fuente del Math SDK y herramientas
+*.py                    text eol=lf
+*.rs                    text eol=lf
+
+# Archivos de configuración y documentación
+*.json                  text eol=lf
+*.yaml                  text eol=lf
+*.yml                   text eol=lf
+*.toml                  text eol=lf
+*.md                    text eol=lf
+*.txt                   text eol=lf
+
+# Helpers específicos para desarrolladores en entornos Windows
+*.bat                   text eol=crlf
+*.cmd                   text eol=crlf
+
+# ------------------------------------------------------------------------------
+# 2. DEFINICIÓN DEL MACRO GIT LFS
+# ------------------------------------------------------------------------------
+[attr]lfs filter=lfs diff=lfs merge=lfs -text
+
+# ------------------------------------------------------------------------------
+# 3. MATH SDK: ARCHIVOS PESADOS DE SIMULACIÓN MATEMÁTICA Y REGULACIÓN
+# ------------------------------------------------------------------------------
+# Libros de eventos comprimidos en ZStandard (hasta 400-600+ MB por modo de juego)
+*.jsonl.zst             lfs
+*.zst                   lfs
+*.zstandard             lfs
+
+# Lookup Tables (LUTs) de producción en CSV (millones de líneas por simulación)
+*.csv                   lfs
+
+# Formatos columnares / binarios de cálculo científico y machine learning
+*.parquet               lfs
+*.arrow                 lfs
+*.feather               lfs
+*.h5                    lfs
+*.hdf5                  lfs
+*.npy                   lfs
+*.npz                   lfs
+
+# Reportes matemáticos y auditorías de volatilidad/RTP
+*.xlsx                  lfs
+*.xls                   lfs
+
+# ------------------------------------------------------------------------------
+# 4. FRONTEND: ASSETS ESTÁTICOS VISUALES Y MULTIMEDIA (PixiJS 8)
+# ------------------------------------------------------------------------------
+# Texturas rasterizadas y atlas de sprites PixiJS
+*.png                   lfs
+*.jpg                   lfs
+*.jpeg                  lfs
+*.webp                  lfs
+*.avif                  lfs
+*.gif                   lfs
+*.bmp                   lfs
+*.tiff                  lfs
+*.tga                   lfs
+
+# Texturas comprimidas por hardware (GPU Texture Formats)
+*.ktx                   lfs
+*.ktx2                  lfs
+*.dds                   lfs
+
+# Audio del juego (FX, música ambiental, loops de free spins, anticipaciones)
+*.mp3                   lfs
+*.m4a                   lfs
+*.ogg                   lfs
+*.wav                   lfs
+*.flac                  lfs
+*.aac                   lfs
+
+# Video (cinemáticas de entrada, big wins, intros de bonus)
+*.mp4                   lfs
+*.webm                  lfs
+*.mov                   lfs
+
+# Animaciones esqueléticas 2D (Spine 2D para PixiJS)
+*.skel                  lfs
+*.skel.bytes            lfs
+*.atlas                 lfs
+*.spine                 lfs
+
+# Tipografías y fuentes web
+*.ttf                   lfs
+*.otf                   lfs
+*.woff                  lfs
+*.woff2                 lfs
+*.eot                   lfs
+
+# Documentos gráficos y archivos de diseño fuente
+*.pdf                   lfs
+*.psd                   lfs
+*.ai                    lfs
+
+# ------------------------------------------------------------------------------
+# 5. OPTIMIZACIÓN DE PULL REQUESTS Y ESTADÍSTICAS (GitHub Linguist)
+# ------------------------------------------------------------------------------
+pnpm-lock.yaml          linguist-generated
+Cargo.lock              linguist-generated
+package-lock.json       linguist-generated
+*.min.js                linguist-generated
+*.min.css               linguist-generated
