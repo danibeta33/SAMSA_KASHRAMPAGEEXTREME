@@ -1,0 +1,78 @@
+body {
+	font-family: 'Europa', sans-serif;
+	cursor: default;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+:root {
+	--scrollbar-size: 6px;
+	--grey: #cccccc;
+
+	--kash-lime: #d4ff3a;
+	--kash-pink: #ec4899;
+	--kash-teal: #14b8a6;
+	--kash-dark: #0d0c0a;
+	--kash-graybluish: #1a1c20;
+	--kash-textmuted: #a8b97a;
+	--kash-line: rgba(212, 255, 58, 0.25);
+	--kash-glow: 0 0 12px rgba(212, 255, 58, 0.35), 0 0 24px rgba(236, 72, 153, 0.18);
+	--kash-pink-glow: 0 4px 18px rgba(236, 72, 153, 0.35);
+}
+
+.scrollY {
+	overflow-y: auto;
+	overflow-x: hidden;
+	min-height: 0;
+	/* https://stackoverflow.com/questions/28636832/firefox-overflow-y-not-working-with-nested-flexbox */
+	-webkit-overflow-scrolling: touch;
+	-webkit-overflow-scroll: touch;
+
+	scrollbar-width: thin;
+}
+
+.scrollX {
+	overflow-x: auto;
+	overflow-y: hidden;
+	-webkit-overflow-scrolling: touch;
+	transform: translate3d(0, 0, 0);
+	/* https://discussions.apple.com/thread/7677586 🤷‍♂️ */
+	-moz-transform: none !important;
+	scrollbar-width: thin;
+}
+
+.hide-scrollbar {
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+.scrollX,
+.scrollY {
+	scrollbar-color: var(--grey) transparent;
+}
+
+.scrollX::-webkit-scrollbar {
+	height: var(--scrollbar-size);
+}
+
+.scrollY::-webkit-scrollbar {
+	width: var(--scrollbar-size);
+}
+
+.scrollY::-webkit-scrollbar-thumb,
+.scrollX::-webkit-scrollbar-thumb {
+	background: var(--grey);
+	border-radius: 10px;
+}
+
+.scroll-light {
+	scrollbar-color: var(--grey) transparent;
+}
+
+.scroll-light::-webkit-scrollbar-thumb {
+	background: var(--grey);
+}

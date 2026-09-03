@@ -1,0 +1,118 @@
+{
+    "workingName": "Kash Rampage Extreme",
+    "frontendConfig": {
+        "file": "fe_config.json",
+        "sha256": "2e61f90a8d87839d0cec3d175493d24bd79c5c82ce4b5d21b93dcf0b46b2b308"
+    },
+    "gameID": "kash_rampage_extreme",
+    "rtp": 96.5,
+    "betDenomination": 1000,
+    "minDenomination": 10,
+    "providerNumber": 0,
+    "standardForceFile": {
+        "file": "force.json",
+        "sha256": "ea6855c94046841f71d05cb267dd135e097fc40c823cad01c0173915988f4852"
+    },
+    "bookShelfConfig": [
+        {
+            "name": "base",
+            "tables": [
+                {
+                    "file": "lookUpTable_base_0.csv",
+                    "sha256": "9708596048ade5bb0c99c98be28efc29926527c3e612d2211c12615e86385c8f"
+                }
+            ],
+            "cost": 1.0,
+            "rtp": 0.965,
+            "std": 26.7,
+            "bookLength": 100000,
+            "feature": true,
+            "autoEndRoundDisabled": false,
+            "buyBonus": false,
+            "maxWin": 5000.0,
+            "booksFile": {
+                "file": "books_base.jsonl.zst",
+                "sha256": "ea8b6bbff8ff9d56e744c47bbd1d15618eb8ef2df6919fe27f5498f9e977db5f"
+            },
+            "forceFile": {
+                "file": "force_record_base.json",
+                "sha256": "685903d3c0c546477a238603ec7686b41ef699fdb9761a8768653f7acd079fe1"
+            }
+        },
+        {
+            "name": "vault_crack",
+            "tables": [
+                {
+                    "file": "lookUpTable_vault_crack_0.csv",
+                    "sha256": "dadf44647f1ec688f9e91a3078a3ce7da06df453fb0b73da22e0f724f0721bb1"
+                }
+            ],
+            "cost": 100.0,
+            "rtp": 0.965,
+            "std": 1.39,
+            "bookLength": 250000,
+            "feature": true,
+            "autoEndRoundDisabled": false,
+            "buyBonus": true,
+            "maxWin": 5000.0,
+            "booksFile": {
+                "file": "books_vault_crack.jsonl.zst",
+                "sha256": "f78ac8b1ec9eb48382f6ebd7cb62f249f73fedf1f77cbb23065e236938328e08"
+            },
+            "forceFile": {
+                "file": "force_record_vault_crack.json",
+                "sha256": "857ac28765fafe9cc22604382bed580c3d5df8aea7dbba3c2134096652a96c0c"
+            }
+        },
+        {
+            "name": "smash_mode",
+            "tables": [
+                {
+                    "file": "lookUpTable_smash_mode_0.csv",
+                    "sha256": "e532424f2edfb999231a485c653b412cf761d7899525d56572bb161ff4d6bef8"
+                }
+            ],
+            "cost": 250.0,
+            "rtp": 0.965,
+            "std": 1.44,
+            "bookLength": 250000,
+            "feature": true,
+            "autoEndRoundDisabled": false,
+            "buyBonus": true,
+            "maxWin": 5000.0,
+            "booksFile": {
+                "file": "books_smash_mode.jsonl.zst",
+                "sha256": "215d2da60fe30d182fcaaa32c97eb49fb6e8f26bb966913fb59f8c3ed3b31d2c"
+            },
+            "forceFile": {
+                "file": "force_record_smash_mode.json",
+                "sha256": "e325fcd040ca9c72bb20be169d4d6164196199c8fe3315c2b1285f450dd2d3fb"
+            }
+        },
+        {
+            "name": "rage_mode",
+            "tables": [
+                {
+                    "file": "lookUpTable_rage_mode_0.csv",
+                    "sha256": "7b7be6a5178bf26c5478bce7e1573edb0adb5e4b1bf0758029df29fb9e512b70"
+                }
+            ],
+            "cost": 500.0,
+            "rtp": 0.965,
+            "std": 1.17,
+            "bookLength": 250000,
+            "feature": true,
+            "autoEndRoundDisabled": false,
+            "buyBonus": true,
+            "maxWin": 5000.0,
+            "booksFile": {
+                "file": "books_rage_mode.jsonl.zst",
+                "sha256": "e6b55f83a6256912ae5a65679439bf47a01ce6e06d2201ec3087be60cb337b21"
+            },
+            "forceFile": {
+                "file": "force_record_rage_mode.json",
+                "sha256": "e4b848c465ef8552e70258f0ea8eae8c4439d6d697bf4e9b6c7cb38dd7257e6b"
+            }
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+{
+    "modes": [
+        {
+            "name": "base",
+            "cost": 1.0,
+            "events": "books_base.jsonl.zst",
+            "weights": "lookUpTable_base_0.csv"
+        },
+        {
+            "name": "vault_crack",
+            "cost": 100.0,
+            "events": "books_vault_crack.jsonl.zst",
+            "weights": "lookUpTable_vault_crack_0.csv"
+        },
+        {
+            "name": "smash_mode",
+            "cost": 250.0,
+            "events": "books_smash_mode.jsonl.zst",
+            "weights": "lookUpTable_smash_mode_0.csv"
+        },
+        {
+            "name": "rage_mode",
+            "cost": 500.0,
+            "events": "books_rage_mode.jsonl.zst",
+            "weights": "lookUpTable_rage_mode_0.csv"
+        }
+    ]
+}

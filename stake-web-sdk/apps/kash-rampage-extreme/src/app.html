@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
+		<link rel="stylesheet" href="%sveltekit.assets%/assets/fonts/europa.css" />
+		<link rel="preload" href="%sveltekit.assets%/assets/fonts/EuropaBold.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="%sveltekit.assets%/assets/fonts/EuropaRegular.woff2" as="font" type="font/woff2" crossorigin />
+		<meta name="viewport" content="width=device-width" />
+		%sveltekit.head%
+	</head>
+	<body style="margin: 0; padding: 0; overflow: hidden; background-color: black">
+		<!-- Force the browser to load Europa weights synchronously before Pixi paints,
+		     otherwise Pixi.Text snapshots the default sans-serif fallback into its texture cache. -->
+		<div style="position: absolute; left: -9999px; top: -9999px; font-family: 'Europa';">
+			<span style="font-weight: 300;">A</span>
+			<span style="font-weight: 400;">A</span>
+			<span style="font-weight: 700;">A</span>
+			<span style="font-weight: 900;">A</span>
+		</div>
+		<div>%sveltekit.body%</div>
+	</body>
+</html>

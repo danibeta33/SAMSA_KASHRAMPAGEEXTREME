@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>KASH RAMPAGE EXTREME — Lo que falta v2</title>
+<style>
+  @page { margin: 16mm 14mm; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #1a1a1a; font-size: 11.5px; line-height: 1.55; margin: 0; }
+  h1 { font-size: 21px; border-bottom: 3px solid #d32b25; padding-bottom: 8px; margin: 0 0 4px; }
+  .meta { color: #555; margin-bottom: 18px; }
+  h2 { font-size: 15px; background: #111; color: #fff; padding: 6px 10px; border-left: 6px solid #d32b25; margin: 26px 0 10px; page-break-after: avoid; }
+  h3 { font-size: 12.5px; margin: 18px 0 6px; page-break-after: avoid; }
+  code { background: #f2f2f2; padding: 1px 4px; border-radius: 3px; font-family: "SF Mono", Menlo, monospace; font-size: 10px; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10px; }
+  th, td { border: 1px solid #ccc; padding: 4px 7px; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin-bottom: 3px; }
+  blockquote { border-left: 4px solid #ffb300; background: #fff8e6; margin: 10px 0; padding: 6px 12px; color: #444; }
+  .tldr { background: #fff5f5; border: 1px solid #f0b9b7; border-radius: 6px; padding: 10px 16px; margin-bottom: 14px; }
+  .shot { margin: 8px 0 4px; page-break-inside: avoid; }
+  .shot img { width: 100%; border-radius: 6px; border: 2px solid #ddd; display: block; }
+  .shot figcaption { font-size: 9.5px; color: #777; padding: 3px 2px; }
+  .tag { display: inline-block; font-size: 9px; font-weight: 700; border-radius: 3px; padding: 1px 6px; vertical-align: 1px; }
+  .tag.css { background: #fdecea; color: #c62828; }        /* sin diseñar */
+  .tag.mix { background: #fff8e6; color: #b26a00; }        /* arte + texto programático */
+  .tag.ok  { background: #e8f5e9; color: #2e7d32; }        /* integrado / contexto */
+  .tag.dec { background: #ede7f6; color: #5e35b1; }        /* decisión de dirección */
+  .cols { display: flex; gap: 12px; page-break-inside: avoid; }
+  .cols > div { flex: 1; }
+</style>
+</head>
+<body>
+
+<h1>KASH RAMPAGE EXTREME — Lo que falta <span style="color:#888; font-weight:400;">(v2 · pedido a arte con pantallazos)</span></h1>
+
+<h2>Inventario</h2>
+<table>
+<tr><th>#</th><th>Elemento</th><th>Estado</th><th>Dónde</th></tr>
+<tr><td>A.1</td><td><strong>Logo oficial + portada</strong> (hay spec en GDD §Portada: Kash ~65% alto, bóveda con resplandor rojo)</td><td>Sin diseñar ★</td><td><code>LoadingOverlay</code></td></tr>
+<tr><td>B.1</td><td>TopBar: título texto + cajas BALANCE / LAST WIN / TUMBLE</td><td>Sin diseñar</td><td><code>TopBar.svelte</code></td></tr>
+<tr><td>B.2</td><td>Chip BONUS (la botonera sí es arte)</td><td>Mixto</td><td><code>BottomBar.svelte</code></td></tr>
+<tr><td>C.1</td><td>Menú hamburguesa (MENU / PAYTABLE / GAME RULES / SOUND)</td><td>Sin diseñar</td><td><code>MenuOverlay</code></td></tr>
+<tr><td>C.2</td><td>Paytable — sprites reales, layout HTML</td><td>Sin diseñar</td><td><code>Game.svelte</code></td></tr>
+<tr><td>C.3</td><td>Game rules — texto plano</td><td>Sin diseñar</td><td><code>Game.svelte</code></td></tr>
+<tr><td>C.4</td><td>Sound settings — sliders CSS</td><td>Sin diseñar</td><td><code>SettingsOverlay</code></td></tr>
+<tr><td>C.5</td><td>Bet menu (BET AMOUNT, grid, MAX, CONFIRM)</td><td>Sin diseñar</td><td><code>BetMenuOverlay</code></td></tr>
+<tr><td>C.6</td><td>Bet replay (la cara de las rondas compartidas en el chat de Stake)</td><td>Sin diseñar</td><td><code>ReplayOverlay</code></td></tr>
+<tr><td>C.7</td><td>Auto spins — integrado 26-08; falta solo el bloque ADVANCED</td><td>Integrado</td><td><code>AutoSpinOverlay</code></td></tr>
+<tr><td>D.1</td><td>Buy bonus full-screen — integrado 26-08</td><td>Integrado</td><td><code>BuyBonusOverlay</code></td></tr>
+<tr><td>D.2</td><td>Detalle del modo (COST / CANCEL / BUY) + ARE YOU SURE (emojis ❌✅)</td><td>Sin diseñar</td><td><code>BuyConfirmOverlay</code></td></tr>
+<tr><td>E.1</td><td>Letterings de win — arte KS1 violeta (recolor o nuevos)</td><td>Mixto</td><td><code>Win.svelte</code></td></tr>
+<tr><td>E.2</td><td>FS intro/outro: paneles arte + contador/total programáticos</td><td>Mixto</td><td><code>FreeSpinIntro/Outro</code></td></tr>
+<tr><td>E.3</td><td><strong>HUD del bonus: FREE SPIN N/M + montos cluster + TUMBLE ×N — candidato #1</strong></td><td>Sin diseñar ★</td><td><code>FreeSpinCounter</code> etc.</td></tr>
+<tr><td>E.4</td><td><strong>LUZ del WILD</strong> — es el único símbolo que queda sin resalte en clusters</td><td>Falta arte ★</td><td>kit Icons_Luz</td></tr>
+<tr><td>E.5</td><td>Celebración KASH RAMPAGE de 6 beats (GDD §9.1)</td><td>Sin diseñar</td><td>nuevo componente</td></tr>
+<tr><td>F</td><td>Arte de juego pendiente (recolors, clips de Kash, fondos, audio) — ver sección F</td><td>—</td><td>—</td></tr>
+</table>
+
+<h2>A. Flujo de carga</h2>
+<h3>A.1 Logo oficial + portada <span class="tag css">SIN DISEÑAR ★</span></h3>
+<ul>
+  <li>El lockup <strong>KASH RAMPAGE EXTREME</strong> del loader sigue siendo un placeholder compuesto por código; "CLICK TO CONTINUE" es texto plano.</li>
+  <li>Spec ya escrita en el GDD (§Nueva Portada): Kash en primer plano ~65% del alto, pose agresiva a mitad de swing, bóveda abierta con resplandor rojo, sin grafiti en el fondo del thumbnail. Sirve para loader, portada y marketing.</li>
+</ul>
+<figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/loader.jpg" alt="Loader"><figcaption>Loader actual: fondo real + lockup placeholder.</figcaption></figure>
+
+<h2>B. Base game — HUD permanente</h2>
+<h3>B.1 TopBar + B.2 chip BONUS <span class="tag css">SIN DISEÑAR</span> / <span class="tag mix">MIXTO</span></h3>
+<ul>
+  <li><strong>Título "KASH RAMPAGE EXTREME"</strong>: texto plano (candidato: logo chico horizontal, sale del pedido A.1). <strong>BALANCE / LAST WIN / TUMBLE ×1</strong>: texto sin placa.</li>
+  <li><strong>Chip BONUS</strong>: pill CSS. La botonera (SPIN/STOP/TURBO/AUTO, bet pill, dock, iconos) ya es arte limpio de los re-exports 26-08.</li>
+</ul>
+<figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/idle.jpg" alt="Idle"><figcaption>Idle actual: board con iconos nuevos, marco con glow, botonera limpia — TopBar y chip BONUS por código.</figcaption></figure>
+
+<h2>C. Menús y modales de sistema</h2>
+<blockquote><strong>Referencia de estilo:</strong> las pantallas ya integradas de AUTO SPINS y BUY BONUS (abajo) — fondo bóveda, cajas con borde fino, botón amarillo primario.</blockquote>
+
+<h3>C.1–C.5 Menú · Paytable · Rules · Sound · Bet menu <span class="tag css">SIN DISEÑAR</span></h3>
+<div class="cols">
+  <div><figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/menu.jpg" alt="Menu"><figcaption>C.1 Menú: panel y botones CSS.</figcaption></figure></div>
+  <div><figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/settings.jpg" alt="Sound"><figcaption>C.4 Sound: sliders CSS.</figcaption></figure></div>
+</div>
+<div class="cols">
+  <div><figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/paytable.jpg" alt="Paytable"><figcaption>C.2 Paytable: sprites reales del kit, tablas HTML.</figcaption></figure></div>
+  <div><figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/rules.jpg" alt="Rules"><figcaption>C.3 Rules: texto plano.</figcaption></figure></div>
+</div>
+<figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/betmenu.jpg" alt="Bet menu"><figcaption>C.5 Bet menu: grid de montos, MAX y CONFIRM por código.</figcaption></figure>
+
+<h3>C.6 Bet replay <span class="tag css">SIN DISEÑAR</span></h3>
+<ul><li>Card con datos + Start Replay: todo CSS. Es lo que ve la gente cuando alguien comparte una ronda en el chat de Stake — vale vestirla.</li></ul>
+<figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/replay.jpg" alt="Replay"><figcaption>ReplayOverlay actual.</figcaption></figure>
+
+<h3>C.7 Auto spins <span class="tag ok">INTEGRADO 26-08</span></h3>
+<ul><li>Despiece integrado (fondo, lockup, cajas, START, X). <strong>Falta solo</strong>: diseño del bloque ADVANCED (loss/single win limit — hoy chips CSS) y, si se quiere, variante "seleccionada" de las cajas (hoy brillo+glow por código).</li></ul>
+<figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/autospins.jpg" alt="Autospins"><figcaption>En juego hoy.</figcaption></figure>
+
+<h2>D. Buy bonus</h2>
+<h3>D.1 Modal de compra <span class="tag ok">INTEGRADO 26-08</span> · D.2 confirmaciones <span class="tag css">SIN DISEÑAR</span></h3>
+<ul>
+  <li>La pantalla de compra ya es el artboard full-screen (bóveda + watermark KASH + cards). El costo es programático por diseño.</li>
+  <li><strong>Falta el doble check</strong>: detalle del modo (caja COST, CANCEL/BUY) y ARE YOU SURE con <strong>emojis ❌✅ de sistema</strong> — lo más crudo del flujo de plata.</li>
+</ul>
+<figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/buy.jpg" alt="Buy"><figcaption>Buy bonus en juego (integrado).</figcaption></figure>
+<div class="cols">
+  <div><figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/buy_detail.jpg" alt="Detalle"><figcaption>D.2 Detalle del modo: CSS.</figcaption></figure></div>
+  <div><figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/buy_confirm.jpg" alt="Are you sure"><figcaption>D.2 ARE YOU SURE: emojis de sistema.</figcaption></figure></div>
+</div>
+
+<h2>E. Wins, bonus y mecánica</h2>
+
+<h3>E.1 Letterings de win <span class="tag mix">MIXTO</span></h3>
+<ul><li>BIG WIN etc. son arte <strong>de la paleta KS1</strong> (violeta/dorado) — pedir recolor o versiones nuevas. El monto es texto con stroke (programático por diseño).</li></ul>
+<figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/win_big.jpg" alt="Big win"><figcaption>BIG WIN con lettering KS1.</figcaption></figure>
+
+<h3>E.2 FS intro / outro <span class="tag mix">MIXTO</span></h3>
+<div class="cols">
+  <div><figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/fs_intro.jpg" alt="FS intro"><figcaption>Panel arte ✔ + contador programático.</figcaption></figure></div>
+  <div><figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/fs_outro.jpg" alt="FS outro"><figcaption>Outro con total win programático.</figcaption></figure></div>
+</div>
+
+<h3>E.3 HUD del bonus <span class="tag css">SIN DISEÑAR ★</span></h3>
+<ul>
+  <li><strong>Badge "FREE SPIN N/M"</strong>, <strong>montos flotantes de cluster</strong> y el <strong>TUMBLE ×N</strong>: todo texto/CSS — la identidad visual del bonus durante todo el feature. Candidato #1.</li>
+  <li>Hay arte parcial disponible: badges circulares <strong>X1–X5</strong> activo/inactivo (piezas <code>RS-10…19</code>, ya con alpha limpio) — falta decidir cómo mapean a la curva de tumble (supera ×5) e integrarlos. <span class="tag dec">DECISIÓN</span></li>
+</ul>
+<figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/bonus_hud.jpg" alt="Bonus HUD"><figcaption>Free spins en curso: contador, montos y multiplicador programáticos.</figcaption></figure>
+
+<h3>E.4 Luz del WILD <span class="tag css">FALTA ARTE ★</span></h3>
+<ul>
+  <li>El resalte de cluster ya es la <strong>carta iluminada</strong> del kit (se ve abajo) y funciona para los 10 regulares. El <strong>WILD no tiene versión luz</strong> — quedó sin resalte propio dentro del cluster (se lee solo por el atenuado del resto). Pedir la carta luz del bate (y confirmar que el scatter no la necesita — no participa en clusters).</li>
+</ul>
+<figure class="shot"><img src="UI_SIN_DISENO_KRE_v2_img/cluster_luz.jpg" alt="Cluster luz"><figcaption>Cluster ganador hoy: cartas luz encendidas + resto atenuado; el wild queda sin resalte propio.</figcaption></figure>
+
+<h3>E.5 Celebración KASH RAMPAGE (6 beats) <span class="tag css">SIN DISEÑAR</span></h3>
+<ul>
+  <li>Spec completa en GDD §9.1: flash rojo→dorado · stamp tipográfico "KASH RAMPAGE" (más pesado que el SMASH win) · reacción del entorno · <strong>pose de reacción de Kash nueva</strong> (bat slam / roar) · partículas rojo+dorado · roll-up. Hoy el rampage remata con la celebración estándar.</li>
+  <li>El batazo mecánico ya está implementado (swing + estallido de símbolos + caída) — esto es la capa de CELEBRACIÓN encima.</li>
+</ul>
+
+<h2>F. Arte de juego pendiente (consolidado — reemplaza ASSETS_FALTANTES 25-08)</h2>
+<table>
+<tr><th>#</th><th>Pedido</th><th>Detalle</th></tr>
+<tr><td>F.1</td><td><strong>Recolors high-tier</strong></td><td>Bluff (H1) y grafiti KASH (H4) a paleta roja — hoy juegan stand-ins del kit (Vial-rampage y Dinero). Incluye sus animaciones: grafiti premium animado, coin-flip del bate, win del KASH.</td></tr>
+<tr><td>F.2</td><td><strong>Luz del WILD</strong></td><td>Carta iluminada del bate (ver E.4).</td></tr>
+<tr><td>F.3</td><td><strong>Clips de Kash recoloreados</strong></td><td>Idles + swing con el outfit nuevo — el batazo del RAMPAGE usa hoy el swing KS1 (remera blanca) como provisorio.</td></tr>
+<tr><td>F.4</td><td><strong>Fondo banco con parallax</strong></td><td>GDD §11.1: hall del banco (base) vs cámara de la bóveda (bonus), mínimo 2 capas + versión mobile portrait. Hoy: una escena estática compartida.</td></tr>
+<tr><td>F.5</td><td><strong>Logo + portada</strong></td><td>Ver A.1 (spec en GDD).</td></tr>
+<tr><td>F.6</td><td><strong>Audio propio de KRE</strong></td><td>GDD §4.4: score de mayor tempo + <strong>stinger dedicado del KASH RAMPAGE</strong> + BGMs de winlevel (AU-05/06/07 nunca entregados). El pack KS1 quedó normalizado (-14 LUFS, mp3+m4a) como provisional digno.</td></tr>
+<tr><td>F.7</td><td><strong>Letterings de win</strong></td><td>Recolor de BIG/MEGA/MAX WIN (violeta KS1) o versiones nuevas (ver E.1).</td></tr>
+<tr><td>F.8</td><td>Decisiones de dirección <span class="tag dec">DECISIÓN</span></td><td>· Badges X1–X5 → ¿display del tumble multiplier? (E.3)<br>· <code>RS-36</code> (wipe de brochazos amarillos full-screen, pieza nueva 26-08) → ¿cortina de transición?<br>· <code>RS-37</code> (marco cómic de estallido) → descartado del win por dirección; ¿reutilizar en la celebración del rampage (E.5)?</td></tr>
+</table>
+
+<h2>Notas</h2>
+<ul>
+  <li>Los VALORES (bet, balance, count-up, costos) son programáticos por diseño — lo diseñable es tipografía/placa, no el número.</li>
+  <li>★ es sugerencia dev; la prioridad la decide dirección.</li>
+  <li>Nada de la sección C bloquea el submit por sí solo (el patrón de modales pasó el approval de Kash Smash). F.1–F.3 son lo más visible del juego que sigue en arte provisorio.</li>
+</ul>
+
+</body>
+</html>
