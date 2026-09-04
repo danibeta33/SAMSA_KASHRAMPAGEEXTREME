@@ -29,8 +29,8 @@
 <Container>
 	{#each context.stateGame.board as reel, reelIndex (reelIndex)}
 		<Container filters={reel.reelState.motion !== 'stopped' ? [blurFilters[reelIndex]] : null}>
-			{#each reel.reelState.symbols as reelSymbol}
-				<ReelSymbol {reelIndex} {reelSymbol} />
+			{#each reel.reelState.symbols as reelSymbol, symbolIndex}
+				<ReelSymbol {reelIndex} {symbolIndex} {reelSymbol} />
 			{/each}
 		</Container>
 	{/each}

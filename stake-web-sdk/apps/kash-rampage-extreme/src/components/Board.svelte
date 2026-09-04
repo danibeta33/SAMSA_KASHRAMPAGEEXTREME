@@ -13,8 +13,11 @@
 
 <script lang="ts">
 	import { BoardContext } from 'components-shared';
+	import { waitForTimeout } from 'utils-shared/wait';
 
 	import { getContext } from '../game/context';
+	import { getSymbolInfo } from '../game/utils';
+	import { playWinFlash, clearWinFlash } from '../game/winFlash.svelte';
 	import { stateWinHighlight } from '../game/stateWinHighlight.svelte';
 	import BoardContainer from './BoardContainer.svelte';
 	import BoardMask from './BoardMask.svelte';
@@ -29,11 +32,13 @@
 		stopButtonClick: () => context.stateGameDerived.enhancedBoard.stop(),
 		boardSettle: ({ board }) => {
 			stateWinHighlight.active = false;
+			clearWinFlash();
 			context.stateGameDerived.enhancedBoard.settle(board);
 		},
 		boardShow: () => (show = true),
 		boardHide: () => {
 			stateWinHighlight.active = false;
+			clearWinFlash();
 			show = false;
 		},
 		boardWithAnimateSymbols: async ({ symbolPositions }) => {
@@ -44,7 +49,23 @@
 				const reelSymbol = context.stateGame.board[position.reel]?.reelState.symbols[position.row];
 				if (reelSymbol) reelSymbol.symbolState = 'win';
 			});
-			await new Promise<void>((resolve) => setTimeout(resolve, 250));
+			// Brillo + flash + boing en cascada (winFlash.svelte.ts). Los
+			// especiales quedan afuera: corren su propio spritesheet.
+			// Piso de 250ms (el hold que había antes): un cluster de PURO especial
+			// —el caso de los SCATTER— no anima nada acá y sin el piso la
+			// presentación pasaría de largo sin que se lea.
+			await Promise.all([
+				playWinFlash({
+					positions: symbolPositions,
+					getSymbolInfo: (position) => {
+						const reelSymbol =
+							context.stateGame.board[position.reel]?.reelState.symbols[position.row];
+						if (!reelSymbol) return undefined;
+						return getSymbolInfo({ rawSymbol: reelSymbol.rawSymbol, state: 'win' });
+					},
+				}),
+				waitForTimeout(250),
+			]);
 			symbolPositions.forEach((position) => {
 				const reelSymbol = context.stateGame.board[position.reel]?.reelState.symbols[position.row];
 				if (reelSymbol) reelSymbol.symbolState = 'postWinStatic';

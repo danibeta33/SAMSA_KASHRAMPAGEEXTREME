@@ -18,6 +18,7 @@
 	import { stateUiTweak } from '../game/stateUiTweak.svelte';
 	import { stateWinHighlight } from '../game/stateWinHighlight.svelte';
 	import type { SelfAnimatedAssetKey, WinPop } from '../game/winPop.svelte';
+	import type { WinFlashCell } from '../game/winFlash.svelte';
 
 	type Props = {
 		x?: number;
@@ -29,6 +30,9 @@
 		// Tweens del pop/boing de cluster ganador (winPop.svelte.ts). Se aplican
 		// al Container DEL SPRITE — la celda (SymbolWrap) queda intacta.
 		winPop?: WinPop;
+		// Tweens del feedback de victoria (winFlash.svelte.ts): alpha del
+		// brillo trasero + escala del ícono, en contenedores SEPARADOS.
+		winFlash?: WinFlashCell;
 	};
 
 	const props: Props = $props();
@@ -190,6 +194,21 @@
 	const winScale = $derived(props.winPop?.scale.current ?? 1);
 	const winRotation = $derived(props.winPop?.rotation.current ?? 0);
 
+	// Feedback de victoria (cascada de Board.svelte):
+	//  · glowAlpha → SOLO el alpha del sprite de brillo trasero. Sin secuencia
+	//    activa cae al comportamiento aprobado (26-08): carta luz a full en
+	//    win/postWinStatic/explosion, apagada en el resto.
+	//  · flashScale → SOLO la escala del ícono, en su propio Container: el
+	//    brillo no escala (si no, el halo respira y pisa la celda vecina) y la
+	//    celda tampoco (eso movería la grilla).
+	const glowAlpha = $derived(props.winFlash?.glow.current ?? (isWinning ? 1 : 0));
+	const flashScale = $derived(props.winFlash?.scale.current ?? 1);
+	// Sin secuencia activa la carta luz SUSTITUYE al ícono — es el resalte
+	// aprobado el 26-08 (y el caso de los especiales, que quedan fuera de la
+	// cascada). Con secuencia, el ícono se dibuja ENCIMA del brillo para que
+	// el boing tenga algo que golpear.
+	const glowReplacesIcon = $derived(!props.winFlash && isWinning && luzReady);
+
 	// POP de aparición SOLO para WILD y SCATTER (resaltan al caer). Bounce de
 	// escala al montar el símbolo (~250ms). Premium/H4 no popea.
 	let pop = $state(1);
@@ -258,12 +277,18 @@
 	</Container>
 {:else}
 	<Container x={props.x} y={props.y} scale={winScale} rotation={winRotation} alpha={dimmed ? 0.3 : 1}>
-		{#if isWinning && luzReady}
-			<!-- Carta iluminada del kit: trae su propio marco + glow — es TODO
-			     el resalte del cluster. -->
-			<Sprite anchor={0.5} key={luzKey} width={luzW} height={luzH} />
-		{:else}
-			<Sprite anchor={0.5} key={props.symbolInfo.assetKey} width={w} height={h} />
+		{#if luzReady && glowAlpha > 0}
+			<!-- BRILLO TRASERO: la carta iluminada del kit (marco + glow
+			     horneado) va PRIMERA = detrás del ícono, con su propio alpha y
+			     SIN escala — el boing es del ícono, no del halo. -->
+			<Sprite anchor={0.5} key={luzKey} width={luzW} height={luzH} alpha={glowAlpha} />
+		{/if}
+		{#if !glowReplacesIcon}
+			<!-- SPRITE PRINCIPAL en su propio Container: acá y solo acá vive la
+			     escala del boing (0.85 → 1.15). -->
+			<Container scale={flashScale}>
+				<Sprite anchor={0.5} key={props.symbolInfo.assetKey} width={w} height={h} />
+			</Container>
 		{/if}
 	</Container>
 {/if}
