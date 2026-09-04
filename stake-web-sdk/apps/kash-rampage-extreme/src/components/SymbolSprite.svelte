@@ -17,6 +17,7 @@
 	// Multiplicador global de tamaño de símbolos, tweakeable en vivo (UiLab).
 	import { stateUiTweak } from '../game/stateUiTweak.svelte';
 	import { stateWinHighlight } from '../game/stateWinHighlight.svelte';
+	import type { SelfAnimatedAssetKey, WinPop } from '../game/winPop.svelte';
 
 	type Props = {
 		x?: number;
@@ -25,6 +26,9 @@
 		symbolState?: SymbolState;
 		rawSymbol?: RawSymbol;
 		oncomplete?: () => void;
+		// Tweens del pop/boing de cluster ganador (winPop.svelte.ts). Se aplican
+		// al Container DEL SPRITE — la celda (SymbolWrap) queda intacta.
+		winPop?: WinPop;
 	};
 
 	const props: Props = $props();
@@ -80,7 +84,9 @@
 		center: { x: number; y: number };
 		box: number;
 	};
-	const ANIM_SPECIAL: Record<string, AnimSpecial> = {
+	// Tipado contra SELF_ANIMATED_ASSET_KEYS: son exactamente los íconos que
+	// winPop saltea por tener clip propio.
+	const ANIM_SPECIAL: Record<SelfAnimatedAssetKey, AnimSpecial> = {
 		// bate WILD — arte 169×205 en (41,51); cuelga abajo (center.y 0.600)
 		sym_w: {
 			key: 'anim_sym_wild',
@@ -107,7 +113,9 @@
 		},
 	};
 	const appContext = getContextApp();
-	const special = $derived(ANIM_SPECIAL[props.symbolInfo.assetKey]);
+	const special = $derived(
+		ANIM_SPECIAL[props.symbolInfo.assetKey as SelfAnimatedAssetKey] as AnimSpecial | undefined,
+	);
 	// Solo animar cuando el sheet ya cargó (no preload); si no, cae al estático.
 	const specialReady = $derived(
 		!!special &&
@@ -137,7 +145,11 @@
 	// tenemos las versiones de luz"). Mientras el highlight global está
 	// activo, el resto del board se atenúa para que salten.
 	const isWinning = $derived(
-		props.symbolState === 'win' || props.symbolState === 'postWinStatic',
+		props.symbolState === 'win' ||
+			props.symbolState === 'postWinStatic' ||
+			// El pop de salida arranca desde la carta iluminada — sin esto el
+			// símbolo volvía al estático en el frame justo antes del boing.
+			props.symbolState === 'explosion',
 	);
 	const dimmed = $derived(
 		stateWinHighlight.active && !isWinning && props.symbolState === 'static',
@@ -173,6 +185,11 @@
 	// (halo lima y win_overlay eliminados 26-08 — la carta luz ES el resalte
 	// del cluster; el W sin luz se lee por el dim del resto del board)
 
+	// Pop/boing del cluster ganador: se multiplica con el pop de aparición y
+	// gira el sprite en su propio centro (los hijos van con anchor 0.5).
+	const winScale = $derived(props.winPop?.scale.current ?? 1);
+	const winRotation = $derived(props.winPop?.rotation.current ?? 0);
+
 	// POP de aparición SOLO para WILD y SCATTER (resaltan al caer). Bounce de
 	// escala al montar el símbolo (~250ms). Premium/H4 no popea.
 	let pop = $state(1);
@@ -194,7 +211,7 @@
 </script>
 
 {#if isWireframe}
-	<Container x={props.x} y={props.y}>
+	<Container x={props.x} y={props.y} scale={winScale} rotation={winRotation}>
 		<!-- filled tile -->
 		<Rectangle
 			x={-w / 2}
@@ -226,7 +243,7 @@
 	     SCALE del Container wrapper — NUNCA en el width del SpriteSheet: bindear
 	     el width a un valor que cambia FRENA la animación (bug: wild/scatter
 	     quedaban estáticos). El width del sheet queda constante y sí anima. -->
-	<Container x={props.x} y={props.y} scale={pop} alpha={dimmed ? 0.3 : 1}>
+	<Container x={props.x} y={props.y} scale={pop * winScale} rotation={winRotation} alpha={dimmed ? 0.3 : 1}>
 		<SpriteSheet
 			anchor={0.5}
 			x={specialOffsetX}
@@ -240,7 +257,7 @@
 		/>
 	</Container>
 {:else}
-	<Container x={props.x} y={props.y} alpha={dimmed ? 0.3 : 1}>
+	<Container x={props.x} y={props.y} scale={winScale} rotation={winRotation} alpha={dimmed ? 0.3 : 1}>
 		{#if isWinning && luzReady}
 			<!-- Carta iluminada del kit: trae su propio marco + glow — es TODO
 			     el resalte del cluster. -->

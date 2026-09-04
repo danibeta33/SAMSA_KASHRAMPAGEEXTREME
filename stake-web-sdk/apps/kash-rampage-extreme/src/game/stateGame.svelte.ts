@@ -6,6 +6,7 @@ import { createEnhanceBoard, createReelForSpinning } from 'utils-slots';
 import { createGetWinLevelDataByWinLevelAlias } from 'utils-shared/winLevel';
 
 import type { GameType, RawSymbol, SymbolState } from './types';
+import type { WinPop } from './winPop.svelte';
 import { stateLayoutDerived } from './stateLayout';
 import { winLevelMap } from './winLevelMap';
 import { eventEmitter } from './eventEmitter';
@@ -73,6 +74,9 @@ export type TumbleSymbol = {
 	rawSymbol: RawSymbol;
 	symbolState: SymbolState;
 	oncomplete: () => void;
+	// Pop/boing de salida del cluster ganador (ver winPop.svelte.ts). Vive por
+	// símbolo porque los tweens son estado propio del sprite, no del board.
+	winPop: WinPop;
 };
 
 export type MultiplierSymbol = {

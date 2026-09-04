@@ -5,6 +5,7 @@
 	import SymbolSpine from './SymbolSpine.svelte';
 	import SymbolSprite from './SymbolSprite.svelte';
 	import type { SymbolState, RawSymbol } from '../game/types';
+	import type { WinPop } from '../game/winPop.svelte';
 	import { getSymbolInfo } from '../game/utils';
 	import { getContext } from '../game/context';
 
@@ -15,6 +16,9 @@
 		rawSymbol: RawSymbol;
 		oncomplete?: () => void;
 		loop?: boolean;
+		// Pop de cluster ganador — solo lo trae el tumble board; el sprite es
+		// quien lo aplica (a sí mismo, no a la celda).
+		winPop?: WinPop;
 	};
 
 	const props: Props = $props();
@@ -34,6 +38,7 @@
 		x={props.x}
 		y={props.y}
 		oncomplete={props.oncomplete}
+		winPop={props.winPop}
 	/>
 {:else}
 	<SymbolSpine

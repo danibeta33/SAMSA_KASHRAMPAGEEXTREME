@@ -25,7 +25,8 @@
 	import TumbleBoardBase from './TumbleBoardBase.svelte';
 	import BoardContainer from './BoardContainer.svelte';
 	import BoardMask from './BoardMask.svelte';
-	import { getSymbolY } from '../game/utils';
+	import { getSymbolY, getSymbolInfo } from '../game/utils';
+	import { createWinPop } from '../game/winPop.svelte';
 	import { getContext } from '../game/context';
 	import { stateWinHighlight } from '../game/stateWinHighlight.svelte';
 
@@ -42,6 +43,7 @@
 			rawSymbol,
 			symbolState: 'static' as const,
 			oncomplete,
+			winPop: createWinPop(),
 		});
 
 		return tumbleSymbol;
@@ -93,11 +95,23 @@
 			// Fin del resalte de cluster: al explotar, el resto del board
 			// vuelve a alpha pleno (ver stateWinHighlight).
 			stateWinHighlight.active = false;
-			explodingPositions.forEach((position) => {
+			const pops = explodingPositions.map((position) => {
 				const tumbleSymbol = context.stateGame.tumbleBoardBase[position.reel]?.[position.row];
-				if (tumbleSymbol) tumbleSymbol.symbolState = 'explosion';
+				if (!tumbleSymbol) return Promise.resolve(false);
+				tumbleSymbol.symbolState = 'explosion';
+				// El pop corre sobre el sprite ganador (SymbolSprite lee los
+				// tweens); los especiales con clip propio resuelven de una y se
+				// quedan con su animación.
+				return tumbleSymbol.winPop.play({
+					symbolInfo: getSymbolInfo({ rawSymbol: tumbleSymbol.rawSymbol, state: 'explosion' }),
+				});
 			});
-			await new Promise<void>((resolve) => setTimeout(resolve, 220));
+			// Piso de 220ms: es lo que dura el gesto de los especiales (que no
+			// popean) y mantiene el pacing anterior cuando el cluster es todo W/S.
+			await Promise.all([
+				...pops,
+				new Promise<void>((resolve) => setTimeout(resolve, 220)),
+			]);
 		},
 		tumbleBoardRemoveExploded: () => {
 			context.stateGame.tumbleBoardBase.forEach((tumbleReel, reelIndex) => {

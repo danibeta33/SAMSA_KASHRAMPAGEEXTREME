@@ -27,5 +27,6 @@
 		state={props.tumbleSymbol.symbolState}
 		rawSymbol={props.tumbleSymbol.rawSymbol}
 		oncomplete={props.tumbleSymbol.oncomplete}
+		winPop={props.tumbleSymbol.winPop}
 	/>
 </SymbolWrap>
