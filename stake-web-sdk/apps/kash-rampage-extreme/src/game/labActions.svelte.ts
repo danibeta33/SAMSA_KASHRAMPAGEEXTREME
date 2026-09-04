@@ -53,10 +53,17 @@ const KASH_CLIPS = [
 	{ label: 'SWING (batea) 🏏', clip: 'anim_kash_swing' },
 ];
 
+// El alias tiene que ser el REAL del winLevelMap: Win.svelte mapea alias → tier
+// de arte (tierFromAlias), y varios alias comparten cartel. Un botón rotulado
+// MEGA con alias 'superwin' mostraba el cartel BIG — el sheet mega no se podía
+// ver desde el lab. Se listan los 4 carteles + los 2 alias que comparten arte
+// pero cambian sonido y ritmo, para poder revisarlos por separado.
 const WINS = [
 	{ label: 'SMALL WIN', alias: 'small', amount: 2_300 },
 	{ label: 'BIG WIN', alias: 'big', amount: 12_000 },
-	{ label: 'MEGA WIN', alias: 'superwin', amount: 150_000 },
+	{ label: 'SUPER WIN (cartel BIG)', alias: 'superwin', amount: 45_000 },
+	{ label: 'MEGA WIN', alias: 'mega', amount: 150_000 },
+	{ label: 'EPIC WIN (cartel MEGA)', alias: 'epic', amount: 800_000 },
 	{ label: 'MAX WIN', alias: 'max', amount: 5_000_000 },
 ];
 

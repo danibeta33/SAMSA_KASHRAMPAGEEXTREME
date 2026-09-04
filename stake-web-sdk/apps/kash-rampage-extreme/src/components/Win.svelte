@@ -15,7 +15,7 @@
 	// CRITICAL: `winUpdate` must always resolve, otherwise
 	// bookEventHandlerMap.setWin hangs. All async paths below preserve that.
 	import { onDestroy, onMount } from 'svelte';
-	import { Container, Rectangle, SpriteSheet, Text } from 'pixi-svelte';
+	import { Container, Rectangle, SpriteSheet, Text, getContextApp } from 'pixi-svelte';
 	import { FadeContainer } from 'components-pixi';
 	import { moneyWinFromBookAmount } from '../game/money';
 
@@ -86,6 +86,16 @@
 		max: { countUpDuration: 4000, bgDim: 0.72, holdMs: 3800, shakeOnHit: 30, flashPeak: 0.6 },
 	};
 
+	// Los epic (100×–cap) usan el cartel MEGA pero con presentación
+	// intensificada (a mitad de camino del MAX) — así el rango alto se
+	// distingue sin necesitar arte propio. Se extrae a función porque la
+	// ventana en pantalla (countUp + hold) ahora también decide el fps del
+	// lettering: el handler y el render tienen que leer LA MISMA config.
+	const cfgFor = (data: WinLevelData | undefined): TierConfig =>
+		data?.alias === 'epic'
+			? { ...TIER_CONFIG.mega, countUpDuration: 3000, holdMs: 3400, shakeOnHit: 26, bgDim: 0.63 }
+			: TIER_CONFIG[tierFromAlias(data?.alias)];
+
 	const COUNT_UP_STEPS = 24;
 
 	const runCountUp = async (target: number, duration: number) => {
@@ -130,14 +140,7 @@
 		},
 		winUpdate: async (emitterEvent) => {
 			winLevelData = emitterEvent.winLevelData;
-			const tier = tierFromAlias(winLevelData?.alias);
-			// Los epic (100×–cap) usan el cartel MEGA pero con presentación
-			// intensificada (a mitad de camino del MAX) — así el rango alto se
-			// distingue sin necesitar arte propio.
-			const cfg =
-				winLevelData?.alias === 'epic'
-					? { ...TIER_CONFIG.mega, countUpDuration: 3000, holdMs: 3400, shakeOnHit: 26, bgDim: 0.63 }
-					: TIER_CONFIG[tier];
+			const cfg = cfgFor(winLevelData);
 
 			// Reset any prior animation state, then apply tier visuals.
 			clearAllTimers();
@@ -181,26 +184,107 @@
 
 	const tier = $derived(tierFromAlias(winLevelData?.alias));
 
-	// Lettering ANIMADO per tier (spritesheets del footage chroma, 16fps).
-	// Aspect = frame del sheet; big/mega/max son 1:1 porque el burst de
-	// rayos llena el cuadro.
-	const LETTERING: Record<Tier, { key: string; aspect: number }> = {
-		small: { key: 'anim_win_small', aspect: 403 / 284 },
-		big: { key: 'anim_win_big', aspect: 587 / 560 },
-		mega: { key: 'anim_win_mega', aspect: 678 / 455 },
-		max: { key: 'anim_win_max', aspect: 807 / 455 },
+	// Lettering ANIMADO per tier.
+	//
+	// ⚠ Drop 04-09: small/big/mega son TexturePacker TRIMMED (max sigue siendo
+	// el sheet viejo, sin recortar). PIXI le da a cada textura `orig` = el
+	// canvas COMPLETO y re-inyecta el recorte al pintar, así que el width/height
+	// del SpriteSheet dimensiona EL CANVAS, no el arte — y el arte no está
+	// centrado en ese canvas (big cae en x=0.526, small en y=0.530). Por eso
+	// cada tier trae la caja del arte medida del .json (unión de los
+	// `spriteSourceSize` de todos los frames, ignorando el frame vacío de 3×3
+	// que TexturePacker mete al inicio de small/big):
+	//   aspect = ancho/alto del ARTE · fill = fracción del canvas que ocupa ·
+	//   center = dónde cae su centro dentro del canvas.
+	// `meta.scale` (0.82/0.67/0.42) no entra en la cuenta: PIXI lo aplica como
+	// resolución y divide canvas y recorte por igual, así que las fracciones
+	// de arriba son invariantes.
+	type Lettering = {
+		key: string;
+		aspect: number;
+		fill: { w: number; h: number };
+		center: { x: number; y: number };
+	};
+	const LETTERING: Record<Tier, Lettering> = {
+		// canvas 1574×886 · arte 1236×584 en (153,178)
+		small: {
+			key: 'anim_win_small',
+			aspect: 1236 / 584,
+			fill: { w: 1236 / 1574, h: 584 / 886 },
+			center: { x: 771 / 1574, y: 470 / 886 },
+		},
+		// canvas 1286×763 · arte 1020×754 en (166,9) — corrido a la derecha
+		big: {
+			key: 'anim_win_big',
+			aspect: 1020 / 754,
+			fill: { w: 1020 / 1286, h: 754 / 763 },
+			center: { x: 676 / 1286, y: 386 / 763 },
+		},
+		// canvas 806×454 · arte 726×454 en (47,0) — a sangre en vertical
+		mega: {
+			key: 'anim_win_mega',
+			aspect: 726 / 454,
+			fill: { w: 726 / 806, h: 454 / 454 },
+			center: { x: 410 / 806, y: 227 / 454 },
+		},
+		// sheet viejo SIN recortar: el canvas ES el arte
+		max: {
+			key: 'anim_win_max',
+			aspect: 1024 / 576,
+			fill: { w: 1, h: 1 },
+			center: { x: 0.5, y: 0.5 },
+		},
 	};
 	const lettering = $derived(LETTERING[tier]);
 	// Tamaño por tier — mega/max bastante más grandes (pedido del usuario).
 	const TIER_SCALE: Record<Tier, number> = { small: 0.72, big: 0.92, mega: 1.14, max: 1.28 };
-	const letteringW = $derived(Math.min(sizes.width * 0.66, 880) * TIER_SCALE[tier]);
-	const letteringH = $derived(letteringW / lettering.aspect);
+	// La medida de referencia es el ancho del ARTE; el canvas se infla desde
+	// ahí dividiendo por el fill, y se corre para que el centro del arte (no el
+	// del canvas) quede en el medio de la pantalla.
+	const letteringArtW = $derived(Math.min(sizes.width * 0.66, 880) * TIER_SCALE[tier]);
+	const letteringArtH = $derived(letteringArtW / lettering.aspect);
+	const letteringSheetW = $derived(letteringArtW / lettering.fill.w);
+	const letteringSheetH = $derived(letteringArtH / lettering.fill.h);
+	const letteringOffsetX = $derived(-letteringSheetW * (lettering.center.x - 0.5));
+	// El -6% es el empujón de siempre para dejarle aire al monto abajo.
+	const letteringOffsetY = $derived(
+		-letteringSheetH * (lettering.center.y - 0.5) - letteringArtH * 0.06,
+	);
 	const amountSize = $derived(Math.min(sizes.width * 0.06, 78));
-	// SMALL/BIG una sola vez (quedan en el último frame); MEGA/MAX loopean el
-	// burst. Sheets remuestreados a la mitad (alta res) → 10fps mantiene la
-	// duración original.
-	const letteringLoop = $derived(tier === 'mega' || tier === 'max');
-	const letteringSpeed = 10 / 60;
+
+	// ── Velocidad de reproducción ────────────────────────────────────────
+	// Los sheets del drop 04-09 son clips CERRADOS: entran con fade-in, se
+	// sostienen y se van con fade-out (el último frame es transparente —
+	// medido: small 34→37, big 32→35, mega 51→53 caen a 0 de cobertura).
+	// Eso cambia dos cosas respecto de los sheets viejos:
+	//   · NO pueden loopear (el cartel parpadearía al reencender el fade-in);
+	//   · NO pueden quedarse en el último frame (quedaría vacío, con el monto
+	//     flotando solo en pantalla).
+	// La solución es calzar el clip a la ventana en la que el overlay está
+	// visible (countUp + hold) para que su fade-out coincida con el del
+	// overlay. El fps sale de la cantidad real de frames del sheet cargado,
+	// así un re-drop con otro largo se acomoda solo sin tocar código.
+	// MAX queda como estaba (sheet viejo, 22 frames en loop a 10fps).
+	const appContext = getContextApp();
+	const letteringFrames = $derived(
+		(
+			appContext.stateApp.loadedAssets?.[
+				lettering.key as keyof typeof appContext.stateApp.loadedAssets
+			] as unknown as unknown[] | undefined
+		)?.length ?? 0,
+	);
+	// Sin preload: hasta que el sheet no está, no se dibuja (evita el
+	// console.error de SpriteSheet por key faltante).
+	const letteringReady = $derived(letteringFrames > 0);
+	const activeCfg = $derived(cfgFor(winLevelData));
+	const letteringWindowMs = $derived(activeCfg.countUpDuration + activeCfg.holdMs);
+	const letteringLoop = $derived(tier === 'max');
+	const letteringFps = $derived(
+		letteringLoop || !letteringFrames
+			? 10
+			: Math.min(30, Math.max(8, (letteringFrames * 1000) / letteringWindowMs)),
+	);
+	const letteringSpeed = $derived(letteringFps / 60);
 </script>
 
 <FadeContainer {show}>
@@ -211,21 +295,24 @@
 		<!-- SIN scale: el usuario no quiere que el lettering crezca/achique.
 		     Los efectos son bgDim (foco) + shake del board + flash blanco. -->
 		<Container x={sizes.width / 2} y={sizes.height / 2}>
-			<SpriteSheet
-				key={lettering.key}
-				anchor={0.5}
-				y={-letteringH * 0.06}
-				width={letteringW}
-				height={letteringH}
-				animationSpeed={letteringSpeed}
-				loop={letteringLoop}
-				play={show}
-			/>
+			{#if letteringReady}
+				<SpriteSheet
+					key={lettering.key}
+					anchor={0.5}
+					x={letteringOffsetX}
+					y={letteringOffsetY}
+					width={letteringSheetW}
+					height={letteringSheetH}
+					animationSpeed={letteringSpeed}
+					loop={letteringLoop}
+					play={show}
+				/>
+			{/if}
 			<!-- Amount — SIN caja. Look "sticker": halo lima difuso detrás +
 			     texto con gradiente lima→blanco, stroke grueso oscuro y drop
 			     shadow marcado. Resalta sin recuadro. -->
 			{@const amtText = moneyWinFromBookAmount(displayAmount)}
-			{@const amtY = letteringH * 0.38}
+			{@const amtY = letteringArtH * 0.38}
 			<!-- halo lima (copia difusa detrás) -->
 			<Text
 				text={amtText}

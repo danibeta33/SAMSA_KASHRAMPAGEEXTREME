@@ -58,19 +58,53 @@
 
 	// Iconos especiales ANIMADOS: W (bate WILD), S (barra SCATTER), H4 (grafiti
 	// KASH PREMIUM). El static key del math (sym_w/sym_s/sym_h4) se mapea al
-	// spritesheet del equipo. aspect = w/h del frame recortado — se respeta para
-	// que las llamas/disco no se estiren. Loop a 10fps.
-	const ANIM_SPECIAL: Record<string, { key: string; aspect: number }> = {
-		// TODO-KRE (F3 arte): anim_sym_wild/anim_sym_scatter siguen con los
-		// colores KS1 (llamas cyan/lima) y pisarían los estáticos nuevos del kit
-		// 25-08 (bate en llamas rojas / barra SCATTER roja) al cargar. Vuelven
-		// cuando el equipo entregue los spritesheets recoloreados.
-		// sym_w: { key: 'anim_sym_wild', aspect: 170 / 202 },
-		// sym_s: { key: 'anim_sym_scatter', aspect: 173 / 254 },
-		// sym_h4 (26-08): anim_sym_premium es el grafiti KS1 violeta y pisaría
-		// el stand-in Dinero del kit ICONS PNG (pedido: solo iconos de Juanda).
-		// Vuelve cuando llegue el grafiti KASH recoloreado + su anim.
-		// sym_h4: { key: 'anim_sym_premium', aspect: 183 / 193 },
+	// spritesheet del equipo (drop 04-09: llamas rojas, ya en paleta con los
+	// estáticos del kit 25-08). Loop a 10fps.
+	//
+	// ⚠ Los sheets nuevos son TexturePacker TRIMMED sobre un canvas 256²: PIXI
+	// devuelve texturas con `orig` 256×256 (el recorte se re-inyecta al pintar),
+	// así que darle `width/height` al SpriteSheet dimensiona el CANVAS, no el
+	// arte. Y el arte no está centrado en ese canvas (el bate cuelga hacia
+	// abajo: centro y=0.60), así que con anchor 0.5 quedaba chico y corrido.
+	// Por eso cada entrada trae la caja del arte medida del .json —
+	// union de los `spriteSourceSize` de los 6 frames, normalizada al canvas:
+	//   aspect = ancho/alto del arte · fill = qué fracción del canvas ocupa ·
+	//   center = dónde cae su centro · box = lado mayor del ARTE en celdas.
+	// El `box` replica el sizeRatio del estático correspondiente para que el
+	// swap estático → animado (los sheets van sin preload) no dé un salto de
+	// tamaño en el board.
+	type AnimSpecial = {
+		key: string;
+		aspect: number;
+		fill: { w: number; h: number };
+		center: { x: number; y: number };
+		box: number;
+	};
+	const ANIM_SPECIAL: Record<string, AnimSpecial> = {
+		// bate WILD — arte 169×205 en (41,51); cuelga abajo (center.y 0.600)
+		sym_w: {
+			key: 'anim_sym_wild',
+			aspect: 169 / 205,
+			fill: { w: 169 / 256, h: 205 / 256 },
+			center: { x: 125.5 / 256, y: 153.5 / 256 },
+			box: 0.9, // = sizeRatios de sym_w
+		},
+		// barra SCATTER — arte 255×254 a sangre, prácticamente centrado
+		sym_s: {
+			key: 'anim_sym_scatter',
+			aspect: 255 / 254,
+			fill: { w: 255 / 256, h: 254 / 256 },
+			center: { x: 127.5 / 256, y: 127 / 256 },
+			box: 0.95, // = sizeRatios de sym_s
+		},
+		// grafiti KASH premium — arte 182×191 en (34,51), también bajo
+		sym_h4: {
+			key: 'anim_sym_premium',
+			aspect: 182 / 191,
+			fill: { w: 182 / 256, h: 191 / 256 },
+			center: { x: 125 / 256, y: 146.5 / 256 },
+			box: 0.8, // = sizeRatios de sym_h4
+		},
 	};
 	const appContext = getContextApp();
 	const special = $derived(ANIM_SPECIAL[props.symbolInfo.assetKey]);
@@ -81,15 +115,22 @@
 				special.key as keyof typeof appContext.stateApp.loadedAssets
 			],
 	);
-	// Caja uniforme para los 3 especiales (destacan sobre los regulares); el
-	// lado mayor del arte ocupa `box`, el menor se deriva del aspect.
-	const specialBox = $derived(SYMBOL_SIZE * 0.98 * stateUiTweak.symScale);
-	const specialW = $derived(
-		special ? (special.aspect >= 1 ? specialBox : specialBox * special.aspect) : 0,
+	// Lado mayor del ARTE (no del canvas) en px de board; el menor sale del aspect.
+	const specialSide = $derived(special ? SYMBOL_SIZE * special.box * stateUiTweak.symScale : 0);
+	const artW = $derived(
+		special ? (special.aspect >= 1 ? specialSide : specialSide * special.aspect) : 0,
 	);
-	const specialH = $derived(
-		special ? (special.aspect >= 1 ? specialBox / special.aspect : specialBox) : 0,
+	const artH = $derived(
+		special ? (special.aspect >= 1 ? specialSide / special.aspect : specialSide) : 0,
 	);
+	// El SpriteSheet se dimensiona por el CANVAS 256² (ver nota arriba): se
+	// infla desde el arte dividiendo por el fill…
+	const specialW = $derived(special ? artW / special.fill.w : 0);
+	const specialH = $derived(special ? artH / special.fill.h : 0);
+	// …y se corre para que el CENTRO DEL ARTE (no el del canvas) caiga en la
+	// celda. Sin esto el bate/grafiti quedan ~10% abajo del centro.
+	const specialOffsetX = $derived(special ? -specialW * (special.center.x - 0.5) : 0);
+	const specialOffsetY = $derived(special ? -specialH * (special.center.y - 0.5) : 0);
 
 	// Resalte de cluster ganador (26-08): la carta ILUMINADA del kit es el
 	// estado de win — sin halo lima (pedido: "quita los cuadros verdes, ya
@@ -188,6 +229,8 @@
 	<Container x={props.x} y={props.y} scale={pop} alpha={dimmed ? 0.3 : 1}>
 		<SpriteSheet
 			anchor={0.5}
+			x={specialOffsetX}
+			y={specialOffsetY}
 			key={special.key}
 			width={specialW}
 			height={specialH}
