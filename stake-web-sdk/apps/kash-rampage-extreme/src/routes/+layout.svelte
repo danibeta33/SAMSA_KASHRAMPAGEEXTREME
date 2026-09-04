@@ -14,12 +14,15 @@
 	import MenuOverlay from '../components/MenuOverlay.svelte';
 	import BetMenuOverlay from '../components/BetMenuOverlay.svelte';
 	import ReplayOverlay from '../components/ReplayOverlay.svelte';
-	import UiLab from '../components/UiLab.svelte';
-	import AnimLab from '../components/AnimLab.svelte';
+	// Laboratorios genéricos del SDK — el catálogo lo inyecta el juego más
+	// abajo (registerGameInspector / registerGameLabActions).
+	import { UiLab, AnimLab } from 'components-inspector';
 	import { stateModal, stateUi, stateUrlDerived, stateI18n } from 'state-shared';
 	import { page } from '$app/state';
 
-	import { setContext } from '../game/context';
+	import { setContext, getContext } from '../game/context';
+	import { registerGameInspector } from '../game/labInspector.svelte';
+	import { registerGameLabActions } from '../game/labActions.svelte';
 	import { loadBrandFonts } from '../game/fonts';
 	import { enableSocialText } from '../game/social';
 	import { preloadHtmlAssets } from '../game/htmlAssets.svelte';
@@ -67,6 +70,17 @@
 	}
 
 	setContext();
+
+	// INYECCIÓN DE LOS LABORATORIOS (solo DEV): el juego registra sus
+	// categorías, sliders, toggles, acciones y diagnóstico en los registros
+	// genéricos de `components-inspector`. UiLab, AnimLab y /sizes leen de
+	// ahí — ninguno importa nada del juego.
+	// `getContext()` es válido acá: `setContext()` acaba de correr en esta
+	// misma inicialización de componente.
+	if (import.meta.env.DEV) {
+		registerGameInspector();
+		registerGameLabActions(getContext());
+	}
 
 	// Registra las Neue Plak en document.fonts y apunta el default de Pixi al
 	// brand font. Fire-and-forget: no-op en SSR, resuelve en ms en cliente.

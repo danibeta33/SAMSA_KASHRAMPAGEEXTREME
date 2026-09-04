@@ -1,1 +1,247 @@
-{"frames": {"anim_kash_idle_glasses1_000": {"frame": {"x": 0, "y": 0, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_001": {"frame": {"x": 384, "y": 0, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_002": {"frame": {"x": 768, "y": 0, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_003": {"frame": {"x": 1152, "y": 0, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_004": {"frame": {"x": 1536, "y": 0, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_005": {"frame": {"x": 1920, "y": 0, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_006": {"frame": {"x": 2304, "y": 0, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_007": {"frame": {"x": 2688, "y": 0, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_008": {"frame": {"x": 0, "y": 460, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_009": {"frame": {"x": 384, "y": 460, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_010": {"frame": {"x": 768, "y": 460, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_011": {"frame": {"x": 1152, "y": 460, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_012": {"frame": {"x": 1536, "y": 460, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_013": {"frame": {"x": 1920, "y": 460, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_014": {"frame": {"x": 2304, "y": 460, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_015": {"frame": {"x": 2688, "y": 460, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_016": {"frame": {"x": 0, "y": 920, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_017": {"frame": {"x": 384, "y": 920, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_018": {"frame": {"x": 768, "y": 920, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_019": {"frame": {"x": 1152, "y": 920, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_020": {"frame": {"x": 1536, "y": 920, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_021": {"frame": {"x": 1920, "y": 920, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_022": {"frame": {"x": 2304, "y": 920, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_023": {"frame": {"x": 2688, "y": 920, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_024": {"frame": {"x": 0, "y": 1380, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_025": {"frame": {"x": 384, "y": 1380, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_026": {"frame": {"x": 768, "y": 1380, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_027": {"frame": {"x": 1152, "y": 1380, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_028": {"frame": {"x": 1536, "y": 1380, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_029": {"frame": {"x": 1920, "y": 1380, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_030": {"frame": {"x": 2304, "y": 1380, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_031": {"frame": {"x": 2688, "y": 1380, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_032": {"frame": {"x": 0, "y": 1840, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_033": {"frame": {"x": 384, "y": 1840, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_034": {"frame": {"x": 768, "y": 1840, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_035": {"frame": {"x": 1152, "y": 1840, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_036": {"frame": {"x": 1536, "y": 1840, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_037": {"frame": {"x": 1920, "y": 1840, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_038": {"frame": {"x": 2304, "y": 1840, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_039": {"frame": {"x": 2688, "y": 1840, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_040": {"frame": {"x": 0, "y": 2300, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_041": {"frame": {"x": 384, "y": 2300, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_042": {"frame": {"x": 768, "y": 2300, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_043": {"frame": {"x": 1152, "y": 2300, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}, "anim_kash_idle_glasses1_044": {"frame": {"x": 1536, "y": 2300, "w": 384, "h": 460}, "rotated": false, "trimmed": false, "spriteSourceSize": {"x": 0, "y": 0, "w": 384, "h": 460}, "sourceSize": {"w": 384, "h": 460}}}, "meta": {"image": "anim_kash_idle_glasses1.webp", "format": "RGBA8888", "size": {"w": 3072, "h": 2760}, "scale": "1", "fps": 10}}
+{"frames": {
+
+"Kash_Gafas_00000.png":
+{
+	"frame": {"x":0,"y":0,"w":375,"h":769},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":104,"w":375,"h":769},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00001.png":
+{
+	"frame": {"x":1538,"y":0,"w":376,"h":769},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":104,"w":376,"h":769},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00002.png":
+{
+	"frame": {"x":3076,"y":0,"w":392,"h":769},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":104,"w":392,"h":769},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00003.png":
+{
+	"frame": {"x":769,"y":375,"w":414,"h":768},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":105,"w":414,"h":768},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00004.png":
+{
+	"frame": {"x":3071,"y":392,"w":430,"h":767},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":106,"w":430,"h":767},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00005.png":
+{
+	"frame": {"x":0,"y":783,"w":430,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":107,"w":430,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00006.png":
+{
+	"frame": {"x":0,"y":2081,"w":432,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":107,"w":432,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00007.png":
+{
+	"frame": {"x":766,"y":2094,"w":432,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":432,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00008.png":
+{
+	"frame": {"x":2298,"y":813,"w":431,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":431,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00009.png":
+{
+	"frame": {"x":3064,"y":822,"w":431,"h":765},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":108,"w":431,"h":765},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00010.png":
+{
+	"frame": {"x":0,"y":1213,"w":431,"h":765},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":108,"w":431,"h":765},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00011.png":
+{
+	"frame": {"x":765,"y":1219,"w":431,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":431,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00012.png":
+{
+	"frame": {"x":1531,"y":1232,"w":431,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":431,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00013.png":
+{
+	"frame": {"x":2297,"y":1244,"w":431,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":431,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00014.png":
+{
+	"frame": {"x":3063,"y":1253,"w":431,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":431,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00015.png":
+{
+	"frame": {"x":0,"y":1650,"w":431,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":431,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00016.png":
+{
+	"frame": {"x":766,"y":1663,"w":431,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":431,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00017.png":
+{
+	"frame": {"x":1532,"y":1675,"w":431,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":431,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00018.png":
+{
+	"frame": {"x":2298,"y":1684,"w":431,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":431,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00019.png":
+{
+	"frame": {"x":3064,"y":1684,"w":431,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":431,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00020.png":
+{
+	"frame": {"x":766,"y":789,"w":430,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":430,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00021.png":
+{
+	"frame": {"x":1532,"y":802,"w":430,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":221,"y":107,"w":430,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00022.png":
+{
+	"frame": {"x":2305,"y":384,"w":429,"h":766},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":107,"w":429,"h":766},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00023.png":
+{
+	"frame": {"x":1532,"y":2115,"w":432,"h":767},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":106,"w":432,"h":767},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00024.png":
+{
+	"frame": {"x":2299,"y":2115,"w":432,"h":768},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":105,"w":432,"h":768},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00025.png":
+{
+	"frame": {"x":1537,"y":376,"w":426,"h":768},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":105,"w":426,"h":768},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00026.png":
+{
+	"frame": {"x":0,"y":375,"w":408,"h":769},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":104,"w":408,"h":769},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00027.png":
+{
+	"frame": {"x":2307,"y":0,"w":384,"h":769},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":104,"w":384,"h":769},
+	"sourceSize": {"w":772,"h":923}
+},
+"Kash_Gafas_00028.png":
+{
+	"frame": {"x":769,"y":0,"w":375,"h":769},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":222,"y":104,"w":375,"h":769},
+	"sourceSize": {"w":772,"h":923}
+}},
+"animations": {
+	"Kash_Gafas": ["Kash_Gafas_00000.png","Kash_Gafas_00001.png","Kash_Gafas_00002.png","Kash_Gafas_00003.png","Kash_Gafas_00004.png","Kash_Gafas_00005.png","Kash_Gafas_00006.png","Kash_Gafas_00007.png","Kash_Gafas_00008.png","Kash_Gafas_00009.png","Kash_Gafas_00010.png","Kash_Gafas_00011.png","Kash_Gafas_00012.png","Kash_Gafas_00013.png","Kash_Gafas_00014.png","Kash_Gafas_00015.png","Kash_Gafas_00016.png","Kash_Gafas_00017.png","Kash_Gafas_00018.png","Kash_Gafas_00019.png","Kash_Gafas_00020.png","Kash_Gafas_00021.png","Kash_Gafas_00022.png","Kash_Gafas_00023.png","Kash_Gafas_00024.png","Kash_Gafas_00025.png","Kash_Gafas_00026.png","Kash_Gafas_00027.png","Kash_Gafas_00028.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "anim_kash_idle_glasses1.webp",
+	"format": "RGBA8888",
+	"size": {"w":4096,"h":4096},
+	"scale": "0.83",
+	"smartupdate": "$TexturePacker:SmartUpdate:6e9f1f4877eefee6286bfc0008927ee3:d62b54d742db1a610c516ef77d0e6b82:f0f5176b77f8b5ccf871a91a7272f78e$"
+}
+}

@@ -3,10 +3,12 @@
 // a dedo desde el UI LAB (tecla T) o la página /sizes, y persistido por
 // bucket en localStorage. Al cambiar el tamaño se aplica el bucket que
 // corresponde (DEFAULTS + override guardado de ese bucket).
-// v14: buckets alineados 1:1 con los tamaños del selector del ACP de Stake —
-// la partición vieja por aspect metía el Desktop de Stake (1200×675) en
-// "landscape chico". El bump invalida overrides con los buckets viejos.
-const KEY = 'kash_tweak_v14'; // { overrides: { [bucket]: {…claves tweakeables} } }
+// La clave de persistencia vive en el manifiesto del juego (`labMeta.ts`) —
+// es la misma que se le pasa al inspector genérico vía `storageKey`, para que
+// el panel no tenga ninguna constante propia del juego.
+import { LAB_STORAGE_KEY } from './labMeta';
+
+const KEY = LAB_STORAGE_KEY; // { overrides: { [bucket]: {…claves tweakeables} } }
 
 import { stateUiTweak } from './stateUiTweak.svelte';
 

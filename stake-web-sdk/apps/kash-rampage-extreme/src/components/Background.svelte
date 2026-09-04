@@ -134,17 +134,17 @@
 	// quedan en el centro del crop (anchorX 0.5) y el cuerpo ocupa 84.7% del
 	// crop → heightMul iguala su alto al standby.
 	// Alineación fina horneada desde el AnimLab (dx/dy/escala que el usuario
-	// ajustó contra el ghost del idle). swingAlign queda como tweak ADICIONAL
-	// en vivo (default 0/0/1) sobre estos valores.
+	// ajustó contra el ghost del idle en resolución con kash.h=650: dx -26, dy -18,
+	// escala 1.020 sobre los valores previos dx37/563, dy-4/563, escala 1.09*0.99).
+	// swingAlign queda como tweak ADICIONAL en vivo (default 0/0/1) sobre estos valores.
 	// dx/dy como FRACCIÓN de kash.h (no px absolutos) → la alineación se
 	// mantiene en TODAS las resoluciones (el offset escala con el personaje).
-	// Ajustados en el lab a 1360×850 (kash.h≈563): dx37 → 0.0657, dy-4 → -0.0071.
 	const SWING = {
 		aspect: 423 / 460,
-		heightMul: 1.09 * 0.99, // ≈1.079 (escala 0.99 del ajuste fino)
+		heightMul: 1.09 * 0.99 * 1.02, // ≈1.1007 (escala horneada con el ajuste del lab)
 		anchorX: 0.5,
-		dxFrac: 37 / 563,
-		dyFrac: -4 / 563,
+		dxFrac: 37 / 563 - 26 / 650, // ≈0.0257 (offset horizontal relativo horneado)
+		dyFrac: -4 / 563 - 18 / 650, // ≈-0.0348 (offset vertical relativo horneado)
 	};
 	const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -175,12 +175,10 @@
 			topY: kash.y + kash.h / 2 - dispH,
 		};
 	});
-	// TODO-KRE (F3 arte): los spritesheets de Kash (idles + swing) siguen con el
-	// outfit KS1 (remera blanca) y chocan con el kash_side rojo nuevo del kit
-	// 25-08. Hasta que el equipo entregue los clips recoloreados, se fuerza el
-	// sprite estático: idleReady en false activa los fallbacks ya existentes
-	// (estático visible, kashSwing de wins resuelve al toque — sin hangs).
-	const KASH_IDLES_ENABLED = false;
+	// Arte nuevo de Kash integrado (04-09): los spritesheets reemplazados en
+	// static/assets/sprites/anim/ (bat1/bat2/swing como PNG, resto como WEBP).
+	// KASH_IDLES_ENABLED activado — las animaciones idle rotan en landscape.
+	const KASH_IDLES_ENABLED = true;
 	// PROTOTIPO 26-08 (mecánica pedida por dirección): el batazo del KASH RAMPAGE
 	// sí reproduce el swing KS1 (outfit viejo, provisorio) para probar cómo se
 	// siente que Kash cause la conversión: swing → golpe en frame 30 (shake +

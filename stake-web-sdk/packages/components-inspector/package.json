@@ -1,0 +1,22 @@
+{
+	"name": "components-inspector",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"version": "0.0.0",
+	"private": true,
+	"license": "MIT",
+	"scripts": {
+		"format": "prettier --write --ignore-path=../../.prettierignore .",
+		"lint": "eslint \"src\""
+	},
+	"type": "module",
+	"devDependencies": {
+		"eslint": "9.21.0",
+		"eslint-config-custom": "workspace:*",
+		"config-ts": "workspace:*",
+		"config-svelte": "workspace:*"
+	},
+	"dependencies": {
+		"svelte": "5.20.5"
+	}
+}
