@@ -16,6 +16,17 @@ export default {
 		src: new URL('../../assets/sprites/bg/vault_scene.jpg', import.meta.url).href,
 		preload: true,
 	},
+	// Background ANIMADO (drop 07-09) — "Fondo_Rampage", 16 frames SIN recortar
+	// de 1728×972 (16:9 exacto), loop limpio: el frame 15 encadena con el 0.
+	// Reemplaza al JPG estático en el mismo hueco de Background.svelte;
+	// `bg_vault` queda como fallback.
+	//
+	// SIN preload: el atlas es un webp de ~13MB. Bloquear el loading screen con
+	// eso castiga el arranque de todos; hasta que entra, el JPG cubre el hueco.
+	anim_fondo: {
+		type: 'spriteSheet',
+		src: new URL('../../assets/sprites/anim/anim_fondo.json', import.meta.url).href,
+	},
 	// Board frame — marco neón gradient (amarillo → rosa) con hueco central
 	// negro donde caen los símbolos. 2000×1694 PNG con transparencia. Preloaded.
 	board_frame: {
@@ -91,6 +102,8 @@ export default {
 		type: 'spriteSheet',
 		src: new URL('../../assets/sprites/anim/anim_win_mega.json', import.meta.url).href,
 	},
+	// MAX re-exportado a mayor resolución el 07-09: 56 frames de 1402×788 en un
+	// solo atlas de 8015×6153.
 	anim_win_max: {
 		type: 'spriteSheet',
 		src: new URL('../../assets/sprites/anim/anim_win_max.json', import.meta.url).href,

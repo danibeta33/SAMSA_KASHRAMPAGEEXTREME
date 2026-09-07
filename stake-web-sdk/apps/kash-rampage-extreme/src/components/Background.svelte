@@ -34,6 +34,13 @@
 	import { triggerBoardShake } from '../game/boardShake.svelte';
 	import { swingAlign } from '../game/swingAlign.svelte';
 	import { celebration } from '../game/celebration.svelte';
+	import { SpriteFactory, registerSpriteAnchors } from '../game/spriteFactory';
+	import {
+		SPRITE_PLACEMENTS,
+		clearSpritePlacement,
+		getSpritePlacement,
+		putSpritePlacement,
+	} from '../game/spriteConfig.svelte';
 
 	const BG_ASPECT = 16 / 9;
 
@@ -51,9 +58,23 @@
 		((appContext.stateApp.loadedAssets?.bg_vault as PIXI.Texture) || PIXI.Texture.EMPTY),
 	);
 
-	const KASH_W = 528;
-	const KASH_H = 1200;
-	const KASH_ASPECT = KASH_W / KASH_H;
+	// ── Fondo ANIMADO (drop 07-09) ─────────────────────────────────────
+	// `anim_fondo` es un sheet TexturePacker de 16 frames SIN recortar (el
+	// frame ES el arte, 1728×972 = 16:9 exacto) que loopea limpio. Ocupa
+	// exactamente el mismo hueco que el JPG: mismo cover, mismo centro, mismo
+	// zIndex — así el encuadre en portrait (zoom + crop corrido) sigue valiendo
+	// tal cual, y ahora además sin la deformación del 0.2% que tenía el sheet
+	// anterior (era 634×356, un pelo más ancho que 16:9).
+	//
+	// El JPG estático NO desaparece: es el fallback mientras el clip carga (~13MB
+	// de webp, sin preload) y también si la carga falla.
+	const fondoReady = $derived(
+		((appContext.stateApp.loadedAssets?.anim_fondo as unknown as unknown[] | undefined)?.length ??
+			0) > 0,
+	);
+	// Ancla y fps salen del registro, como el resto de los clips: este
+	// componente sigue sin conocer un solo número de encuadre.
+	const fondoSpeed = $derived((getSpritePlacement('anim_fondo').fps ?? 10) / 60);
 
 	const context = getContext();
 	const sizes = $derived(context.stateLayoutDerived.canvasSizes());
@@ -79,7 +100,9 @@
 	});
 	const bgX = $derived(bt.portrait ? sizes.width / 2 - bgCover.w * 0.13 : sizes.width / 2);
 
-	// Layer 2 — Kash.
+	// Layer 2 — Kash. El alto es lo único que decide el componente: el ANCHO
+	// sale del aspect que el registro de sprites tiene por assetId (los clips y
+	// el PNG estático no comparten recorte), vía SpriteFactory.place().
 	const PANEL_HALF_H = 214; // main units: BOARD_SIZES.h/2 + padding del panel
 	const kash = $derived.by(() => {
 		if (bt.portrait) {
@@ -88,7 +111,6 @@
 			const gap = Math.max(boardTop - bt.topSafe, 40);
 			const h = Math.min(gap * 1.9, sizes.height * 0.34);
 			return {
-				w: h * KASH_ASPECT,
 				h,
 				x: sizes.width * 0.19,
 				// centro tal que ~36% del cuerpo queda detrás del board
@@ -97,7 +119,6 @@
 		}
 		const targetH = sizes.height * stateTweak.kashH;
 		return {
-			w: targetH * KASH_ASPECT,
 			h: targetH,
 			x: sizes.width * stateTweak.kashX,
 			y: sizes.height * stateTweak.kashY,
@@ -123,56 +144,98 @@
 		'anim_kash_idle_nose1',
 		'anim_kash_idle_bat1', 'anim_kash_idle_bat2',
 	];
-	const CLIP_ASPECT = 384 / 460; // idéntico para los 6 idles (alta res, recorte común)
-	// El swing (Kash_Batea) viene de otro canvas (1080²) y con el cuerpo
-	// desplazándose. Overrides para que su frame de reposo calce EXACTO con el
-	// standby: cuerpo = 80% del crop → escala 1/0.8; centro del cuerpo en 44.1%
-	// del ancho → anchorX; pies al fondo del crop → anchorY 1 (misma línea de
-	// pies que los idles). Fuera de reposo el cuerpo se mueve (es el bateo).
-	// Swing PLANTADO: cada frame recortado centrado en los PIES (ver
-	// swing_planted.py) → Kash queda fijo, solo torso/bate se mueven. Los pies
-	// quedan en el centro del crop (anchorX 0.5) y el cuerpo ocupa 84.7% del
-	// crop → heightMul iguala su alto al standby.
-	// Alineación fina horneada desde el AnimLab (dx/dy/escala que el usuario
-	// ajustó contra el ghost del idle en resolución con kash.h=650: dx -26, dy -18,
-	// escala 1.020 sobre los valores previos dx37/563, dy-4/563, escala 1.09*0.99).
-	// swingAlign queda como tweak ADICIONAL en vivo (default 0/0/1) sobre estos valores.
-	// dx/dy como FRACCIÓN de kash.h (no px absolutos) → la alineación se
-	// mantiene en TODAS las resoluciones (el offset escala con el personaje).
-	const SWING = {
-		aspect: 423 / 460,
-		heightMul: 1.09 * 0.99 * 1.02, // ≈1.1007 (escala horneada con el ajuste del lab)
-		anchorX: 0.5,
-		dxFrac: 37 / 563 - 26 / 650, // ≈0.0257 (offset horizontal relativo horneado)
-		dyFrac: -4 / 563 - 18 / 650, // ≈-0.0348 (offset vertical relativo horneado)
-	};
+	// La GEOMETRÍA de cada clip (ancla, aspect, escala, fps, capa) ya no vive
+	// acá: son datos del registro `spriteConfig.svelte.ts`, resueltos por
+	// assetId. Este componente decide DÓNDE está el actor y QUÉ clip suena; no
+	// conoce ni un solo número de encuadre, y no queda una sola rama `isSwing`.
+	//
+	// Eso es lo que elimina el salto: todos los clips de Kash resuelven al ancla
+	// de PIES (0.5, 1) por su tag `character`, así el punto anclado en (x,y) es
+	// la línea de pies aunque el bounding box del clip cambie.
+	//
+	// `registerSpriteAnchors` hace dos cosas de una: inyecta el resolver en
+	// `pixi-svelte` (para que <Sprite>/<SpriteSheet> anclen solos por su `key`) y
+	// le pasa el diccionario de texturas del loader a la factory imperativa.
+	registerSpriteAnchors(() => appContext.stateApp.loadedAssets);
+
+	const SWING_CLIP = 'anim_kash_swing';
 	const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
 	let currentClip = $state('anim_kash_idle_stand1');
 	let currentLoop = $state(true);
 	let currentFrame = $state(0);
 
+	/**
+	 * Props de dibujo de un clip, resueltas por la factory desde el registro. El
+	 * punto de referencia es SIEMPRE el mismo para todos los clips —
+	 * (kash.x, línea de pies)— sin un solo offset por animación: la diferencia
+	 * entre uno y otro la pone el placement del asset, no el componente.
+	 */
+	const placeKash = (assetId: string) =>
+		SpriteFactory.place(assetId, { x: kash.x, y: kash.y + kash.h / 2, height: kash.h });
+
+	const kashPlaced = $derived(placeKash(currentClip));
+	// El SMASH pasa por delante del board, salvo durante la celebración (que va
+	// encima de todo). `foreground` es un dato del asset, no un `isSwing`.
+	const kashLayer = $derived(kashPlaced.foreground && celebration.n === 0 ? 15 : -4);
+
+	// DEV — el AnimLab sigue alineando el swing con dx/dy/dscale en píxeles de
+	// canvas. Eso ya NO toca el render: se traduce a un override del registro.
+	// Un offset es un ancla disfrazada (desplazar d px equivale a mover el pivot
+	// d/tamaño), así que el tweak entra por el mismo canal por el que va a
+	// escribir el Inspector Genérico en el Paso 4, y el camino de dibujo queda
+	// libre de offsets. Con el default (0/0/1) no se escribe ningún override.
+	$effect(() => {
+		if (!import.meta.env.DEV) return;
+		const { dx, dy, dscale } = swingAlign;
+		if (dx === 0 && dy === 0 && dscale === 1) {
+			clearSpritePlacement(SWING_CLIP);
+			return;
+		}
+		// Base HORNEADA (no el valor resuelto): leer el override acá crearía un
+		// ciclo con la escritura de este mismo efecto.
+		const base = SPRITE_PLACEMENTS[SWING_CLIP];
+		// Pivot neutro de un personaje: centro-abajo. Todo lo que el pivot del
+		// swing se aparta de ahí ES el desplazamiento de alineación horneado, y
+		// se puede recuperar en píxeles multiplicándolo por el tamaño base.
+		const baseH = kash.h * (base.scale ?? 1);
+		const baseW = baseH * (base.aspect ?? 1);
+		const bakedDx = (0.5 - base.anchorX) * baseW;
+		const bakedDy = (1 - base.anchorY) * baseH;
+		// El slider de escala del lab cambia el tamaño, así que el pivot se
+		// recalcula sobre el tamaño NUEVO: horneado + nudge, plegados de vuelta.
+		const scale = (base.scale ?? 1) * dscale;
+		const height = kash.h * scale;
+		const width = height * (base.aspect ?? 1);
+		putSpritePlacement(SWING_CLIP, {
+			...base,
+			scale,
+			anchorX: 0.5 - (bakedDx + dx) / width,
+			anchorY: 1 - (bakedDy + dy) / height,
+		});
+	});
+
 	// Debug (solo DEV): expone la posición REAL renderizada de Kash para el
 	// AnimLab (líneas de referencia de pies/centro para detectar movimiento).
 	$effect(() => {
 		if (!import.meta.env.DEV) return;
-		const isSwing = currentClip === 'anim_kash_swing';
-		const dispH = isSwing ? kash.h * SWING.heightMul : kash.h;
-		const dispW = isSwing ? dispH * SWING.aspect : kash.h * clipAspect;
-		const anchorX = isSwing ? SWING.anchorX : 0.5;
+		// Caja REAL renderizada: sale del mismo `place()` que dibuja el sprite,
+		// así que ahora incluye los offsets del swing (antes la caja del lab se
+		// dibujaba sin dx/dy y quedaba corrida respecto de lo que se veía).
+		const p = kashPlaced;
 		(globalThis as unknown as { __kashDbg?: unknown }).__kashDbg = {
 			clip: currentClip,
 			frame: currentFrame,
 			loop: currentLoop,
 			cw: sizes.width,
 			ch: sizes.height,
-			cx: kash.x, // centro del cuerpo (ancla del standby)
-			feetY: kash.y + kash.h / 2, // línea de pies
-			dispW,
-			dispH,
-			leftX: kash.x - anchorX * dispW,
-			rightX: kash.x + (1 - anchorX) * dispW,
-			topY: kash.y + kash.h / 2 - dispH,
+			cx: kash.x, // centro del cuerpo (referencia: ancla del standby)
+			feetY: kash.y + kash.h / 2, // línea de pies (referencia)
+			dispW: p.width,
+			dispH: p.height,
+			leftX: p.x - p.anchor.x * p.width,
+			rightX: p.x + (1 - p.anchor.x) * p.width,
+			topY: p.y - p.anchor.y * p.height,
 		};
 	});
 	// Arte nuevo de Kash integrado (04-09): los spritesheets reemplazados en
@@ -191,7 +254,6 @@
 		KASH_IDLES_ENABLED &&
 			!!appContext.stateApp.loadedAssets?.[currentClip as keyof typeof appContext.stateApp.loadedAssets],
 	);
-	const clipAspect = CLIP_ASPECT;
 
 	let actionTimer: ReturnType<typeof setTimeout>;
 	// El golpe del swing se dispara por FRAME REAL (onFrameChange), no por ms:
@@ -210,7 +272,7 @@
 	// SFX del bate AU-09 — Feedback N1 #7: el SMASH suena con su golpe).
 	const onFrame = (frame: number) => {
 		currentFrame = frame;
-		if (currentClip === 'anim_kash_swing' && !swingHit && frame >= SWING_STRIKE_FRAME) {
+		if (currentClip === SWING_CLIP && !swingHit && frame >= SWING_STRIKE_FRAME) {
 			swingHit = true;
 			triggerBoardShake(24, 600);
 			context.eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_wild_explode' });
@@ -263,7 +325,7 @@
 			// este caller nunca llegaría y se comía el timeout de 1.6s (QA: 5
 			// TIMEOUTs en 17 spins de autoplay). Si el golpe está pendiente nos
 			// sumamos a su resolve; si ya pasó, la celebración sale al toque.
-			if (currentClip === 'anim_kash_swing') {
+			if (currentClip === SWING_CLIP) {
 				if (swingHit || !strikeResolve) return;
 				await waitForResolve(
 					(resolve) => {
@@ -279,7 +341,7 @@
 			}
 			clearTimeout(actionTimer);
 			swingHit = false;
-			currentClip = 'anim_kash_swing';
+			currentClip = SWING_CLIP;
 			currentLoop = false;
 			// Golpe en frame 30 @24fps ≈ 1.25s — el fallback apenas por encima:
 			// si el clip no corre (race rara vista 1 vez en QA), la celebración
@@ -310,17 +372,32 @@
 	});
 </script>
 
-<!-- Layer 1 — BG vault scene (cover, back). JPG hasta que el canvas del
-     video está listo — mismo nodo, solo muta la textura. -->
-<BaseSprite
-	x={bgX}
-	y={sizes.height / 2}
-	anchor={0.5}
-	texture={bgTexture}
-	width={bgCover.w}
-	height={bgCover.h}
-	zIndex={-5}
-/>
+<!-- Layer 1 — BG vault scene (cover, back). El clip animado (anim_fondo) en
+     cuanto está cargado; el JPG estático como fallback del primer instante.
+     Mismo x/y/cover/zIndex en las dos ramas: el swap no mueve el encuadre. -->
+{#if fondoReady}
+	<SpriteSheet
+		key="anim_fondo"
+		x={bgX}
+		y={sizes.height / 2}
+		width={bgCover.w}
+		height={bgCover.h}
+		animationSpeed={fondoSpeed}
+		loop
+		play
+		zIndex={-5}
+	/>
+{:else}
+	<BaseSprite
+		x={bgX}
+		y={sizes.height / 2}
+		anchor={0.5}
+		texture={bgTexture}
+		width={bgCover.w}
+		height={bgCover.h}
+		zIndex={-5}
+	/>
+{/if}
 
 {#if bt.portrait}
 	<!-- Velo oscuro en portrait: apaga el grafiti detrás del board -->
@@ -343,14 +420,14 @@
 		<!-- GHOST del idle standby (solo DEV, toggle en el AnimLab): referencia
 		     semitransparente para alinear el bateo. -->
 		{#if swingAlign.ghost}
+			{@const ghost = placeKash('anim_kash_idle_stand1')}
 			<SpriteSheet
 				key="anim_kash_idle_stand1"
-				x={kash.x}
-				y={kash.y + kash.h / 2}
-				anchor={{ x: 0.5, y: 1 }}
-				height={kash.h}
-				width={kash.h * clipAspect}
-				animationSpeed={10 / 60}
+				x={ghost.x}
+				y={ghost.y}
+				height={ghost.height}
+				width={ghost.width}
+				animationSpeed={ghost.animationSpeed}
 				loop
 				play
 				alpha={0.4}
@@ -358,54 +435,49 @@
 			/>
 		{/if}
 		{#key currentClip}
-			{@const isSwing = currentClip === 'anim_kash_swing'}
-			{@const swingH = kash.h * SWING.heightMul * (isSwing ? swingAlign.dscale : 1)}
 			<SpriteSheet
 				key={currentClip}
-				x={kash.x + (isSwing ? kash.h * SWING.dxFrac + swingAlign.dx : 0)}
-				y={kash.y + kash.h / 2 + (isSwing ? kash.h * SWING.dyFrac + swingAlign.dy : 0)}
-				anchor={{ x: isSwing ? SWING.anchorX : 0.5, y: 1 }}
-				height={isSwing ? swingH : kash.h}
-				width={isSwing ? swingH * SWING.aspect : kash.h * clipAspect}
-				animationSpeed={(isSwing ? 24 : 10) / 60}
+				x={kashPlaced.x}
+				y={kashPlaced.y}
+				height={kashPlaced.height}
+				width={kashPlaced.width}
+				animationSpeed={kashPlaced.animationSpeed}
 				loop={currentLoop}
 				play
 				onComplete={onClipComplete}
 				onFrameChange={onFrame}
-				zIndex={isSwing ? (celebration.n > 0 ? -4 : 15) : -4}
+				zIndex={kashLayer}
 			/>
 		{/key}
-	{:else if swingReady && currentClip === 'anim_kash_swing' && !currentLoop}
+	{:else if swingReady && currentClip === SWING_CLIP && !currentLoop}
 		<!-- PROTOTIPO batazo RAMPAGE con idles apagados: el swing KS1 reemplaza
 		     al estático SOLO mientras dura el clip (onClipComplete vuelve a
 		     standby → cae de nuevo al estático). Mismos transforms/zIndex que la
-		     rama isSwing de arriba. -->
+		     rama del clip actual — el placement sale del mismo registro. -->
 		{#key currentClip}
-			{@const swingH = kash.h * SWING.heightMul * swingAlign.dscale}
 			<SpriteSheet
-				key="anim_kash_swing"
-				x={kash.x + kash.h * SWING.dxFrac + swingAlign.dx}
-				y={kash.y + kash.h / 2 + kash.h * SWING.dyFrac + swingAlign.dy}
-				anchor={{ x: SWING.anchorX, y: 1 }}
-				height={swingH}
-				width={swingH * SWING.aspect}
-				animationSpeed={24 / 60}
+				key={SWING_CLIP}
+				x={kashPlaced.x}
+				y={kashPlaced.y}
+				height={kashPlaced.height}
+				width={kashPlaced.width}
+				animationSpeed={kashPlaced.animationSpeed}
 				loop={false}
 				play
 				onComplete={onClipComplete}
 				onFrameChange={onFrame}
-				zIndex={celebration.n > 0 ? -4 : 15}
+				zIndex={kashLayer}
 			/>
 		{/key}
 	{:else}
 		<!-- fallback hasta que cargue la stand-by webp -->
+		{@const still = placeKash('kash_side')}
 		<Sprite
-			x={kash.x}
-			y={kash.y + kash.h / 2}
-			anchor={{ x: 0.5, y: 1 }}
+			x={still.x}
+			y={still.y}
 			key="kash_side"
-			width={kash.w}
-			height={kash.h}
+			width={still.width}
+			height={still.height}
 			zIndex={-4}
 		/>
 	{/if}

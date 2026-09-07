@@ -12,6 +12,7 @@
 <script lang="ts">
 	import BaseSprite from './BaseSprite.svelte';
 	import { getContextApp } from '../context.svelte';
+	import { resolveAssetAnchor } from '../anchorRegistry';
 	import type { LoadedSprite } from '../types';
 
 	const { debug, key, ...baseSpriteProps }: Props = $props();
@@ -19,6 +20,13 @@
 	const texture = $derived(
 		(context.stateApp.loadedAssets?.[key] || PIXI.Texture.EMPTY) as LoadedSprite,
 	);
+
+	// Ancla por assetId: si el consumidor NO pasó `anchor`, se le pregunta al
+	// resolver que el juego inyecta con `setAnchorResolver`. Un `anchor`
+	// explícito siempre gana, y sin resolver (o con un id desconocido) esto
+	// vale `undefined` — `propsSyncEffect` ignora las props undefined, así que
+	// el default (0,0) de PixiJS queda intacto.
+	const anchor = $derived(baseSpriteProps.anchor ?? resolveAssetAnchor(key));
 </script>
 
 {#if texture === PIXI.Texture.EMPTY || debug}
@@ -26,4 +34,4 @@
 	{console.log('loadedAssets', $state.snapshot(context.stateApp).loadedAssets)}
 {/if}
 
-<BaseSprite {...baseSpriteProps} {texture} />
+<BaseSprite {...baseSpriteProps} {anchor} {texture} />

@@ -76,14 +76,53 @@
 		flashPeak: number; // alpha del flash blanco de entrada
 	};
 
+	// ── Reloj del clip de MAX ───────────────────────────────────────────
+	// El cartel de MAX corre a su velocidad de autoría (30fps) y se congela en
+	// el último frame con el arte a tamaño completo — ver el bloque de
+	// velocidad más abajo. Esas dos constantes viven ACÁ arriba porque el
+	// count-up del tier se mide contra ellas.
+	const MAX_FPS = 30;
+	// Medido sobre los `spriteSourceSize` del sheet: 0-4 es la entrada, 5-42 el
+	// sostén a sangre (1307×788), 43-45 ya encoge y 46-49 colapsa hacia el
+	// centro antes de los 6 frames vacíos del final (50-55). Congelar en 42
+	// deja el cartel entero.
+	const MAX_HOLD_FRAME = 42;
+	// Cuánto dura el MOVIMIENTO del cartel: desde el frame 0 hasta que se
+	// congela. ≈1400ms. Es "lo que dura la animación" a ojo del jugador — los
+	// frames posteriores no se ven.
+	const MAX_CLIP_MS = Math.round((MAX_HOLD_FRAME / MAX_FPS) * 1000);
+
 	// holdMs = pausa con el monto final en pantalla ANTES del fade-out.
 	// bgDim en TODOS los tiers (leve en small) para que el lettering resalte.
 	// shakeOnHit + flash = efectos de entrada SIN escalar el lettering.
+	//
+	// countUpDuration de MAX (07-09): estaba en 4000ms fijos, heredados de
+	// cuando el cartel era un loop sin final propio. Con el clip nuevo el
+	// cartel se planta a los ~1.4s y los números seguían subiendo 2.6s más,
+	// solos — se leía como que la celebración se colgaba. Ahora se ata al
+	// clip: el conteo termina UN SEGUNDO después de que el cartel se planta.
+	// Atado y no hardcodeado para que un re-drop con otro largo (o un cambio
+	// de MAX_FPS) reajuste el conteo sin tocar este número.
+	const MAX_COUNT_UP_TAIL_MS = 1000;
+	// holdMs de MAX (07-09): estaba en 3800ms, la pausa QUIETA entre el final
+	// del conteo y el fade-out — con el cartel ya congelado y el monto ya en su
+	// valor final, ahí no se mueve nada en pantalla. Al acortar el conteo esa
+	// pausa quedó siendo la mitad del festejo. A esto hay que sumarle el
+	// fade-out del FadeContainer (~400ms del Tween por defecto), así que 1000ms
+	// acá son ~1.4s de imagen fija: alcanza para leer el monto sin que el
+	// cartel se quede plantado.
+	const MAX_HOLD_MS = 1000;
 	const TIER_CONFIG: Record<Tier, TierConfig> = {
 		small: { countUpDuration: 600, bgDim: 0.18, holdMs: 1500, shakeOnHit: 0, flashPeak: 0.25 },
 		big: { countUpDuration: 1200, bgDim: 0.4, holdMs: 2200, shakeOnHit: 16, flashPeak: 0.4 },
 		mega: { countUpDuration: 2000, bgDim: 0.55, holdMs: 2900, shakeOnHit: 22, flashPeak: 0.5 },
-		max: { countUpDuration: 4000, bgDim: 0.72, holdMs: 3800, shakeOnHit: 30, flashPeak: 0.6 },
+		max: {
+			countUpDuration: MAX_CLIP_MS + MAX_COUNT_UP_TAIL_MS, // ≈2400ms
+			bgDim: 0.72,
+			holdMs: MAX_HOLD_MS,
+			shakeOnHit: 30,
+			flashPeak: 0.6,
+		},
 	};
 
 	// Los epic (100×–cap) usan el cartel MEGA pero con presentación
@@ -127,6 +166,9 @@
 	context.eventEmitter.subscribeOnMount({
 		winShow: () => {
 			show = true;
+			// `play={show}` hace gotoAndPlay(0) en el sheet: el congelado del
+			// tier max se levanta acá para que el clip arranque de nuevo.
+			letteringHeld = false;
 			enterCelebration();
 		},
 		winHide: () => {
@@ -144,6 +186,10 @@
 
 			// Reset any prior animation state, then apply tier visuals.
 			clearAllTimers();
+			// Belt del reset de winShow: si un winUpdate llegara sin winShow
+			// previo (wins encadenados), el clip de max no debe seguir congelado
+			// del festejo anterior.
+			letteringHeld = false;
 			bgDimAlpha = cfg.bgDim;
 			// Efectos de entrada SIN escalar: golpe al board + flash blanco.
 			if (cfg.shakeOnHit) triggerBoardShake(cfg.shakeOnHit, 500);
@@ -186,8 +232,8 @@
 
 	// Lettering ANIMADO per tier.
 	//
-	// ⚠ Drop 04-09: small/big/mega son TexturePacker TRIMMED (max sigue siendo
-	// el sheet viejo, sin recortar). PIXI le da a cada textura `orig` = el
+	// ⚠ Drop 04-09 / 07-09: los CUATRO tiers son ya TexturePacker TRIMMED.
+	// PIXI le da a cada textura `orig` = el
 	// canvas COMPLETO y re-inyecta el recorte al pintar, así que el width/height
 	// del SpriteSheet dimensiona EL CANVAS, no el arte — y el arte no está
 	// centrado en ese canvas (big cae en x=0.526, small en y=0.530). Por eso
@@ -227,10 +273,13 @@
 			fill: { w: 726 / 806, h: 454 / 454 },
 			center: { x: 410 / 806, y: 227 / 454 },
 		},
-		// sheet viejo SIN recortar: el canvas ES el arte
+		// canvas 1402×788 · arte 1402×788 en (0,0) — re-export 07-09 a mayor
+		// resolución. Aunque el sheet viene trimmed frame a frame, la UNIÓN de
+		// los 56 recortes es el canvas entero, así que arte y canvas coinciden:
+		// fill 1 y centro al medio.
 		max: {
 			key: 'anim_win_max',
-			aspect: 1024 / 576,
+			aspect: 1402 / 788,
 			fill: { w: 1, h: 1 },
 			center: { x: 0.5, y: 0.5 },
 		},
@@ -253,9 +302,10 @@
 	const amountSize = $derived(Math.min(sizes.width * 0.06, 78));
 
 	// ── Velocidad de reproducción ────────────────────────────────────────
-	// Los sheets del drop 04-09 son clips CERRADOS: entran con fade-in, se
-	// sostienen y se van con fade-out (el último frame es transparente —
-	// medido: small 34→37, big 32→35, mega 51→53 caen a 0 de cobertura).
+	// Los sheets de los drops 04-09 y 07-09 son clips CERRADOS: entran con
+	// fade-in, se sostienen y se van con fade-out (el último frame es
+	// transparente — medido: small 34→37, big 32→35, mega 51→53 y, desde el
+	// 07-09, max 50→55 caen a 0 de cobertura).
 	// Eso cambia dos cosas respecto de los sheets viejos:
 	//   · NO pueden loopear (el cartel parpadearía al reencender el fade-in);
 	//   · NO pueden quedarse en el último frame (quedaría vacío, con el monto
@@ -264,7 +314,20 @@
 	// visible (countUp + hold) para que su fade-out coincida con el del
 	// overlay. El fps sale de la cantidad real de frames del sheet cargado,
 	// así un re-drop con otro largo se acomoda solo sin tocar código.
-	// MAX queda como estaba (sheet viejo, 22 frames en loop a 10fps).
+	//
+	// MAX es la EXCEPCIÓN (decisión del usuario 07-09): corre a 30fps fijos, su
+	// velocidad de autoría. Estirarlo a la ventana lo dejaría en ~7fps y el
+	// batido de partículas se vería a tirones. Pero a 30fps sus 56 frames duran
+	// 1.87s y la ventana del tier es más larga, así que dejarlo llegar al final
+	// del clip (6 frames vacíos) dejaría el monto solo en pantalla.
+	//
+	// La salida es CONGELAR el clip en el último frame con arte a tamaño
+	// completo en vez de dejarlo correr hasta los frames vacíos: el cartel
+	// entra a su velocidad real, se queda puesto el resto del festejo, y la
+	// salida la hace el fade del FadeContainer (que es quien apaga el overlay
+	// entero, lettering y monto a la vez). Congelar = animationSpeed 0; NO
+	// `play=false`, que en AnimatedSprite hace gotoAndStop(0) y saltaría al
+	// primer frame, que está casi vacío.
 	const appContext = getContextApp();
 	const letteringFrames = $derived(
 		(
@@ -278,13 +341,25 @@
 	const letteringReady = $derived(letteringFrames > 0);
 	const activeCfg = $derived(cfgFor(winLevelData));
 	const letteringWindowMs = $derived(activeCfg.countUpDuration + activeCfg.holdMs);
-	const letteringLoop = $derived(tier === 'max');
+	// Ningún tier loopea ya: los cuatro sheets son clips cerrados.
+	const letteringLoop = false;
+	// MAX_FPS / MAX_HOLD_FRAME están declaradas arriba, junto a TIER_CONFIG:
+	// el count-up del tier se mide contra ellas.
+	let letteringHeld = $state(false);
+	// Un ÚNICO cambio de estado por celebración (no uno por frame): en cuanto
+	// el clip de max llega al frame de sostén, se congela y no se vuelve a
+	// tocar hasta el próximo winShow.
+	const onLetteringFrame = (frame: number) => {
+		if (!letteringHeld && tier === 'max' && frame >= MAX_HOLD_FRAME) letteringHeld = true;
+	};
 	const letteringFps = $derived(
-		letteringLoop || !letteringFrames
-			? 10
-			: Math.min(30, Math.max(8, (letteringFrames * 1000) / letteringWindowMs)),
+		tier === 'max'
+			? MAX_FPS
+			: !letteringFrames
+				? 10
+				: Math.min(30, Math.max(6, (letteringFrames * 1000) / letteringWindowMs)),
 	);
-	const letteringSpeed = $derived(letteringFps / 60);
+	const letteringSpeed = $derived(letteringHeld ? 0 : letteringFps / 60);
 </script>
 
 <FadeContainer {show}>
@@ -306,6 +381,7 @@
 					animationSpeed={letteringSpeed}
 					loop={letteringLoop}
 					play={show}
+					onFrameChange={onLetteringFrame}
 				/>
 			{/if}
 			<!-- Amount — SIN caja. Look "sticker": halo lima difuso detrás +

@@ -116,7 +116,7 @@ export const bucketFor = (w: number, h: number): ResBucketKey =>
 // posición histórica del board en verticales (la rama portrait de hudLayout
 // ahora lee boardX/boardY tweakeables en vez del 0.46 fijo).
 const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
-	// Aprobado por el usuario en /sizes (15-07, viewport 425×812 — Mobile L).
+	// Aprobado por el usuario en /sizes (04-09, viewport 425×812 — Mobile L).
 	portrait_l: {
 		freeScale: 1,
 		boardH: 0.92,
@@ -124,7 +124,7 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		boardY: 0.385,
 		stackScale: 1.35,
 		stackRight: -36,
-		stackBottom: 33,
+		stackBottom: 6,
 		iconScale: 1.015,
 		iconX: 22,
 		iconY: 118,
@@ -132,15 +132,15 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		kashX: 0.106,
 		kashY: 0.587,
 	},
-	// Aprobado por el usuario en /sizes (15-07, viewport 375×667 — Mobile M).
+	// Aprobado por el usuario en /sizes (04-09, viewport 375×667 — Mobile M).
 	portrait_m: {
 		freeScale: 1,
 		boardH: 0.92,
 		boardX: 0.485,
 		boardY: 0.424,
-		stackScale: 1.17,
+		stackScale: 1.035,
 		stackRight: -36,
-		stackBottom: 4,
+		stackBottom: 14,
 		iconScale: 1.015,
 		iconX: 22,
 		iconY: 118,
@@ -148,15 +148,15 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		kashX: 0.106,
 		kashY: 0.587,
 	},
-	// Aprobado por el usuario en /sizes (15-07, viewport 320×568 — Mobile S).
+	// Aprobado por el usuario en /sizes (04-09, viewport 320×568 — Mobile S).
 	portrait_s: {
 		freeScale: 1,
 		boardH: 0.92,
 		boardX: 0.485,
-		boardY: 0.436,
-		stackScale: 1.145,
+		boardY: 0.439,
+		stackScale: 0.945,
 		stackRight: -36,
-		stackBottom: 0,
+		stackBottom: 18,
 		iconScale: 1.015,
 		iconX: 22,
 		iconY: 118,
@@ -180,48 +180,48 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		kashX: 0.108,
 		kashY: 0.566,
 	},
-	// Aprobado por el usuario en /sizes (15-07, viewport 400×225).
+	// Aprobado por el usuario en /sizes (04-09, viewport 400×225).
 	popout_s: {
 		freeScale: 1,
 		boardH: 0.96,
 		boardX: 0.5,
 		boardY: 0.545,
-		stackScale: 1.075,
-		stackRight: 46,
-		stackBottom: -2,
-		iconScale: 1,
+		stackScale: 0.85,
+		stackRight: 45,
+		stackBottom: 14,
+		iconScale: 0.735,
 		iconX: 22,
 		iconY: 18,
 		kashH: 0.68,
 		kashX: 0.106,
 		kashY: 0.587,
 	},
-	// Aprobado por el usuario en /sizes (15-07, viewport 800×450).
+	// Aprobado por el usuario en /sizes (04-09, viewport 800×450).
 	popout_l: {
 		freeScale: 1,
 		boardH: 0.984,
 		boardX: 0.5,
 		boardY: 0.56,
-		stackScale: 0.94,
+		stackScale: 0.835,
 		stackRight: 44,
 		stackBottom: 4,
-		iconScale: 0.805,
+		iconScale: 0.71,
 		iconX: 22,
 		iconY: 18,
 		kashH: 0.68,
 		kashX: 0.106,
 		kashY: 0.587,
 	},
-	// Aprobado por el usuario en /sizes (15-07, viewport 1024×576).
+	// Aprobado por el usuario en /sizes (04-09, viewport 1024×576).
 	laptop: {
 		freeScale: 1,
 		boardH: 0.89,
 		boardX: 0.508,
-		boardY: 0.548,
-		stackScale: 0.935,
-		stackRight: 38,
-		stackBottom: 0,
-		iconScale: 0.78,
+		boardY: 0.543,
+		stackScale: 0.815,
+		stackRight: 41,
+		stackBottom: 6,
+		iconScale: 0.735,
 		iconX: 22,
 		iconY: 18,
 		kashH: 0.722,

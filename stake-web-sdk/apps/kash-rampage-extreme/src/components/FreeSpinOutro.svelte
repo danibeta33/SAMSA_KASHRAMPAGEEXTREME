@@ -191,7 +191,9 @@
 		small: { key: 'anim_win_small', aspect: 300 / 145 },
 		big: { key: 'anim_win_big', aspect: 1 },
 		mega: { key: 'anim_win_mega', aspect: 1 },
-		max: { key: 'anim_win_max', aspect: 1 },
+		// Drop 07-09: el sheet de MAX es 1402×788 (≈16:9), no 1:1 — con aspect 1
+		// el cartel salía aplastado a lo alto dentro del panel.
+		max: { key: 'anim_win_max', aspect: 1402 / 788 },
 	};
 	const lettering = $derived(LETTERING[currentTier]);
 	// Los tiers 1:1 traen el burst completo — más chicos que el lettering

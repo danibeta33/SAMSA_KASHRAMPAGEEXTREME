@@ -26,7 +26,11 @@ export type RawAudio = LoadedAudio<string>;
 export type RawSpine = PIXI.Dict<SPINE_PIXI.TextureAtlas | Uint8Array>;
 export type RawSprite = LoadedSprite;
 export type RawSprites = { textures: PIXI.Dict<LoadedSprite> };
-export type RawSpriteSheet = { textures: PIXI.Dict<LoadedSprite> };
+// El Spritesheet REAL de PixiJS, no un `{ textures }` estructural: el
+// procesador necesita `data.animations` (el orden del clip) y `linkedSheets`
+// (las páginas extra de un sheet multipack), y ninguno de los dos existe en el
+// tipo reducido. Ver `getSpriteSheetFrames` en assetLoad.ts.
+export type RawSpriteSheet = PIXI.Spritesheet;
 export type RawAsset = RawSpine | RawSprite | RawSprites | RawSpriteSheet | RawAudio;
 export type RawType = 'spine' | 'sprite' | 'sprites' | 'spriteSheet' | 'font' | 'audio';
 
