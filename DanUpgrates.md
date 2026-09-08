@@ -651,3 +651,452 @@ exista, los sliders `dx/dy` del AnimLab quedan redundantes y se pueden retirar.
 | **Overrides no persisten** | A propósito: son ajuste en vivo. El valor bueno se hornea en `SPRITE_PLACEMENTS`. Si el Paso 4 quiere persistirlos, va por `localStorage` con su propia clave. |
 | **Símbolos y letterings todavía pasan `anchor` a mano** | El registro ya los clasifica con el mismo valor que pasan hoy (`0.5`), así que borrar esas props es mecánico y sin cambio visual. Quedó fuera del alcance de este paso, que era Kash. |
 | **Sin type-check automatizado** | La app no tiene `svelte-check`. La validación es `vite build` + el script de paridad. |
+
+---
+
+## Paso 4 — Swap del símbolo Premium y HUD superior en canvas
+
+**Fecha:** 2026-09-08
+**App:** `stake-web-sdk/apps/kash-rampage-extreme`
+**Objetivo:** cerrar la transferencia del objeto especial (H4) al asset
+`anim_sym_premium` eliminando el fajo estático que lo respaldaba, y reemplazar la
+barra HTML del HUD superior por piezas independientes **dentro del canvas Pixi**,
+posicionables en vivo desde el Inspector. Se suma una auditoría de la math contra
+los MD de QA, en modo solo-lectura.
+
+### 1. Punto de partida
+
+El HUD superior era un único contenedor HTML fijo, ajeno al canvas y a los
+laboratorios, con su alto duplicado a mano en la geometría del board:
+
+```text
++layout.svelte ──<TopBar />──▶ franja HTML `position: fixed`
+                                  ├─ brand "KASH RAMPAGE EXTREME" (string literal)
+                                  ├─ BALANCE · LAST WIN · TUMBLE (flex row)
+                                  └─ 4 media queries con alturas 24/40/56
+                                                    │
+hudLayout.ts ──topBarHeight()── copia esas alturas ─┘
+             └──▶ boardTransform() → sMaxTop / topSafe
+```
+
+Y el símbolo Premium arrastraba una geometría que ya no correspondía al arte:
+
+| Dónde | Qué había hardcodeado |
+|---|---|
+| `src/components/SymbolSprite.svelte` | `ANIM_SPECIAL.sym_h4` con la caja del **grafiti viejo** — arte 182×191 sobre canvas 256², `center.y` 0.572. El sheet en disco ya era `Special_Billetes` (canvas 432², arte casi a sangre y centrado), así que el ícono se dibujaba ~30 % chico y corrido hacia arriba |
+| `src/game/assets.ts` | `sym_h4` → `symbols/h4.png` ("fajo Dinero, stand-in del grafiti"), vivo solo como fallback mientras el clip —sin `preload`— terminaba de bajar |
+| `src/game/hudLayout.ts` | `topBarHeight()` con `24 / 40 / 56` — las media queries de TopBar copiadas a mano |
+| `src/components/TopBar.svelte` | brand, colores y los 3 pares label/valor, todo en CSS; sin ningún control desde el UI LAB |
+
+La animación vieja del grafiti **no** tenía entrada propia que borrar: fue
+sobreescrita bajo el mismo nombre de archivo y solo sobrevive en git
+(`git show HEAD:…/anim_sym_premium.json` → `Special_Graffiti`, 6 frames).
+
+### 2. Modificaciones realizadas
+
+**Archivos creados**
+
+| Archivo | Rol |
+|---|---|
+| `src/components/Contenedor1.svelte` | Recipiente reutilizable del HUD: sprite `ui_contenedor1` + título fijo + texto dinámico. Exporta `CONTENEDOR1_ASPECT` para que el layout no re-mida el arte. |
+| `src/components/TopHud.svelte` | Dueño de los 3 recipientes + el sprite del título, del auto layout fila/columna y del cableado reactivo que venía de TopBar. |
+| `.scripts/repack_spritesheet.py` | Re-empaqueta un sheet de TexturePacker a un canvas por frame más chico, preservando los ratios normalizados. Genérico: sirve para cualquier `anim_*`. |
+| `static/assets/sprites/symbols/h4_still.png` | Still de H4 para la tabla de pagos de las reglas (ver §3e). Es HTML, no pasa por el registro Pixi. |
+
+**Archivos modificados**
+
+| Archivo | Cambio |
+|---|---|
+| `src/game/assets.ts` | −`sym_h4` · `preload: true` en `anim_sym_premium` · +`ui_contenedor1` · +`ui_title` |
+| `src/components/SymbolSprite.svelte` | Geometría real de `ANIM_SPECIAL.sym_h4` + `STATIC_LESS` / `hasStatic`, la guarda que impide pedir la textura borrada |
+| `src/components/Game.svelte` | Monta `<TopHud />` dentro de `<App>`, **fuera** del `<Container>` de `boardTransform` |
+| `src/routes/+layout.svelte` | Se va el `import TopBar` y el `<TopBar />` |
+| `src/game/hudLayout.ts` | `topBarHeight()` → `0`, conservando firma y callers |
+| `src/game/stateTweak.svelte.ts` | 8 claves nuevas en `Tweak` / `DEFAULTS` / `TWEAKABLE_KEYS` |
+| `src/game/labMeta.ts` | Categorías `tophud` y `title` + 7 sliders + el toggle `hudVertical` |
+| `static/assets/sprites/anim/anim_sym_premium.{json,webp}` | Re-empaquetado a 256² |
+
+**Archivos eliminados:** `src/components/TopBar.svelte` y
+`static/assets/sprites/symbols/h4.png`. Se conserva `sym_h4_luz`: es la carta
+iluminada del estado de win, no el fajo del board.
+
+**Sin cambios:** `stake-math-sdk/**` (decisión del usuario) y el handler
+`kashRampage` de `bookEventHandlerMap.ts`.
+
+### 3. Cómo se hizo
+
+**a) El re-pack como operación que preserva invariantes.**
+`SymbolSprite` no dimensiona el sheet por su canvas sino por el **arte** que
+contiene, usando tres ratios normalizados (`aspect`, `fill`, `center`). Esos
+ratios son invariantes de escala, así que sirven de test del re-pack: si el
+script decodifica bien y reescala parejo, no se mueven. `--verify` los compara y
+falla si se corren más de 5e-3.
+
+Lo no obvio es decodificar el atlas de entrada: los frames vienen `trimmed`
+(recortados a su bounding box) y algunos `rotated` (girados 90° para empaquetar),
+así que hay que des-rotar y re-expandir cada uno a su `sourceSize` **antes** de
+tocar la escala. El sheet de salida se emite sin trim ni rotación, que es lo que
+vuelve triviales sus ratios.
+
+```text
+drop inicial     25f × 701²   atlas 3296²   10.34 MB
+re-export equipo 25f × 432²   atlas 2027²    4.67 MB
+tras el re-pack  25f × 256²   atlas 1280²    0.79 MB   (5.9× más liviano)
+
+aspect  1.031026 → 1.032258      center.y  0.503472 → 0.503906
+fill.h  0.969907 → 0.968750      fill.w    1.000000 → 1.000000
+```
+
+El atlas se ajusta a la grilla en vez de redondear a potencia de 2: WebP
+comprime el vacío a casi nada, pero la textura **descomprimida** en VRAM cuesta
+`ancho×alto×4` igual — 2048² serían 16.7 MB contra 6.5 MB de 1280².
+
+**b) Borrar una textura sin borrar la identidad del símbolo.**
+`sym_h4` no era solo un asset: es la clave con la que H4 se nombra en
+`constants.ts` (`H4: mkSprite('sym_h4')`), en `winPop.svelte.ts`
+(`SELF_ANIMATED_ASSET_KEYS`) y en `LUZ_KEY`. Todas esas referencias siguen. Lo
+que desapareció es su entrada en el registro, y con ella la posibilidad de que
+alguien pida la textura:
+
+```ts
+// SymbolSprite.svelte
+const STATIC_LESS = new Set(['sym_h4']);
+const hasStatic = $derived(!STATIC_LESS.has(props.symbolInfo.assetKey));
+// …
+{#if !glowReplacesIcon && hasStatic}
+    <Sprite anchor={0.5} key={props.symbolInfo.assetKey} … />
+{/if}
+```
+
+Con `preload: true` el clip ya está en `loadedAssets` antes del primer render del
+board, así que la rama estática es inalcanzable — pero *inalcanzable por orden de
+carga* no es lo mismo que *imposible*. La guarda lo vuelve una invariante del
+componente. Sin ella, el caso degradado es exactamente el `"Sprite key not
+found"` que `05-preflight-checklist.md` marca como motivo #1 de rechazo.
+
+**c) Auto layout por lista, no por posiciones.**
+No existía ningún helper de fila/columna en el monorepo (`utils-layout` solo hace
+fit y alineación; los `Layout*.svelte` del SDK son constantes a mano). El de acá
+es deliberadamente chico: los recipientes se arman como **lista** y el toggle
+decide sobre qué eje se aplica el paso.
+
+```ts
+const vertical = $derived(stateTweak.hudVertical >= 0.5);
+const step     = $derived((vertical ? panelH : panelW) + gap);
+```
+
+Armarlo como lista es lo que hace que al caer TUMBLE en viewports angostos los
+dos restantes se re-acomoden solos, sin dejar el hueco que dejaría una posición
+fija por recipiente. El paso incluye el lado del panel, así que subir la escala
+nunca los superpone.
+
+Tamaños y gap se multiplican por `uiScaleFor()`, igual que `stackScale` /
+`stackRight`: el slider es un trim **por bucket** encima del escalado global, no
+un reemplazo.
+
+**El grupo se clampea dentro del canvas, incluso en LIBRE.** Medido en el
+navegador con los defaults sacados del mock landscape (`hudX` 0.885):
+
+| Viewport | Borde derecho del panel | Ancho | Resultado |
+|---|---|---|---|
+| 1200×675 desktop | 1149.5 | 1200 | entra |
+| 400×225 popout S | 383.2 | 400 | entra justo |
+| 320×568 Mobile S | 349.1 | 320 | **se salía 29 px** |
+| 425×812 Mobile L | 463.6 | 425 | **se salía 39 px** |
+
+Es la única excepción a la regla "en LIBRE el usuario es el cap": `freeScale`
+apaga los topes ANTI-SOLAPE del board, que como mucho afean. Acá lo que se caía
+del viewport era BALANCE — un dato obligatorio, no un solape. Y los dos buckets
+afectados son justamente los que traen `freeScale: 1` en `PER_BUCKET_SEED`, así
+que atarlo a esa bandera lo habría dejado roto donde más importaba. Dentro del
+canvas el posicionamiento sigue siendo libre.
+
+**El valor achica la tipografía si el string es largo.** Pixi `Text` no recorta
+ni ajusta: lo que no entra se dibuja fuera del recipiente. El cuerpo entra cómodo
+hasta ~11 caracteres (`$100,000.00`, el balance del mock), pero las condiciones
+del reviewer son peores — XEC se muestra como SC y con balances altos salen
+strings como `SC 1,000,000.00`. `Contenedor1` escala la fuente por
+`11 / max(11, value.length)`: determinista y sin medir texto.
+
+**d) El alternador fila/columna es un toggle, no una acción.**
+`UiLab.svelte` (tecla `T`) renderiza `group.controls` e **ignora**
+`group.actions` — las acciones las dibuja AnimLab (tecla `A`). Registrado como
+acción, el botón habría aparecido en el panel equivocado, separado de los
+sliders que modifica. Como toggle queda junto a ellos, persiste por bucket como
+el resto y encaja con que el `InspectorHost` solo maneja números (`on: 1` /
+`off: 0`, igual que `freeScale`).
+
+**e) La tabla de pagos también consumía el PNG borrado.**
+Borrar `symbols/h4.png` rompió un consumidor que no está en el registro Pixi: la
+tabla de pagos de las reglas es HTML escrito a mano en `Game.svelte` y traía
+`<img src="assets/sprites/symbols/h4.png">` en las dos versiones (ES y EN). Con
+el archivo borrado quedaba una imagen rota y un 404 en consola — justo lo que el
+`05-preflight-checklist.md` pide que dé cero.
+
+Se exportó un still del clip nuevo (frame 12, recortado al arte y re-encuadrado
+en 512² como el resto del kit) a `symbols/h4_still.png`, y las dos tablas apuntan
+ahí. Se exportó desde el sheet de 432² —antes del re-pack— para que el ícono de
+las reglas no salga upscaleado desde los 256² del board. El nombre es distinto a
+propósito: `h4.png` sigue borrado y el registro sigue sin estático para H4.
+
+Para que esto no vuelva a pasar, la verificación ahora incluye recorrer TODAS las
+referencias `assets/**.{png,jpg,webp,gif}` del código contra `static/` y exigir
+cero faltantes — encontró este caso y ningún otro.
+
+**El `InspectorRegistry` no se tocó.** Los 8 controles entraron solo agregando
+datos a `labMeta.ts` y claves a `stateTweak`, que es exactamente el flujo que
+dejó planteado el Paso 1. `labInspector.svelte.ts` tampoco cambió: ya itera los
+tres manifiestos.
+
+⚠ **No se subió `LAB_STORAGE_KEY`** (sigue en `kash_tweak_v14`). `loadOverrides`
+filtra por `TWEAKABLE_KEYS` y las claves ausentes caen a `DEFAULTS` /
+`PER_BUCKET_SEED`, así que agregar claves es retrocompatible. Bumpear la versión
+habría borrado los valores ya aprobados en los 7 buckets.
+
+### 4. Auditoría de la math (solo lectura)
+
+Corrida de `verify_10m.py` (10M rondas por modo) contra las LUT de
+`library/publish_files/`, contrastada con `01-stake-approval-checklist.md` §5:
+
+| Requisito Stake | Medido | Estado |
+|---|---|---|
+| RTP 90–98 % | base 96.5000 · vault 96.4984 · smash 96.4995 · rage 96.1993 | ✅ |
+| Modos dentro de ±0.5 % del base | Δ máx 0.30 % (rage) | ✅ |
+| Max win realmente obtenible | 5000x alcanzado en los 4 modos; 1/45.455 en base | ✅ |
+| Hit-rate no-cero mejor que ~1 en 20 | 1 en 4.548 (base) | ✅ |
+| Simulaciones 100k–1M por modo | base 100k books · buys 250k | ✅ |
+| Sin huecos en la distribución | bandas 1000–2000 / 2000–3000 / 3000–5000 pobladas | ✅ |
+
+**Hallazgos NO corregidos, por decisión explícita del usuario:**
+
+1. `rage_mode` mide **0.962** pero `library/configs/config.json` y
+   `math_config.json` lo **declaran 0.965**. Cumple Stake igual (está dentro del
+   ±0.5 % del base), pero es un desajuste declarado-vs-real y hace fallar el
+   propio `verify_10m.py`, cuya tolerancia es ±0.05 %. Es el pendiente #1 de
+   `HANDOFF.md`.
+2. `books_rage_mode.jsonl.zst` pesa **620 MB** (smash 486, vault 442). El
+   `05-preflight-checklist.md` fija ~400 MB como tamaño seguro para books de
+   buys; el uploader del ACP trunca por encima de ~1 GB.
+
+Nota de entorno: `verify_10m.py` importa `numpy` y la consola de Windows abre en
+cp1252, así que el script muere al imprimir el `✗` del resumen de fallas —
+después de haber impreso todos los números. No se tocó porque vive en
+`stake-math-sdk/`.
+
+### 5. Comportamiento preservado
+
+Lo que TopBar cumplía y TopHud replica — todo esto viene de requisitos de
+approval, no de gusto:
+
+| Comportamiento | Cómo sigue |
+|---|---|
+| Bet replay oculta el balance | `stateUrlDerived.replay()` cambia el primer recipiente a `BET` con `wageredBetAmount` |
+| Payout incremental | `tumbleWinAmountUpdate/Reset/Hide` + `lastWinBookAmount = tumbleBookAmount ?? stateBet.winBookEventAmount` |
+| TUMBLE real | `globalMultiplierUpdate` / `globalMultiplierHide` |
+| Oculto durante el loading | Montado en el `{:else}` de `showLoadingScreen` (antes era `topbar--hidden`) |
+| Escalera responsive | TUMBLE cae bajo 430 px y el título bajo 360 px; BALANCE y LAST WIN nunca |
+| Moneda de la sesión | Mismos `money()` / `moneyWinFromBookAmount()` |
+| Activación y payout de H4 | Intactos por construcción: viven en la math (`rampage.premium_symbol`, `apply_kash_rampage()`, evento `kashRampage`) y el swap fue solo de textura |
+
+### 6. Verificación ejecutada
+
+Se levantó el juego real (mock RGS en :3032 + dev en :3002) y se lo manejó con
+Edge headless por CDP — driver mínimo sobre el `WebSocket` global de Node 24, sin
+instalar Playwright. Cada corrida hace click en el loading screen, saca captura y
+devuelve **toda** la consola.
+
+| Chequeo | Resultado |
+|---|---|
+| `vite build` | ✅ `✔ done`, `200 /` y `200 /sizes`, sin errores |
+| Consola en los 4 viewports | ✅ solo HMR de vite (DEV) y warnings de swiftshader por headless. **Cero "Sprite key not found", cero 404, cero excepciones** |
+| `h4.png` tras borrarlo | ✅ 404 en el server y **cero referencias** que lo pidan |
+| Referencias `assets/**` vs disco | ✅ 0 faltantes (este barrido encontró el `<img>` de la paytable) |
+| Ratios del sheet vs los horneados en el código | ✅ idénticos |
+| Símbolo Premium en el board | ✅ entra del tamaño de los demás y centrado |
+| Layout landscape vs `REFERENCIA_NUEVA_UI.png` | ✅ barra negra fuera, título arriba a la izquierda, 3 recipientes en columna a la derecha |
+| Escalera responsive | ✅ TUMBLE cae bajo 430 px, título bajo 360 px, BALANCE y LAST WIN siempre presentes |
+| Auto layout | ✅ `hudVertical` alterna columna↔fila y `hudGap` / `hudScale` / `hudX` / `hudY` responden en vivo |
+
+**Nota de entorno:** `vite build` completa y escribe el sitio, pero el proceso no
+termina solo. Se verificó que **no es por estos cambios**: la app `apps/cluster`,
+intacta, hace exactamente lo mismo. En CI hay que envolverlo con `timeout` y
+mirar el `✔ done` en vez del exit code.
+
+### 7. Pendiente para el próximo pase de laboratorio
+
+Los defaults de `hudX/hudY/titleX/titleY` se midieron del mock **landscape** y
+ahí calzan. En portrait el clamp garantiza que nada quede fuera de pantalla, pero
+los recipientes quedan **encima de la grilla**: al pasar `topBarHeight()` a 0 el
+board ya no reserva franja superior y crece hasta arriba, mientras el HUD flota
+sobre la escena (que es lo que pide la referencia). Es ajuste de encuadre, no de
+fórmula: mover `hudY` (y si hace falta `boardY`) por bucket en `/sizes` o con la
+tecla `T`, y congelar lo aprobado en `PER_BUCKET_SEED` — el mismo flujo con el
+que se fijaron board, kash y stack. No se sembraron valores ahí a propósito: esa
+tabla es de valores **aprobados por el usuario**, no inventados.
+
+### 8. Análisis de riesgos
+
+| Riesgo | Estado / mitigación |
+|---|---|
+| **`sym_h4` borrado → "Sprite key not found"** | Doble cobertura: `preload` en el clip + la guarda `STATIC_LESS`. Verificado con consola limpia en 4 viewports. Falta el pase con CDN throttleado y el recorrido autoplay/bonus/replay. |
+| **Los 3 recipientes caen en la zona de `stackRightReserve()`** | En landscape quedan por encima del stack BET/SPIN, sin tocarlo. En portrait se montan sobre la grilla — ver §7. |
+| **25 frames en vez de 6 durante el spin** | El clip de H4 es 4× más largo que el del grafiti y puede haber varias instancias animando a la vez en la caída. Medir FPS; si molesta, bajar `animationSpeed` o limitar la animación al estado `static`. |
+| **Si el sheet se re-exporta, la geometría vuelve a mentir** | Es el bug que originó este paso. Los tres ratios están comentados con su origen y `repack_spritesheet.py --report` los imprime listos para pegar. |
+| **`topBarHeight()` devuelve 0 pero sigue existiendo** | A propósito: `boardTransform` la usa en `sMaxTop` y en el `topSafe` que en portrait suma `PORTRAIT_ICON_ROW_H`. Queda un solo punto donde volver a reservar alto arriba. |
+| **El HUD ya no capa la escala del board** | Al no reservar franja superior, el board puede crecer hasta donde lo dejen los otros caps y pasar por detrás del HUD nuevo. En `freeScale` el usuario es el cap, como en el resto del lab. |
+| **Texto Pixi vs texto DOM** | Los valores ahora rasterizan por canvas: dependen de `loadBrandFonts()` y no heredan el antialiasing del navegador. Verificar legibilidad en Mobile S y Popout S, que es donde TopBar ya sacrificaba tamaño. |
+| **`.bak` del re-pack dentro de `static/`** | El script deja backups junto al asset y `static/` se copia entera al build. Se borraron a mano; si se vuelve a correr, borrarlos antes de empaquetar. |
+
+---
+
+## Paso 5 — Pulido: rotación del atlas, textos inclinados, acordeón y escala de especiales
+
+**Fecha:** 2026-09-08
+**App:** `stake-web-sdk/apps/kash-rampage-extreme` + `packages/components-inspector`
+**Objetivo:** cerrar tres defectos que quedaron visibles después del Paso 4 —
+frames del fajo mal orientados, texto horizontal sobre recipientes inclinados y
+un panel de laboratorio vuelto inmanejable por la cantidad de sliders — y sumar
+un multiplicador de tamaño para los íconos especiales.
+
+### 1. Punto de partida
+
+| Dónde | Qué estaba mal |
+|---|---|
+| `static/assets/sprites/anim/anim_sym_premium.json` | 11 de los 25 frames salían girados 180°: el re-pack del Paso 4 desgiraba con `ROTATE_270` los frames que el atlas trae con `rotated: true` |
+| `src/components/Contenedor1.svelte` | Los `Text` se dibujaban horizontales sobre un panel inclinado ~9°, y su centro vertical estaba mal medido: las etiquetas se montaban sobre el borde superior |
+| `packages/components-inspector/src/components/UiLab.svelte` | Las 6 categorías se renderizaban siempre expandidas — 22 controles en una lista con scroll |
+| `src/components/SymbolSprite.svelte` | El tamaño de W / S / H4 salía solo de su `box`, sin forma de resaltarlos sin re-exportar arte |
+
+### 2. Modificaciones realizadas
+
+**Archivos modificados**
+
+| Archivo | Cambio |
+|---|---|
+| `.scripts/repack_spritesheet.py` | `ROTATE_270` → `ROTATE_90` al desgirar frames `rotated` |
+| `static/assets/sprites/anim/anim_sym_premium.{json,webp}` | Regenerado desde el master 432² con la rotación corregida |
+| `src/components/Contenedor1.svelte` | `CONTENEDOR1_TILT` + `rotation` en los dos `Text`; `BODY_TOP` / `BODY_BOTTOM` re-medidos |
+| `packages/components-inspector/src/components/UiLab.svelte` | Acordeón por categoría con `$state`, encabezados clickeables y ABRIR/PLEGAR TODO |
+| `src/game/stateTweak.svelte.ts` | Clave `specialScale` (default `1.3`) en `Tweak`, `DEFAULTS` y `TWEAKABLE_KEYS` |
+| `src/game/labMeta.ts` | Slider `specialScale` en la categoría `hud` |
+| `src/components/SymbolSprite.svelte` | `specialMult` aplicado a `w`/`h` y a `specialSide` |
+
+**Archivos creados / eliminados:** ninguno.
+
+### 3. Cómo se hizo
+
+**a) La rotación del atlas: diagnóstico por vecinos, no por convención.**
+Las convenciones de `rotated` de TexturePacker se documentan de las dos formas
+según la versión, así que en vez de discutir el sentido se usó el propio sheet
+como oráculo: **14 de los 25 frames NO vienen rotados** y son la referencia de
+orientación correcta. Los rotados son
+`[0, 1, 2, 3, 7, 13, 15, 17, 20, 21, 23]` — exactamente los que se veían mal.
+
+Decodificando el frame 3 (rotado) con las dos opciones y comparándolo con el
+frame 4 (no rotado, su vecino inmediato en la animación), `ROTATE_90` alinea y
+`ROTATE_270` deja el fajo cabeza abajo. Con eso el criterio queda objetivo y
+reproducible, no estético.
+
+El sheet se regeneró desde el master 432² original (guardado fuera del repo),
+no desde el 256² ya publicado: rotar el downscale habría corregido la
+orientación arrastrando la pérdida de calidad de dos reescalados.
+
+Los ratios normalizados **no cambiaron** (`aspect 1.032258`,
+`fill {1.0, 0.96875}`, `center {0.5, 0.503906}`), así que `ANIM_SPECIAL` no se
+tocó: girar 180° un arte casi centrado y casi a sangre no mueve el bounding box
+de la unión. Peso y dimensiones tampoco cambian — 1280², 0.79 MB.
+
+**b) La inclinación del texto se midió, no se eligió.**
+El pedido era "unos 10 grados". El valor real del panel sale de un ajuste por
+mínimos cuadrados sobre el borde superior del PNG (60 % central, salteando las
+esquinas biseladas): pendiente `dy/dx = -0.15625` → **-8.88°**. Se usó el
+medido, que es lo que hace que la inclinación coincida de verdad.
+
+Lo importante es el **signo**: en Pixi la Y crece hacia abajo y el recipiente
+sube hacia la derecha, así que la rotación es NEGATIVA. Con `+10 * Math.PI / 180`
+el texto se habría inclinado *en contra* del panel — el doble del error visual
+que con 0.
+
+```ts
+export const CONTENEDOR1_TILT = Math.atan(-0.15625); // ≈ -0.1550 rad ≈ -8.88°
+```
+
+Ambos `Text` giran sobre su propio centro (`anchor` 0.5), así que el apilado
+vertical no se mueve y cada línea queda paralela al cuerpo.
+
+**c) El bug que la rotación destapó: el cuerpo estaba mal medido.**
+Al inclinar el texto se hizo evidente que las etiquetas se montaban sobre el
+borde superior. La causa no era la rotación sino `BODY_CENTER_Y`, estimado a ojo
+en el Paso 4 sobre el alto total del PNG. **El recipiente es un paralelogramo:**
+su borde superior está mucho más abajo a la izquierda que a la derecha, así que
+un min/max sobre todo el ancho describe un "cuerpo" que no corresponde a ninguna
+columna concreta. Como el texto va centrado, la referencia correcta es la
+columna central. Clasificando por color en `x = 637` de 1275:
+
+```text
+.   0..86     Y  86..108    D 108..403   ← cuerpo real
+Y 403..410    D 410..438    Y 438..446   ← borde inferior + cinta
+```
+
+`BODY_CENTER_Y` pasa de `-0.121` a `+0.010` (≈ 9 px de corrección a la escala de
+desktop) y `BODY_H` de `0.659` a `0.589`.
+
+**d) Acordeón con `$state`, sin sembrar nada.**
+
+```ts
+let openCats = $state<Record<string, boolean>>({});
+const isOpen = (id: string, index: number) => openCats[id] ?? index === 0;
+const toggleCat = (id: string, index: number) => (openCats[id] = !isOpen(id, index));
+```
+
+El mapa guarda **solo** las categorías que el usuario tocó; las ausentes caen al
+default (la primera abierta, el resto plegadas), así que un juego que registre
+categorías nuevas no necesita inicializar nada. Funciona porque el `$state` de
+Svelte 5 hace proxy profundo y rastrea también las claves que todavía no
+existen: leer `openCats[id]` cuando es `undefined` deja la dependencia
+registrada y la escritura posterior repinta.
+
+Con una sola categoría el encabezado no se renderiza (comportamiento previo), así
+que ese caso se fuerza a expandido — si no, el panel quedaría sin forma de
+abrirse.
+
+`components-inspector` se consume por `main: "./index.ts"`, o sea **desde
+fuente**: a diferencia de `pixi-svelte` no hace falta `svelte-package`. El cambio
+alcanza a los 7 juegos del monorepo, pero es DEV-only y puramente de
+presentación: ningún juego pierde controles.
+
+**e) `specialScale` enganchado a la lista canónica.**
+El multiplicador se decide con `SELF_ANIMATED_ASSET_KEYS` (`winPop.svelte.ts`) y
+no con el mapa `ANIM_SPECIAL`, por dos razones: esa lista **es** la definición de
+"especial" del juego (la misma que usa winPop para saltear el pop), y está
+declarada arriba en el archivo, donde se calculan `w`/`h`.
+
+Se aplica a los **dos** caminos de render — el clip animado y el sprite estático
+de respaldo. Si escalara solo el animado, W y S (que van sin `preload`) darían un
+salto de tamaño en el instante en que su sheet termina de bajar y reemplaza al
+estático.
+
+### 4. Verificación ejecutada
+
+Mismo driver CDP sobre Edge headless del Paso 4 (WebSocket global de Node 24, sin
+Playwright).
+
+| Chequeo | Resultado |
+|---|---|
+| `vite build` | ✅ `✔ done`, `200 /` y `200 /sizes` |
+| Los 25 frames del fajo | ✅ contact sheet: los 11 que venían rotados ahora coinciden con sus vecinos |
+| Consola | ✅ solo HMR de vite y warnings de swiftshader |
+| Texto inclinado | ✅ paralelo al panel y **dentro** del cuerpo (se corrigió tras detectar el desborde) |
+| Acordeón | ✅ 6 categorías con su contador; al abrir "BOTONERA + ÍCONOS" pasan de 0 a 7 sliders visibles |
+| `specialScale` en el panel | ✅ "Especiales (W/S/H4)" en 1.3, dentro de la categoría de íconos |
+| Premium en el board | ✅ visiblemente más grande que los regulares |
+
+### 5. Análisis de riesgos
+
+| Riesgo | Estado / mitigación |
+|---|---|
+| **`specialScale` 1.3 desborda la celda en W y S** | Sus `box` son 0.9 y 0.95, así que a 1.3 quedan en **1.17 y 1.235 celdas** y se meten sobre los vecinos (H4, con box 0.8, queda en 1.04). Es el efecto pedido, pero el punto exacto se ajusta con el slider — y es por bucket, así que en Mobile S puede necesitar menos. |
+| **El master 432² del fajo vive fuera del repo** | El `.webp` versionado es el 256² re-empaquetado. Si hay que volver a re-empaquetar (otro tamaño, otra corrección), hace falta el export original de TexturePacker: conviene guardarlo en el Drive del arte, no en `static/`. |
+| **Se tocó `UiLab.svelte`, compartido por 7 juegos** | DEV-only y sin cambios de contrato: sigue leyendo `registry.groups` y despachando a `read/write/step/toggle/commit/reset`. `AnimLab` e `InspectorRemotePanel` no se tocaron — el panel externo de `/sizes` sigue mostrando todo expandido. |
+| **La inclinación está horneada en el componente** | `CONTENEDOR1_TILT` sale del PNG actual. Si el arte del recipiente se re-exporta con otra inclinación hay que volver a medir la pendiente del borde superior. |
+| **El título no se rotó** | El pedido lo mencionaba, pero su arte ya trae ángulos propios y la referencia lo muestra derecho. Quedó sin rotar y sin slider de rotación; si se quiere, es una clave más en `stateTweak` + `labMeta`. |

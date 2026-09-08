@@ -120,9 +120,18 @@ export default {
 		type: 'spriteSheet',
 		src: new URL('../../assets/sprites/anim/anim_sym_scatter.json', import.meta.url).href,
 	},
+	// PREMIUM (H4) — drop 08-09: el clip `Special_Billetes` (fajo de billetes,
+	// 25 frames de 256²) reemplazó al `Special_Graffiti` bajo el mismo nombre de
+	// archivo, y con él se retiró el sprite estático `sym_h4`. Al no haber
+	// fallback, este sheet es la ÚNICA representación de H4 y por eso va con
+	// PRELOAD: sin él, un board que se pinte antes de que termine la descarga
+	// dejaría la celda vacía. Re-empaquetado con `.scripts/repack_spritesheet.py`
+	// de 2027² / 4.67 MB a 1280² / 0.79 MB para que preloadearlo no castigue el
+	// arranque (el original a 701² pesaba 10.34 MB).
 	anim_sym_premium: {
 		type: 'spriteSheet',
 		src: new URL('../../assets/sprites/anim/anim_sym_premium.json', import.meta.url).href,
+		preload: true,
 	},
 	// Symbols — 12 sprites, set KASH RAMPAGE (Drive ICONS PNG, kit 26-08).
 	// Los 10 regulares vienen del canvas 1080×970 del artista (Juanda) con la
@@ -141,7 +150,12 @@ export default {
 	sym_h1: { type: 'sprite', src: new URL('../../assets/sprites/symbols/h1.png', import.meta.url).href }, // Rampage Vial (stand-in de Bluff)
 	sym_h2: { type: 'sprite', src: new URL('../../assets/sprites/symbols/h2.png', import.meta.url).href }, // UZI
 	sym_h3: { type: 'sprite', src: new URL('../../assets/sprites/symbols/h3.png', import.meta.url).href }, // Bomb (Dinamita)
-	sym_h4: { type: 'sprite', src: new URL('../../assets/sprites/symbols/h4.png', import.meta.url).href }, // KASH premium — fajo Dinero (stand-in del grafiti)
+	// (sym_h4 eliminado 08-09 junto con symbols/h4.png — el fajo estático era el
+	// fallback del grafiti mientras cargaba su clip. Ahora H4 se dibuja SIEMPRE
+	// con `anim_sym_premium`, que va preloaded. La clave `sym_h4` sigue viva como
+	// IDENTIDAD del símbolo en constants.ts, winPop.ts y LUZ_KEY — lo que
+	// desapareció es su textura, y `STATIC_LESS` en SymbolSprite.svelte impide
+	// que alguien la pida.)
 	sym_w:  { type: 'sprite', src: new URL('../../assets/sprites/symbols/w.png',  import.meta.url).href }, // Bat WILD
 	sym_s:  { type: 'sprite', src: new URL('../../assets/sprites/symbols/s.png',  import.meta.url).href }, // Gold Bar SCATTER
 	// Iconos ILUMINADOS (Icons_Luz, kit 26-08) — carta full-bleed 1080×970
@@ -160,4 +174,20 @@ export default {
 	sym_h3_luz: { type: 'sprite', src: new URL('../../assets/sprites/symbols/luz/h3_luz.png', import.meta.url).href },
 	sym_h1_luz: { type: 'sprite', src: new URL('../../assets/sprites/symbols/luz/h1_luz.png', import.meta.url).href },
 	sym_h4_luz: { type: 'sprite', src: new URL('../../assets/sprites/symbols/luz/h4_luz.png', import.meta.url).href },
+	// HUD superior (drop 08-09, ref. REFERENCIA_NUEVA_UI.png) — reemplaza la
+	// barra negra única de TopBar.svelte. `ui_contenedor1` es el recipiente
+	// biselado que se instancia 3 veces (Balance / Last Win / Tumble) y
+	// `ui_title` el logo RAMPAGE EXTREME, que va suelto arriba a la izquierda.
+	// Ambos con PRELOAD: son livianos (0.03 y 0.91 MB) y forman parte del primer
+	// frame jugable, así que no pueden aparecer con pop.
+	ui_contenedor1: {
+		type: 'sprite',
+		src: new URL('../../assets/ui/Contenedor1.png', import.meta.url).href,
+		preload: true,
+	},
+	ui_title: {
+		type: 'sprite',
+		src: new URL('../../assets/ui/Title.png', import.meta.url).href,
+		preload: true,
+	},
 } as const;

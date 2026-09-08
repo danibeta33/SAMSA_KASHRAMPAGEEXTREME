@@ -32,6 +32,24 @@ type Tweak = {
 	// mandan tal cual, aunque las cosas se solapen. Pedido del usuario para
 	// el ajuste a dedo: él es el cap.
 	freeScale: number;
+	// ── HUD SUPERIOR (TopHud.svelte, drop 08-09) ────────────────────────────
+	// Grupo de los 3 recipientes (Balance / Last Win / Tumble). X/Y son
+	// fracciones del canvas como boardX/boardY; la escala y el gap se
+	// multiplican por uiScale igual que stackScale/stackRight.
+	hudX: number;
+	hudY: number;
+	hudScale: number;
+	hudGap: number; // Separación entre recipientes (px de diseño)
+	hudVertical: number; // 0/1 — 0 = fila (horizontal) · 1 = columna (vertical)
+	// Sprite del título, con controles PROPIOS: se mueve y escala sin relación
+	// con el grupo de arriba.
+	titleX: number;
+	titleY: number;
+	titleScale: number;
+	// Multiplicador de tamaño SOLO para los íconos especiales (W wild, S scatter
+	// y H4 premium) sobre el tamaño que ya les da su `box`. Sirve para que los
+	// tres resalten contra los 10 regulares sin re-exportar arte.
+	specialScale: number;
 };
 
 // Board height at which the reels grid matches the engine-native scale (1:1).
@@ -79,6 +97,21 @@ const DEFAULTS: Tweak = {
 	iconX: 22,
 	iconY: 18,
 	freeScale: 0,
+	// HUD superior — medidos del mock DESPUES de REFERENCIA_NUEVA_UI.png:
+	// recipientes en COLUMNA sobre el margen derecho, arrancando arriba, y el
+	// logo a la izquierda sobre el personaje. Son un punto de partida: el valor
+	// bueno de cada bucket se ajusta en el UI LAB y se congela en
+	// PER_BUCKET_SEED, igual que se hizo con board/kash/stack.
+	hudX: 0.885,
+	hudY: 0.155,
+	hudScale: 1,
+	hudGap: 6,
+	hudVertical: 1,
+	titleX: 0.1,
+	titleY: 0.17,
+	titleScale: 1,
+	// 1.3 = los especiales entran 30 % más grandes que su box actual.
+	specialScale: 1.3,
 };
 
 // ── Buckets de resolución — 1:1 con los tamaños del ACP de Stake ────────
@@ -245,6 +278,15 @@ const TWEAKABLE_KEYS = [
 	'iconX',
 	'iconY',
 	'freeScale',
+	'hudX',
+	'hudY',
+	'hudScale',
+	'hudGap',
+	'hudVertical',
+	'titleX',
+	'titleY',
+	'titleScale',
+	'specialScale',
 ] as const;
 
 type Overrides = Partial<Record<ResBucketKey, Partial<Tweak>>>;

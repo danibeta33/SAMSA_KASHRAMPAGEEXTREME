@@ -4,7 +4,6 @@
 	import { Authenticate, LoadI18n } from 'components-shared';
 	import Game from '../components/Game.svelte';
 	import GameLoader from '../components/GameLoader.svelte';
-	import TopBar from '../components/TopBar.svelte';
 	import BottomBar from '../components/BottomBar.svelte';
 	import LoadingOverlay from '../components/LoadingOverlay.svelte';
 	import BuyBonusOverlay from '../components/BuyBonusOverlay.svelte';
@@ -135,7 +134,8 @@
 
 {@render props.children()}
 
-<TopBar />
+<!-- (TopBar eliminado 08-09: el HUD superior es ahora TopHud.svelte, dentro del
+     canvas Pixi y montado desde Game.svelte.) -->
 <BottomBar />
 <ReplayOverlay />
 <LoadingOverlay />

@@ -1,63 +1,545 @@
-{"frames": {
-
-"Special_Graffiti_00000.png":
 {
-	"frame": {"x":181,"y":191,"w":179,"h":185},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":36,"y":57,"w":179,"h":185},
-	"sourceSize": {"w":256,"h":256}
-},
-"Special_Graffiti_00001.png":
-{
-	"frame": {"x":179,"y":380,"w":180,"h":186},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":35,"y":56,"w":180,"h":186},
-	"sourceSize": {"w":256,"h":256}
-},
-"Special_Graffiti_00002.png":
-{
-	"frame": {"x":0,"y":191,"w":181,"h":189},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":35,"y":53,"w":181,"h":189},
-	"sourceSize": {"w":256,"h":256}
-},
-"Special_Graffiti_00003.png":
-{
-	"frame": {"x":0,"y":0,"w":182,"h":191},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":34,"y":51,"w":182,"h":191},
-	"sourceSize": {"w":256,"h":256}
-},
-"Special_Graffiti_00004.png":
-{
-	"frame": {"x":0,"y":571,"w":181,"h":188},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":35,"y":54,"w":181,"h":188},
-	"sourceSize": {"w":256,"h":256}
-},
-"Special_Graffiti_00005.png":
-{
-	"frame": {"x":0,"y":380,"w":179,"h":191},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":36,"y":51,"w":179,"h":191},
-	"sourceSize": {"w":256,"h":256}
-}},
-"animations": {
-	"Special_Graffiti": ["Special_Graffiti_00000.png","Special_Graffiti_00001.png","Special_Graffiti_00002.png","Special_Graffiti_00003.png","Special_Graffiti_00004.png","Special_Graffiti_00005.png"]
-},
-"meta": {
-	"app": "https://www.codeandweb.com/texturepacker",
-	"version": "1.1",
-	"image": "anim_sym_premium.webp",
-	"format": "RGBA8888",
-	"size": {"w":1024,"h":1024},
-	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:8c4b20051dbb286b2ab7a041c749c4a9:cc50c4dded88d79f7e9c2035b4ec34cc:12b256bc16f0b53e3b1908fa77f50b9c$"
-}
+  "frames": {
+    "Special_Billetes_00000.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00001.png": {
+      "frame": {
+        "x": 256,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00002.png": {
+      "frame": {
+        "x": 512,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00003.png": {
+      "frame": {
+        "x": 768,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00004.png": {
+      "frame": {
+        "x": 1024,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00005.png": {
+      "frame": {
+        "x": 0,
+        "y": 256,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00006.png": {
+      "frame": {
+        "x": 256,
+        "y": 256,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00007.png": {
+      "frame": {
+        "x": 512,
+        "y": 256,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00008.png": {
+      "frame": {
+        "x": 768,
+        "y": 256,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00009.png": {
+      "frame": {
+        "x": 1024,
+        "y": 256,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00010.png": {
+      "frame": {
+        "x": 0,
+        "y": 512,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00011.png": {
+      "frame": {
+        "x": 256,
+        "y": 512,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00012.png": {
+      "frame": {
+        "x": 512,
+        "y": 512,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00013.png": {
+      "frame": {
+        "x": 768,
+        "y": 512,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00014.png": {
+      "frame": {
+        "x": 1024,
+        "y": 512,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00015.png": {
+      "frame": {
+        "x": 0,
+        "y": 768,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00016.png": {
+      "frame": {
+        "x": 256,
+        "y": 768,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00017.png": {
+      "frame": {
+        "x": 512,
+        "y": 768,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00018.png": {
+      "frame": {
+        "x": 768,
+        "y": 768,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00019.png": {
+      "frame": {
+        "x": 1024,
+        "y": 768,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00020.png": {
+      "frame": {
+        "x": 0,
+        "y": 1024,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00021.png": {
+      "frame": {
+        "x": 256,
+        "y": 1024,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00022.png": {
+      "frame": {
+        "x": 512,
+        "y": 1024,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00023.png": {
+      "frame": {
+        "x": 768,
+        "y": 1024,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    },
+    "Special_Billetes_00024.png": {
+      "frame": {
+        "x": 1024,
+        "y": 1024,
+        "w": 256,
+        "h": 256
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 256,
+        "h": 256
+      }
+    }
+  },
+  "meta": {
+    "app": "https://www.codeandweb.com/texturepacker",
+    "version": "1.1",
+    "image": "anim_sym_premium.webp",
+    "format": "RGBA8888",
+    "smartupdate": "$TexturePacker:SmartUpdate:d7fb42c7a971a20b07227a90574474c4:c21c5d585249c23e7fd80fd1a1af881e:12b256bc16f0b53e3b1908fa77f50b9c$",
+    "size": {
+      "w": 1280,
+      "h": 1280
+    },
+    "scale": "1"
+  },
+  "animations": {
+    "Special_Billetes": [
+      "Special_Billetes_00000.png",
+      "Special_Billetes_00001.png",
+      "Special_Billetes_00002.png",
+      "Special_Billetes_00003.png",
+      "Special_Billetes_00004.png",
+      "Special_Billetes_00005.png",
+      "Special_Billetes_00006.png",
+      "Special_Billetes_00007.png",
+      "Special_Billetes_00008.png",
+      "Special_Billetes_00009.png",
+      "Special_Billetes_00010.png",
+      "Special_Billetes_00011.png",
+      "Special_Billetes_00012.png",
+      "Special_Billetes_00013.png",
+      "Special_Billetes_00014.png",
+      "Special_Billetes_00015.png",
+      "Special_Billetes_00016.png",
+      "Special_Billetes_00017.png",
+      "Special_Billetes_00018.png",
+      "Special_Billetes_00019.png",
+      "Special_Billetes_00020.png",
+      "Special_Billetes_00021.png",
+      "Special_Billetes_00022.png",
+      "Special_Billetes_00023.png",
+      "Special_Billetes_00024.png"
+    ]
+  }
 }

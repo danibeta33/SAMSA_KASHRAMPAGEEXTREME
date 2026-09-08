@@ -21,12 +21,19 @@ export const uiScaleFor = (w: number, h: number) =>
 		? Math.min(1, Math.max(0.7, w / 425))
 		: Math.min(1, Math.max(0.32, Math.min(w / 1200, h / 675)));
 
-// Alto del TopBar según sus media queries (TopBar.svelte).
-export const topBarHeight = (w: number, h: number) => {
-	if (h <= 300) return 24;
-	if (w <= 700) return 40;
-	return 56;
-};
+// Alto de la franja superior reservada al HUD. Desde el 08-09 vale SIEMPRE 0:
+// TopBar.svelte —la barra HTML `position: fixed` que ocupaba 24/40/56 px según
+// el viewport— se reemplazó por TopHud.svelte, que vive DENTRO del canvas y se
+// posiciona con sus propios sliders, así que ya no le roba alto al board.
+//
+// La función se conserva (en vez de borrarla y limpiar los callers) porque
+// `boardTransform` la usa en dos lugares distintos: el cap superior `sMaxTop` y
+// el `topSafe` que en portrait todavía tiene que sumar PORTRAIT_ICON_ROW_H. Que
+// devuelva 0 mantiene esa estructura intacta y deja un solo punto donde volver
+// a reservar espacio arriba si alguna vez hace falta.
+// Los parámetros se conservan aunque no se usen: los callers siguen pasando
+// (w, h) y quitarlos haría que TS rechace esas llamadas por aridad.
+export const topBarHeight = (_w: number, _h: number) => 0;
 
 // Alto visual del stack BET/SPIN/TURBO/AUTO a escala 1 (pill + dock con el
 // solape del pillGap). Medido del layout congelado: dock 218×1.16 de ancho

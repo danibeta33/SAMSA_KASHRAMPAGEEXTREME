@@ -111,6 +111,7 @@
 	import ResumeBet from './ResumeBet.svelte';
 	import Sound from './Sound.svelte';
 	import Background from './Background.svelte';
+	import TopHud from './TopHud.svelte';
 	import BoardFrame from './BoardFrame.svelte';
 	import MultiplierGrid from './MultiplierGrid.svelte';
 	import Board from './Board.svelte';
@@ -219,11 +220,19 @@
 			</MainContainer>
 		</Container>
 
-		<!-- La UI Pixi del SDK (bottom HUD default) está desmontada: el HUD ahora
-		     son overlays HTML — TopBar.svelte (marquee/balance/lastwin) y
-		     BottomBar.svelte (SPIN/STOP, TURBO, AUTO, BET ±, iconos, BONUS) con
-		     los assets del pack "Asset 2@4x". Los broadcasts uiShow/uiHide del
-		     bookEventHandlerMap los consume BottomBar. -->
+		<!-- HUD superior (08-09): título + los 3 recipientes, EN EL CANVAS. Va
+		     fuera del <Container> de arriba a propósito — ese aplica
+		     boardTransform y arrastraría al HUD con la escala del board. Acá
+		     queda en coordenadas de canvas y los sliders del UI LAB lo mueven
+		     libre. Al estar dentro de este {:else}, no existe mientras el
+		     loading screen está al frente (era el `topbar--hidden` de TopBar). -->
+		<TopHud />
+
+		<!-- La UI Pixi del SDK (bottom HUD default) sigue desmontada: abajo el
+		     HUD es el overlay HTML BottomBar.svelte (SPIN/STOP, TURBO, AUTO,
+		     BET ±, iconos, BONUS) con los assets del pack "Asset 2@4x". Los
+		     broadcasts uiShow/uiHide del bookEventHandlerMap los consume
+		     BottomBar. -->
 		<Win />
 		<FreeSpinIntro />
 		<FreeSpinOutro />
@@ -625,7 +634,7 @@
 					</thead>
 					<tbody>
 						<tr class="tier-high">
-							<td class="lb-sym"><img src="assets/sprites/symbols/h4.png" alt="H4" /><span>KASH</span></td>
+							<td class="lb-sym"><img src="assets/sprites/symbols/h4_still.png" alt="H4" /><span>KASH</span></td>
 							<td>13.5×</td>
 							<td>24.5×</td>
 							<td>95.0×</td>
@@ -777,7 +786,7 @@
 					</thead>
 					<tbody>
 						<tr class="tier-high">
-							<td class="lb-sym"><img src="assets/sprites/symbols/h4.png" alt="H4" /><span>KASH</span></td>
+							<td class="lb-sym"><img src="assets/sprites/symbols/h4_still.png" alt="H4" /><span>KASH</span></td>
 							<td>13.5×</td>
 							<td>24.5×</td>
 							<td>95.0×</td>

@@ -16,8 +16,14 @@
 	import type { RawSymbol, SymbolState } from '../game/types';
 	// Multiplicador global de tamaño de símbolos, tweakeable en vivo (UiLab).
 	import { stateUiTweak } from '../game/stateUiTweak.svelte';
+	// Multiplicador extra SOLO para los especiales (slider `specialScale`).
+	import { stateTweak } from '../game/stateTweak.svelte';
 	import { stateWinHighlight } from '../game/stateWinHighlight.svelte';
-	import type { SelfAnimatedAssetKey, WinPop } from '../game/winPop.svelte';
+	import {
+		SELF_ANIMATED_ASSET_KEYS,
+		type SelfAnimatedAssetKey,
+		type WinPop,
+	} from '../game/winPop.svelte';
 	import type { WinFlashCell } from '../game/winFlash.svelte';
 
 	type Props = {
@@ -61,8 +67,28 @@
 	const colorOf = (raw?: RawSymbol) => TIER_COLOR[(raw?.name ?? 'L')[0]] ?? 0x777777;
 
 	const isWireframe = $derived(props.symbolInfo.assetKey === 'wireframe');
-	const w = $derived(SYMBOL_SIZE * props.symbolInfo.sizeRatios.width * stateUiTweak.symScale);
-	const h = $derived(SYMBOL_SIZE * props.symbolInfo.sizeRatios.height * stateUiTweak.symScale);
+
+	// Escala extra de los ESPECIALES (W wild, S scatter, H4 premium). Se
+	// engancha a `SELF_ANIMATED_ASSET_KEYS` en vez de a `ANIM_SPECIAL` por dos
+	// razones: esa lista es la definición canónica de "especial" del juego (la
+	// misma que usa winPop para saltear el pop), y está declarada arriba — el
+	// mapa `ANIM_SPECIAL` recién existe más abajo y `w`/`h` se calculan acá.
+	//
+	// Se aplica a los DOS caminos de render (el clip animado y el sprite
+	// estático de respaldo). Si solo escalara el animado, W y S —que van sin
+	// preload— darían un salto de tamaño en el momento en que su sheet termina
+	// de bajar y reemplaza al estático.
+	const SPECIAL_KEYS = new Set<string>(SELF_ANIMATED_ASSET_KEYS);
+	const specialMult = $derived(
+		SPECIAL_KEYS.has(props.symbolInfo.assetKey) ? stateTweak.specialScale : 1,
+	);
+
+	const w = $derived(
+		SYMBOL_SIZE * props.symbolInfo.sizeRatios.width * stateUiTweak.symScale * specialMult,
+	);
+	const h = $derived(
+		SYMBOL_SIZE * props.symbolInfo.sizeRatios.height * stateUiTweak.symScale * specialMult,
+	);
 
 	// Iconos especiales ANIMADOS: W (bate WILD), S (barra SCATTER), H4 (grafiti
 	// KASH PREMIUM). El static key del math (sym_w/sym_s/sym_h4) se mapea al
@@ -107,12 +133,17 @@
 			center: { x: 127.5 / 256, y: 127 / 256 },
 			box: 0.95, // = sizeRatios de sym_s
 		},
-		// grafiti KASH premium — arte 182×191 en (34,51), también bajo
+		// KASH premium — fajo de billetes (drop 08-09: el clip `Special_Billetes`
+		// reemplazó al `Special_Graffiti` bajo el mismo nombre de archivo). Arte
+		// 256×248 casi a sangre y centrado, contra el grafiti viejo que era
+		// 182×191 en (34,51) y colgaba abajo. Números medidos del .json con
+		// `.scripts/repack_spritesheet.py --report`: si el sheet se vuelve a
+		// re-exportar hay que volver a correrlo y pegar los valores que imprime.
 		sym_h4: {
 			key: 'anim_sym_premium',
-			aspect: 182 / 191,
-			fill: { w: 182 / 256, h: 191 / 256 },
-			center: { x: 125 / 256, y: 146.5 / 256 },
+			aspect: 1.032258,
+			fill: { w: 1.0, h: 0.96875 },
+			center: { x: 0.5, y: 0.503906 },
 			box: 0.8, // = sizeRatios de sym_h4
 		},
 	};
@@ -120,15 +151,29 @@
 	const special = $derived(
 		ANIM_SPECIAL[props.symbolInfo.assetKey as SelfAnimatedAssetKey] as AnimSpecial | undefined,
 	);
-	// Solo animar cuando el sheet ya cargó (no preload); si no, cae al estático.
+	// Solo animar cuando el sheet ya cargó; si no, cae al estático.
 	const specialReady = $derived(
 		!!special &&
 			!!appContext.stateApp.loadedAssets?.[
 				special.key as keyof typeof appContext.stateApp.loadedAssets
 			],
 	);
+	// Símbolos SIN sprite estático de respaldo: su .png se borró del registro
+	// porque el clip animado es ahora la única representación (H4 / fajo, drop
+	// 08-09 — `anim_sym_premium` va con `preload`, así que ya está en
+	// `loadedAssets` antes del primer render del board).
+	//
+	// Esta guarda NO es defensa en profundidad opcional: sin ella la rama
+	// `{:else}` pediría `<Sprite key="sym_h4">` sobre una clave inexistente y
+	// PIXI escupiría "Sprite key not found" — el motivo #1 de rechazo del
+	// `05-preflight-checklist.md`. Que hoy sea inalcanzable depende del orden de
+	// carga; acá se vuelve una invariante del componente.
+	const STATIC_LESS = new Set(['sym_h4']);
+	const hasStatic = $derived(!STATIC_LESS.has(props.symbolInfo.assetKey));
 	// Lado mayor del ARTE (no del canvas) en px de board; el menor sale del aspect.
-	const specialSide = $derived(special ? SYMBOL_SIZE * special.box * stateUiTweak.symScale : 0);
+	const specialSide = $derived(
+		special ? SYMBOL_SIZE * special.box * stateUiTweak.symScale * specialMult : 0,
+	);
 	const artW = $derived(
 		special ? (special.aspect >= 1 ? specialSide : specialSide * special.aspect) : 0,
 	);
@@ -283,9 +328,10 @@
 			     SIN escala — el boing es del ícono, no del halo. -->
 			<Sprite anchor={0.5} key={luzKey} width={luzW} height={luzH} alpha={glowAlpha} />
 		{/if}
-		{#if !glowReplacesIcon}
+		{#if !glowReplacesIcon && hasStatic}
 			<!-- SPRITE PRINCIPAL en su propio Container: acá y solo acá vive la
-			     escala del boing (0.85 → 1.15). -->
+			     escala del boing (0.85 → 1.15). Se omite en los símbolos sin
+			     estático (ver STATIC_LESS): su clip preloaded ya cubre el hueco. -->
 			<Container scale={flashScale}>
 				<Sprite anchor={0.5} key={props.symbolInfo.assetKey} width={w} height={h} />
 			</Container>

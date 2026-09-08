@@ -41,6 +41,24 @@
 	let copied = $state(false);
 	let side = $state<'left' | 'right'>('right');
 
+	// ── Acordeón de categorías ───────────────────────────────────────────────
+	// Con 4+ categorías registradas el panel se volvió una lista larga que
+	// obligaba a scrollear para llegar a los sliders de abajo. Cada encabezado
+	// ahora despliega/pliega los controles de SU categoría.
+	//
+	// El mapa guarda solo las categorías que el usuario tocó; las que no están
+	// caen al default de `isOpen` (la primera abierta, el resto plegadas), así
+	// que un juego que registre categorías nuevas no necesita sembrar nada.
+	// `$state` en Svelte 5 hace proxy profundo del objeto y también rastrea las
+	// claves ausentes, por eso leer una clave que todavía no existe y escribirla
+	// después repinta igual.
+	let openCats = $state<Record<string, boolean>>({});
+	const isOpen = (id: string, index: number) => openCats[id] ?? index === 0;
+	const toggleCat = (id: string, index: number) => (openCats[id] = !isOpen(id, index));
+	const setAll = (open: boolean) => {
+		for (const g of groups) openCats[g.category.id] = open;
+	};
+
 	onMount(() => {
 		const key = toggleKey.toLowerCase();
 		const handler = (e: KeyboardEvent) => {
@@ -82,39 +100,62 @@
 			{#if registry.note}
 				<p class="lab__note">{registry.note}</p>
 			{/if}
-			{#each groups as group (group.category.id)}
-				{#if groups.length > 1}
-					<div class="lab__cat">{group.category.label}</div>
+			{#if groups.length > 1}
+				<div class="lab__all">
+					<button onclick={() => setAll(true)}>ABRIR TODO</button>
+					<button onclick={() => setAll(false)}>PLEGAR TODO</button>
+				</div>
+			{/if}
+			{#each groups as group, groupIndex (group.category.id)}
+				<!-- Con una sola categoría no hay encabezado que clickear, así que
+				     tampoco se pliega: se muestra siempre. -->
+				{@const single = groups.length === 1}
+				{@const expanded = single || isOpen(group.category.id, groupIndex)}
+				{#if !single}
+					<button
+						type="button"
+						class="lab__cat"
+						class:lab__cat--open={expanded}
+						aria-expanded={expanded}
+						onclick={() => toggleCat(group.category.id, groupIndex)}
+					>
+						<span class="lab__cat-arrow">{expanded ? '▾' : '▸'}</span>
+						<span class="lab__cat-name">{group.category.label}</span>
+						<span class="lab__cat-count">{group.controls.length}</span>
+					</button>
 				{/if}
-				{#each group.controls as control (control.id)}
-					{#if control.kind === 'toggle'}
-						<label class="lab__check">
-							<input
-								type="checkbox"
-								checked={registry.isOn(control.id)}
-								onchange={(e) => registry.toggle(control.id, (e.target as HTMLInputElement).checked)}
-							/>
-							<span>{control.label}</span>
-						</label>
-					{:else}
-						<label class="lab__row">
-							<span class="lab__label">{control.label}</span>
-							<button class="lab__fine" onclick={(e) => fine(control, -1, e)} title="fino − (Shift ×10)">−</button>
-							<input
-								type="range"
-								min={control.min}
-								max={control.max}
-								step={control.step}
-								value={registry.read(control.id)}
-								oninput={(e) => onSlide(control.id, e)}
-								onchange={() => registry.commit()}
-							/>
-							<button class="lab__fine" onclick={(e) => fine(control, 1, e)} title="fino + (Shift ×10)">+</button>
-							<span class="lab__value">{registry.read(control.id)}</span>
-						</label>
+				{#if expanded}
+						{#each group.controls as control (control.id)}
+							{#if control.kind === 'toggle'}
+								<label class="lab__check">
+									<input
+										type="checkbox"
+										checked={registry.isOn(control.id)}
+										onchange={(e) =>
+											registry.toggle(control.id, (e.target as HTMLInputElement).checked)}
+									/>
+									<span>{control.label}</span>
+								</label>
+							{:else}
+								<label class="lab__row">
+									<span class="lab__label">{control.label}</span>
+									<button class="lab__fine" onclick={(e) => fine(control, -1, e)} title="fino − (Shift ×10)">−</button>
+									<input
+										type="range"
+										min={control.min}
+										max={control.max}
+										step={control.step}
+										value={registry.read(control.id)}
+										oninput={(e) => onSlide(control.id, e)}
+										onchange={() => registry.commit()}
+									/>
+									<button class="lab__fine" onclick={(e) => fine(control, 1, e)} title="fino + (Shift ×10)">+</button>
+									<span class="lab__value">{registry.read(control.id)}</span>
+								</label>
+							{/if}
+						{/each}
 					{/if}
 				{/each}
-			{/each}
 			<p class="lab__note" style="margin-top: 6px">− / + = un paso fino · Shift+click = ×10</p>
 			<div class="lab__actions">
 				<button onclick={copy}>{copied ? '✓ COPIADO' : 'COPY VALUES'}</button>
@@ -180,13 +221,66 @@
 		font-size: 10px;
 		line-height: 1.35;
 	}
+	/* Encabezado de categoría = botón del acordeón (ancho completo, se clickea
+	   en cualquier parte de la fila). */
 	.lab__cat {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		width: 100%;
 		margin: 8px 0 4px;
+		padding: 3px 2px;
+		background: transparent;
+		border: 0;
+		border-bottom: 1px solid rgba(246, 239, 27, 0.2);
 		color: #b9a97a;
+		font-family: inherit;
 		font-size: 10px;
 		font-weight: 700;
 		letter-spacing: 1px;
-		border-bottom: 1px solid rgba(246, 239, 27, 0.2);
+		text-align: left;
+		cursor: pointer;
+	}
+	.lab__cat:hover {
+		color: #f6ef1b;
+		background: rgba(246, 239, 27, 0.07);
+	}
+	.lab__cat--open {
+		color: #f6ef1b;
+	}
+	.lab__cat-arrow {
+		width: 10px;
+		color: #e02330;
+	}
+	.lab__cat-name {
+		flex: 1;
+	}
+	/* Cuántos controles esconde la categoría plegada. */
+	.lab__cat-count {
+		color: #777;
+		font-weight: 400;
+		font-variant-numeric: tabular-nums;
+	}
+	.lab__all {
+		display: flex;
+		gap: 6px;
+		margin: 6px 0 2px;
+	}
+	.lab__all button {
+		flex: 1;
+		background: transparent;
+		border: 1px solid rgba(246, 239, 27, 0.35);
+		color: #b9a97a;
+		border-radius: 4px;
+		font-family: inherit;
+		font-size: 9px;
+		letter-spacing: 1px;
+		padding: 3px;
+		cursor: pointer;
+	}
+	.lab__all button:hover {
+		background: rgba(246, 239, 27, 0.15);
+		color: #f6ef1b;
 	}
 	.lab__check {
 		display: flex;

@@ -35,6 +35,8 @@ export const LAB_CATEGORIES: (InspectorCategoryConfig & { id: string })[] = [
 	{ id: 'board', label: 'GRILLA', order: 1 },
 	{ id: 'hud', label: 'BOTONERA + ÍCONOS', order: 2 },
 	{ id: 'kash', label: 'KASH', order: 3 },
+	{ id: 'tophud', label: 'HUD SUPERIOR', order: 4 },
+	{ id: 'title', label: 'TÍTULO', order: 5 },
 ];
 
 export const LAB_TOGGLES: (InspectorToggleConfig & { id: string })[] = [
@@ -46,6 +48,20 @@ export const LAB_TOGGLES: (InspectorToggleConfig & { id: string })[] = [
 		on: 1,
 		off: 0,
 		default: 0,
+	},
+	// El alternador fila/columna del HUD superior va como TOGGLE y no como
+	// acción a propósito: UiLab.svelte (tecla T) renderiza `group.controls` e
+	// IGNORA `group.actions` — las acciones las dibuja AnimLab (tecla A). Como
+	// toggle queda junto a sus sliders, persiste por bucket como el resto, y
+	// encaja con que el host del inspector solo maneja números.
+	{
+		id: 'hudVertical',
+		label: 'COLUMNA (off = fila)',
+		category: 'tophud',
+		order: 44,
+		on: 1,
+		off: 0,
+		default: 1,
 	},
 ];
 
@@ -59,9 +75,17 @@ export const LAB_SLIDERS: (InspectorSliderConfig & { id: string })[] = [
 	{ id: 'iconScale', label: 'Config+Bonus', min: 0.4, max: 2, step: 0.005, category: 'hud', order: 23 },
 	{ id: 'iconX', label: 'Config X', min: -40, max: 400, step: 1, category: 'hud', order: 24 },
 	{ id: 'iconY', label: 'Config Y', min: -40, max: 400, step: 1, category: 'hud', order: 25 },
+	{ id: 'specialScale', label: 'Especiales (W/S/H4)', min: 0.6, max: 2.5, step: 0.005, category: 'hud', order: 26 },
 	{ id: 'kashH', label: 'Kash size', min: 0.3, max: 1.2, step: 0.002, category: 'kash', order: 30 },
 	{ id: 'kashX', label: 'Kash X', min: -0.1, max: 0.5, step: 0.001, category: 'kash', order: 31 },
 	{ id: 'kashY', label: 'Kash Y', min: 0.2, max: 0.9, step: 0.001, category: 'kash', order: 32 },
+	{ id: 'hudX', label: 'HUD X', min: 0, max: 1, step: 0.001, category: 'tophud', order: 40 },
+	{ id: 'hudY', label: 'HUD Y', min: 0, max: 1, step: 0.001, category: 'tophud', order: 41 },
+	{ id: 'hudScale', label: 'HUD size', min: 0.3, max: 2.5, step: 0.005, category: 'tophud', order: 42 },
+	{ id: 'hudGap', label: 'Separación', min: -40, max: 120, step: 1, category: 'tophud', order: 43 },
+	{ id: 'titleX', label: 'Título X', min: 0, max: 1, step: 0.001, category: 'title', order: 50 },
+	{ id: 'titleY', label: 'Título Y', min: 0, max: 1, step: 0.001, category: 'title', order: 51 },
+	{ id: 'titleScale', label: 'Título size', min: 0.2, max: 3, step: 0.005, category: 'title', order: 52 },
 ];
 
 export type LabSliderKey = (typeof LAB_SLIDERS)[number]['id'];
