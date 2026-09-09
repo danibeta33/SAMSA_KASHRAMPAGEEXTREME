@@ -145,121 +145,221 @@ export const bucketFor = (w: number, h: number): ResBucketKey =>
 
 
 // Punto de partida por bucket (antes de los overrides del usuario) — acá se
-// congelan los JSON aprobados del UI LAB. portrait.boardY=0.46 preserva la
-// posición histórica del board en verticales (la rama portrait de hudLayout
-// ahora lee boardX/boardY tweakeables en vez del 0.46 fijo).
+// congelan los JSON aprobados del UI LAB. Los 7 buckets del ACP quedaron
+// congelados el 08-09 con el drop del HUD superior + título: cada uno trae
+// ahora, además de board/kash/botonera, sus propios hud*/title*/specialScale
+// (la rama portrait de hudLayout lee boardX/boardY tweakeables, así que el
+// board vertical se posiciona desde acá y no con constantes fijas).
 const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
-	// Aprobado por el usuario en /sizes (04-09, viewport 425×812 — Mobile L).
+	// Aprobado por el usuario en /sizes (08-09, viewport 425×812 — Mobile L).
 	portrait_l: {
+		// board + layout libre
 		freeScale: 1,
 		boardH: 0.92,
 		boardX: 0.485,
-		boardY: 0.385,
+		boardY: 0.316,
+		// botonera + iconos + especiales
 		stackScale: 1.35,
 		stackRight: -36,
 		stackBottom: 6,
-		iconScale: 1.015,
+		iconScale: 0.655,
 		iconX: 22,
 		iconY: 118,
+		specialScale: 1.3,
+		// Kash
 		kashH: 0.68,
 		kashX: 0.106,
 		kashY: 0.587,
+		// HUD superior
+		hudVertical: 0,
+		hudX: 0.333,
+		hudY: 0.579,
+		hudScale: 0.82,
+		hudGap: 6,
+		// titulo
+		titleX: 0.57,
+		titleY: 0.07,
+		titleScale: 0.74,
 	},
-	// Aprobado por el usuario en /sizes (04-09, viewport 375×667 — Mobile M).
+	// Aprobado por el usuario en /sizes (08-09, viewport 375×667 — Mobile M).
 	portrait_m: {
+		// board + layout libre
 		freeScale: 1,
 		boardH: 0.92,
 		boardX: 0.485,
-		boardY: 0.424,
+		boardY: 0.34,
+		// botonera + iconos + especiales
 		stackScale: 1.035,
 		stackRight: -36,
 		stackBottom: 14,
-		iconScale: 1.015,
+		iconScale: 0.625,
 		iconX: 22,
 		iconY: 118,
+		specialScale: 1.3,
+		// Kash
 		kashH: 0.68,
 		kashX: 0.106,
 		kashY: 0.587,
+		// HUD superior
+		hudVertical: 0,
+		hudX: 0.307,
+		hudY: 0.632,
+		hudScale: 0.86,
+		hudGap: 6,
+		// titulo
+		titleX: 0.561,
+		titleY: 0.07,
+		titleScale: 0.74,
 	},
-	// Aprobado por el usuario en /sizes (04-09, viewport 320×568 — Mobile S).
+	// Aprobado por el usuario en /sizes (08-09, viewport 320×568 — Mobile S).
 	portrait_s: {
+		// board + layout libre
 		freeScale: 1,
-		boardH: 0.92,
-		boardX: 0.485,
-		boardY: 0.439,
+		boardH: 0.908,
+		boardX: 0.482,
+		boardY: 0.346,
+		// botonera + iconos + especiales
 		stackScale: 0.945,
 		stackRight: -36,
 		stackBottom: 18,
-		iconScale: 1.015,
+		iconScale: 0.665,
 		iconX: 22,
 		iconY: 118,
+		specialScale: 1.3,
+		// Kash
 		kashH: 0.68,
 		kashX: 0.106,
 		kashY: 0.587,
+		// HUD superior
+		hudVertical: 0,
+		hudX: 0.281,
+		hudY: 0.64,
+		hudScale: 1,
+		hudGap: 6,
+		// titulo
+		titleX: 0.246,
+		titleY: 0.237,
+		titleScale: 0.865,
 	},
-	// Aprobado por el usuario en /sizes (15-07, viewport 1200×675).
+	// Aprobado por el usuario en /sizes (08-09, viewport 1200×675 — Desktop).
 	desktop: {
+		// board + layout libre
 		freeScale: 1,
-		boardH: 0.912,
-		boardX: 0.525,
-		boardY: 0.542,
-		stackScale: 0.86,
+		boardH: 0.974,
+		boardX: 0.504,
+		boardY: 0.538,
+		// botonera + iconos + especiales
+		stackScale: 0.88,
 		stackRight: 37,
-		stackBottom: 2,
-		iconScale: 0.805,
-		iconX: 22,
-		iconY: 18,
-		kashH: 0.68,
+		stackBottom: 10,
+		iconScale: 0.675,
+		iconX: 9,
+		iconY: 16,
+		specialScale: 1.235,
+		// Kash
+		kashH: 0.702,
 		kashX: 0.108,
 		kashY: 0.566,
+		// HUD superior
+		hudVertical: 1,
+		hudX: 0.909,
+		hudY: 0.193,
+		hudScale: 1.205,
+		hudGap: -12,
+		// titulo
+		titleX: 0.133,
+		titleY: 0.147,
+		titleScale: 1.55,
 	},
-	// Aprobado por el usuario en /sizes (04-09, viewport 400×225).
+	// Aprobado por el usuario en /sizes (08-09, viewport 400×225 — Popout S).
 	popout_s: {
+		// board + layout libre
 		freeScale: 1,
-		boardH: 0.96,
-		boardX: 0.5,
-		boardY: 0.545,
-		stackScale: 0.85,
+		boardH: 1.078,
+		boardX: 0.512,
+		boardY: 0.498,
+		// botonera + iconos + especiales
+		stackScale: 0.96,
 		stackRight: 45,
 		stackBottom: 14,
-		iconScale: 0.735,
+		iconScale: 0.785,
 		iconX: 22,
 		iconY: 18,
-		kashH: 0.68,
-		kashX: 0.106,
-		kashY: 0.587,
+		specialScale: 1.305,
+		// Kash
+		kashH: 0.73,
+		kashX: 0.1,
+		kashY: 0.568,
+		// HUD superior
+		hudVertical: 1,
+		hudX: 0.906,
+		hudY: 0.155,
+		hudScale: 1.045,
+		hudGap: -8,
+		// titulo
+		titleX: 0.061,
+		titleY: 0.089,
+		titleScale: 1.515,
 	},
-	// Aprobado por el usuario en /sizes (04-09, viewport 800×450).
+	// Aprobado por el usuario en /sizes (08-09, viewport 800×450 — Popout L).
 	popout_l: {
+		// board + layout libre
 		freeScale: 1,
-		boardH: 0.984,
-		boardX: 0.5,
-		boardY: 0.56,
-		stackScale: 0.835,
+		boardH: 1.126,
+		boardX: 0.506,
+		boardY: 0.5,
+		// botonera + iconos + especiales
+		stackScale: 0.94,
 		stackRight: 44,
 		stackBottom: 4,
-		iconScale: 0.71,
+		iconScale: 0.655,
 		iconX: 22,
 		iconY: 18,
-		kashH: 0.68,
-		kashX: 0.106,
-		kashY: 0.587,
+		specialScale: 1.165,
+		// Kash
+		kashH: 0.702,
+		kashX: 0.079,
+		kashY: 0.581,
+		// HUD superior
+		hudVertical: 1,
+		hudX: 0.912,
+		hudY: 0.155,
+		hudScale: 1.09,
+		hudGap: 8,
+		// titulo
+		titleX: 0.088,
+		titleY: 0.123,
+		titleScale: 1.455,
 	},
-	// Aprobado por el usuario en /sizes (04-09, viewport 1024×576).
+	// Aprobado por el usuario en /sizes (08-09, viewport 1024×576 — Laptop).
 	laptop: {
+		// board + layout libre
 		freeScale: 1,
-		boardH: 0.89,
-		boardX: 0.508,
-		boardY: 0.543,
-		stackScale: 0.815,
+		boardH: 1.028,
+		boardX: 0.516,
+		boardY: 0.509,
+		// botonera + iconos + especiales
+		stackScale: 0.88,
 		stackRight: 41,
 		stackBottom: 6,
-		iconScale: 0.735,
+		iconScale: 0.755,
 		iconX: 22,
 		iconY: 18,
-		kashH: 0.722,
-		kashX: 0.106,
-		kashY: 0.569,
+		specialScale: 1.33,
+		// Kash
+		kashH: 0.708,
+		kashX: 0.093,
+		kashY: 0.577,
+		// HUD superior
+		hudVertical: 1,
+		hudX: 0.926,
+		hudY: 0.155,
+		hudScale: 1,
+		hudGap: 6,
+		// titulo
+		titleX: 0.115,
+		titleY: 0.134,
+		titleScale: 1.5,
 	},
 };
 

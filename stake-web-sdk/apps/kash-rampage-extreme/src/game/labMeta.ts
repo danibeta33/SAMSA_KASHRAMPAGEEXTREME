@@ -21,9 +21,12 @@ import type {
  * `stateTweak.svelte.ts` la usa para leer/escribir sus overrides por bucket.
  *
  * v14: buckets alineados 1:1 con los tamaños del selector del ACP de Stake.
+ * v15 (08-09): se congelaron en PER_BUCKET_SEED los 7 buckets aprobados con
+ * el HUD superior + título + especiales. El bump invalida los overrides
+ * viejos de localStorage para que los valores nuevos manden.
  * Subir el número invalida los overrides guardados con buckets viejos.
  */
-export const LAB_STORAGE_KEY = 'kash_tweak_v14';
+export const LAB_STORAGE_KEY = 'kash_tweak_v15';
 
 export const LAB_TITLE = 'UI LAB';
 

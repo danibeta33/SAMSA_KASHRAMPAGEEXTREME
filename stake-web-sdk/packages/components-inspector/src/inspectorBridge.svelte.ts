@@ -7,7 +7,15 @@
 //
 // El puente es genérico: no conoce ni el juego ni la página que lo hospeda.
 
-import type { InspectorControl, InspectorStatus } from './InspectorRegistry.svelte';
+import {
+	DEFAULT_CATEGORY,
+	type InspectorCategory,
+	type InspectorControl,
+	type InspectorStatus,
+} from './InspectorRegistry.svelte';
+
+/** Categoría + sus controles, tal como los itera un panel. */
+export type RemoteGroup = { category: InspectorCategory; controls: InspectorControl[] };
 
 /** Superficie del registro remoto vista desde el documento padre. */
 export type RemoteInspector = {
@@ -15,6 +23,8 @@ export type RemoteInspector = {
 	title: string;
 	status: InspectorStatus;
 	schema: InspectorControl[];
+	/** Opcional: registros viejos pueden no publicarla (el puente hace fallback). */
+	categorySchema?: InspectorCategory[];
 	read: (id: string) => number;
 	write: (id: string, value: number) => void;
 	commit: () => void;
@@ -40,6 +50,7 @@ export class InspectorBridge {
 	// esa posición (`state_invalid_placement`). Los privados se preservan.
 	#connected = $state(false);
 	#controls = $state<InspectorControl[]>([]);
+	#categories = $state<InspectorCategory[]>([]);
 	#values = $state<Record<string, number>>({});
 	#title = $state('INSPECTOR');
 	#statusLabel = $state('…');
@@ -61,6 +72,35 @@ export class InspectorBridge {
 
 	get values(): Record<string, number> {
 		return this.#values;
+	}
+
+	get categories(): InspectorCategory[] {
+		return this.#categories;
+	}
+
+	/**
+	 * Controles agrupados por categoría, en el orden del registro remoto — el
+	 * equivalente de `InspectorRegistry.groups` de este lado del iframe, para
+	 * que el panel remoto dibuje el mismo acordeón que el local.
+	 *
+	 * Si el remoto no publica categorías (registro viejo) se arma una sola
+	 * bolsa con todo, que renderiza igual que la lista plana de antes.
+	 */
+	get groups(): RemoteGroup[] {
+		const cats = this.#categories.length
+			? this.#categories
+			: [{ id: DEFAULT_CATEGORY, label: DEFAULT_CATEGORY, order: 0 }];
+		const known = new Set(cats.map((c) => c.id));
+		return cats
+			.map((category) => ({
+				category,
+				// Los controles cuya categoría no exista en el catálogo remoto caen
+				// en la primera, así ninguno se pierde de vista.
+				controls: this.#controls.filter(
+					(c) => c.category === category.id || (!known.has(c.category) && category === cats[0]),
+				),
+			}))
+			.filter((g) => g.controls.length > 0);
 	}
 
 	get title(): string {
@@ -85,6 +125,7 @@ export class InspectorBridge {
 	connect() {
 		this.#connected = false;
 		this.#controls = [];
+		this.#categories = [];
 		clearInterval(this.#pollId);
 		this.#pollId = setInterval(() => {
 			if (!this.remote?.ready) return;
@@ -104,6 +145,7 @@ export class InspectorBridge {
 		const r = this.remote;
 		if (!r?.ready) return;
 		this.#controls = r.schema; // objetos planos, no proxies del otro realm
+		this.#categories = r.categorySchema ?? [];
 		this.#values = Object.fromEntries(this.controls.map((c) => [c.id, r.read(c.id)]));
 		this.#title = r.title;
 		this.#statusLabel = r.status.label || '?';

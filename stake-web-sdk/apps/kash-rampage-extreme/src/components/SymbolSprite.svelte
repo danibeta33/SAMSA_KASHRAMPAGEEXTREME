@@ -78,9 +78,20 @@
 	// estático de respaldo). Si solo escalara el animado, W y S —que van sin
 	// preload— darían un salto de tamaño en el momento en que su sheet termina
 	// de bajar y reemplaza al estático.
+	//
+	// `SPECIAL_TRIM` es un ajuste NATIVO por símbolo, encima del slider: el bate
+	// WILD entra en su box con más sangrado que el scatter y el H4, así que a
+	// `specialScale` igual se veía más grande que los otros dos. Como multiplica
+	// (no reemplaza) al slider, el W sigue creciendo y achicándose con los demás,
+	// solo que un poco más abajo. Los que no están en el mapa valen 1.
+	// El primer intento fue 0.75 y el usuario lo vio PASADO de chico contra el
+	// resto: 0.90 es el valor bueno (10 % abajo, no 25 %).
 	const SPECIAL_KEYS = new Set<string>(SELF_ANIMATED_ASSET_KEYS);
+	const SPECIAL_TRIM: Record<string, number> = { sym_w: 0.9 };
 	const specialMult = $derived(
-		SPECIAL_KEYS.has(props.symbolInfo.assetKey) ? stateTweak.specialScale : 1,
+		SPECIAL_KEYS.has(props.symbolInfo.assetKey)
+			? stateTweak.specialScale * (SPECIAL_TRIM[props.symbolInfo.assetKey] ?? 1)
+			: 1,
 	);
 
 	const w = $derived(

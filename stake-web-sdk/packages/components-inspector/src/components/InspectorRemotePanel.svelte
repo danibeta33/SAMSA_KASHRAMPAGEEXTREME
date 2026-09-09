@@ -4,7 +4,9 @@
 	// través de `InspectorBridge`. Pensado para páginas de presets/tamaños que
 	// embeben el juego y necesitan el panel FUERA del frame para no taparlo.
 	//
-	// Genérico: el catálogo lo descubre el puente en runtime.
+	// Genérico: el catálogo lo descubre el puente en runtime, categorías
+	// incluidas — el acordeón de abajo es el MISMO que el de UiLab (antes esta
+	// página dibujaba una lista plana y no coincidía con el panel de la tecla T).
 	import type { InspectorBridge } from '../inspectorBridge.svelte';
 	import type { InspectorSlider } from '../InspectorRegistry.svelte';
 
@@ -26,6 +28,18 @@
 	const fine = (control: InspectorSlider, dir: 1 | -1, e: MouseEvent) =>
 		bridge.step(control.id, dir, e.shiftKey ? 10 : 1);
 
+	// ── Acordeón de categorías (idéntico a UiLab) ────────────────────────────
+	// El mapa guarda solo las categorías que el usuario tocó; las que no están
+	// caen al default de `isOpen` (la primera abierta, el resto plegadas), así
+	// que un juego que registre categorías nuevas no necesita sembrar nada.
+	const groups = $derived(bridge.groups);
+	let openCats = $state<Record<string, boolean>>({});
+	const isOpen = (id: string, index: number) => openCats[id] ?? index === 0;
+	const toggleCat = (id: string, index: number) => (openCats[id] = !isOpen(id, index));
+	const setAll = (open: boolean) => {
+		for (const g of groups) openCats[g.category.id] = open;
+	};
+
 	const copy = async () => {
 		const json = JSON.stringify(decorateSnapshot(bridge.snapshot()), null, 2);
 		console.log('[inspector remoto]', json);
@@ -45,34 +59,61 @@
 		<span class="lab__bucket">{bridge.connected ? bridge.statusLabel : 'conectando…'}</span>
 	</div>
 	<p class="lab__note">{note}</p>
-	{#each bridge.controls as control (control.id)}
-		{#if control.kind === 'toggle'}
-			<label class="lab__check">
-				<input
-					type="checkbox"
-					checked={bridge.isOn(control)}
-					disabled={!bridge.connected}
-					onchange={(e) => bridge.toggle(control.id, (e.target as HTMLInputElement).checked)}
-				/>
-				<span>{control.label}</span>
-			</label>
-		{:else}
-			<label class="lab__row">
-				<span class="lab__label">{control.label}</span>
-				<button class="lab__fine" disabled={!bridge.connected} onclick={(e) => fine(control, -1, e)}>−</button>
-				<input
-					type="range"
-					min={control.min}
-					max={control.max}
-					step={control.step}
-					disabled={!bridge.connected}
-					value={bridge.values[control.id] ?? control.min}
-					oninput={(e) => bridge.write(control.id, parseFloat((e.target as HTMLInputElement).value))}
-					onchange={() => bridge.commit()}
-				/>
-				<button class="lab__fine" disabled={!bridge.connected} onclick={(e) => fine(control, 1, e)}>+</button>
-				<span class="lab__value">{bridge.values[control.id] ?? '–'}</span>
-			</label>
+	{#if groups.length > 1}
+		<div class="lab__all">
+			<button disabled={!bridge.connected} onclick={() => setAll(true)}>ABRIR TODO</button>
+			<button disabled={!bridge.connected} onclick={() => setAll(false)}>PLEGAR TODO</button>
+		</div>
+	{/if}
+	{#each groups as group, groupIndex (group.category.id)}
+		<!-- Con una sola categoría no hay encabezado que clickear, así que
+		     tampoco se pliega: se muestra siempre. -->
+		{@const single = groups.length === 1}
+		{@const expanded = single || isOpen(group.category.id, groupIndex)}
+		{#if !single}
+			<button
+				type="button"
+				class="lab__cat"
+				class:lab__cat--open={expanded}
+				aria-expanded={expanded}
+				onclick={() => toggleCat(group.category.id, groupIndex)}
+			>
+				<span class="lab__cat-arrow">{expanded ? '▾' : '▸'}</span>
+				<span class="lab__cat-name">{group.category.label}</span>
+				<span class="lab__cat-count">{group.controls.length}</span>
+			</button>
+		{/if}
+		{#if expanded}
+			{#each group.controls as control (control.id)}
+				{#if control.kind === 'toggle'}
+					<label class="lab__check">
+						<input
+							type="checkbox"
+							checked={bridge.isOn(control)}
+							disabled={!bridge.connected}
+							onchange={(e) => bridge.toggle(control.id, (e.target as HTMLInputElement).checked)}
+						/>
+						<span>{control.label}</span>
+					</label>
+				{:else}
+					<label class="lab__row">
+						<span class="lab__label">{control.label}</span>
+						<button class="lab__fine" disabled={!bridge.connected} onclick={(e) => fine(control, -1, e)}>−</button>
+						<input
+							type="range"
+							min={control.min}
+							max={control.max}
+							step={control.step}
+							disabled={!bridge.connected}
+							value={bridge.values[control.id] ?? control.min}
+							oninput={(e) => bridge.write(control.id, parseFloat((e.target as HTMLInputElement).value))}
+							onchange={() => bridge.commit()}
+						/>
+						<button class="lab__fine" disabled={!bridge.connected} onclick={(e) => fine(control, 1, e)}>+</button>
+						<span class="lab__value">{bridge.values[control.id] ?? '–'}</span>
+					</label>
+				{/if}
+			{/each}
 		{/if}
 	{/each}
 	<div class="lab__actions">
@@ -111,6 +152,67 @@
 		color: #999;
 		font-size: 10px;
 		line-height: 1.35;
+	}
+	/* Encabezado de categoría = botón del acordeón (ancho completo, se clickea
+	   en cualquier parte de la fila). Mismos valores que UiLab. */
+	.lab__cat {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		width: 100%;
+		margin: 8px 0 4px;
+		padding: 3px 2px;
+		background: transparent;
+		border: 0;
+		border-bottom: 1px solid rgba(246, 239, 27, 0.2);
+		color: #b9a97a;
+		font-family: inherit;
+		font-size: 10px;
+		font-weight: 700;
+		letter-spacing: 1px;
+		text-align: left;
+		cursor: pointer;
+	}
+	.lab__cat:hover {
+		color: #f6ef1b;
+		background: rgba(246, 239, 27, 0.07);
+	}
+	.lab__cat--open {
+		color: #f6ef1b;
+	}
+	.lab__cat-arrow {
+		width: 10px;
+		color: #e02330;
+	}
+	.lab__cat-name {
+		flex: 1;
+	}
+	/* Cuántos controles esconde la categoría plegada. */
+	.lab__cat-count {
+		color: #777;
+		font-weight: 400;
+		font-variant-numeric: tabular-nums;
+	}
+	.lab__all {
+		display: flex;
+		gap: 6px;
+		margin: 6px 0 2px;
+	}
+	.lab__all button {
+		flex: 1;
+		background: transparent;
+		border: 1px solid rgba(246, 239, 27, 0.35);
+		color: #b9a97a;
+		border-radius: 4px;
+		font-family: inherit;
+		font-size: 9px;
+		letter-spacing: 1px;
+		padding: 3px;
+		cursor: pointer;
+	}
+	.lab__all button:hover:not(:disabled) {
+		background: rgba(246, 239, 27, 0.15);
+		color: #f6ef1b;
 	}
 	.lab__check {
 		display: flex;

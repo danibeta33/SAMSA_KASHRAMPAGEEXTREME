@@ -272,6 +272,17 @@ export class InspectorRegistry {
 		return $state.snapshot(this.#controls) as InspectorControl[];
 	}
 
+	/**
+	 * Copia PLANA de las categorías, ya ordenadas. Mismo motivo que `schema`:
+	 * sin esto el panel remoto solo recibía los controles sueltos y no podía
+	 * armar el acordeón que sí tiene el panel local (`UiLab`), así que `/sizes`
+	 * dibujaba una lista larga y plana — el usuario lo reportó como "no está
+	 * igual que al darle a la T".
+	 */
+	get categorySchema(): InspectorCategory[] {
+		return $state.snapshot(this.categories) as InspectorCategory[];
+	}
+
 	// ── Registro (lo que llama el juego) ─────────────────────────────────────
 	configure(host: InspectorHost) {
 		this.#host = host;
