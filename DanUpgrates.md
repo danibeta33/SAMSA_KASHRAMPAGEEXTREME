@@ -1887,3 +1887,126 @@ el efecto corrigiera la fase: se veía como un parpadeo.
 | **La salida está atada a `WIN_POP_TOTAL_MS`** | Si alguien cambia los tiempos de `WIN_POP_STEPS`, la velocidad del marco se reajusta sola — que es lo que se quiere. Pero si el desmontaje del símbolo dejara de coincidir con el pop (p.ej. otro orden en `tumbleBoardExplode`), el cierre volvería a cortarse. El acople está anotado en el componente. |
 | **`specialScale` y `<id>Scale` conviven** | Dos niveles de escala para los 3 animados. El de grupo está en "BOTONERA + ÍCONOS" y el individual en la categoría del símbolo, separados a propósito, pero hay que recordar que se multiplican. |
 | **El contador de FS quedó sin `PER_BUCKET_SEED`** | `fsX`/`fsY` arrancan en 0.18/0.14, que es un punto de partida medido a ojo. Hay que ajustarlo en los 7 buckets y congelarlo — es justamente lo que el pedido habilita. |
+
+---
+
+## Paso 9 — Reset del resalte de victoria tras el Premium Accent
+
+**Fecha:** 2026-09-09
+**App:** `stake-web-sdk/apps/kash-rampage-extreme`
+**Objetivo:** matar un bug de **estado residual**: durante el KASH RAMPAGE las
+celdas convertidas a H4 (Medallón X / `anim_sym_premium`) quedaban iluminadas y
+con marco de victoria sin ser ganadoras, y atenuaban al resto del board.
+
+### 1. El bug
+
+Reporte de dirección con captura: "hay unas X iluminadas y con marco que no
+revientan mientras el resto sí, y después se apagan solas".
+
+La presentación de un cluster (`boardWithAnimateSymbols`, en `Board.svelte`) hace
+tres cosas y **no las deshace**:
+
+1. prende `stateWinHighlight.active` — todo lo que no gana cae a alpha 0.3;
+2. pasa las celdas a `symbolState = 'win'` y corre `playWinFlash`;
+3. al terminar las deja en `postWinStatic`, **a propósito**.
+
+Eso es correcto en el ciclo normal, porque lo que sigue es `tumbleBoard`
+(`boardHide` + `boardSettle`) y el settle **reconstruye** los `ReelSymbol` desde
+cero — `createReelSymbol` los nace en `initialSymbolState`. El ciclo de tumble se
+limpia solo.
+
+El problema son las presentaciones que **no** terminan en tumble. Hoy hay
+exactamente una que corre sobre el **mismo board que después se evalúa**: el
+**Premium Accent** (beat 4 de `kashRampage` en `bookEventHandlerMap.ts`), el pulso
+sobre las celdas que el batazo convirtió a KASH. Sin nada que las devuelva, esas
+celdas se quedaban en `postWinStatic` hasta el siguiente settle, y como
+`isWinning` en `SymbolSprite.svelte` incluye ese estado:
+
+```ts
+const isWinning = $derived(
+  props.symbolState === 'win' ||
+    props.symbolState === 'postWinStatic' ||
+    props.symbolState === 'explosion',
+);
+```
+
+...seguían mostrando su carta `_luz` y su marco **sin ser ganadoras**:
+
+- **no hacen boing** — `playWinFlash` ya se limpió, así que no tienen celda de
+  winFlash y `glowReplacesIcon` deja solo la carta, quieta;
+- **no explotan** — no están en `explodingSymbols` del book;
+- y `stateWinHighlight.active` quedaba prendido, atenuando al 30 % a todo lo que
+  no fuera ellas — incluido el cluster real cuando por fin se detectaba.
+
+Los otros dos `animateSymbols` del map (freeSpinTrigger / Retrigger sobre los
+SCATTER) **no** sufren esto: ahí sigue una transición y un spin nuevo, y el spin
+crea `ReelSymbol` nuevos en `static`.
+
+### 2. El apagado: `boardAnimateSymbolsReset`
+
+Evento nuevo en la unión `EmitterEventBoard` (`Board.svelte`), con su handler al
+lado de la presentación que deshace:
+
+```ts
+boardAnimateSymbolsReset: () => {
+  stateWinHighlight.active = false;
+  clearWinFlash();
+  context.stateGame.board.forEach((reel) =>
+    reel.reelState.symbols.forEach((reelSymbol) => {
+      if (reelSymbol.symbolState === 'win' || reelSymbol.symbolState === 'postWinStatic') {
+        reelSymbol.symbolState = 'static';
+      }
+    }),
+  );
+},
+```
+
+Barre **el board entero** por estado, no la lista de posiciones que se animó. Es
+a propósito: es un apagado de seguridad y no depende de que el emisor recuerde
+qué celdas pulsó. `explosion` queda afuera — esa celda está saliendo con el pop y
+cortarle el marco a mitad sería el bug inverso.
+
+**Devolver a `static` alcanza para apagar el paquete completo**, no hace falta
+tocar el marco a mano: el `$effect` de `SymbolSprite` rearma `marcoPhase` a
+`'intro'` en cuanto el estado sale de win/postWinStatic, y `marcoOn` se apaga
+solo porque depende de `isWinning`.
+
+### 3. Dónde se dispara
+
+En `kashRampage`, **inmediatamente después** del `await animateSymbols` del
+Premium Accent y **antes** del settle del beat 5 — o sea estrictamente antes de
+que corra la detección de clusters reales:
+
+```ts
+const premium = conversions.filter((c) => c.premium);
+if (premium.length) {
+  eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_wild_explode' });
+  await animateSymbols({ positions: premium });
+  eventEmitter.broadcast({ type: 'boardAnimateSymbolsReset' });
+}
+// Settle (beat 5): respiro para leer el board nuevo antes de los clusters.
+await waitForTimeout(300);
+```
+
+El orden importa: el `await` garantiza que el pulso se leyó entero (glow + flash
++ el piso de 250 ms), el reset lo apaga, y recién entonces los 300 ms del settle
+muestran el board nuevo **limpio**. Si el cluster ganador incluye alguna de esas
+mismas celdas KASH —el caso normal, el batazo convierte para armar cluster— se
+vuelven a encender desde `static` con su presentación propia, que es lo que se
+quiere: la ganan de nuevo, con boing y explosión.
+
+### 4. Verificación
+
+| Chequeo | Resultado |
+|---|---|
+| `svelte.compile` de `Board.svelte` | ✅ sin errores ni warnings |
+| Evento en la unión `EmitterEventBoard` → `typesEmitterEvent.ts` | ✅ exhaustividad del emitter cubierta |
+| `vite build` | ⏳ corriendo al cierre de este paso — el bundle de cliente ya se emitió |
+
+### 5. Riesgos
+
+| Riesgo | Estado / mitigación |
+|---|---|
+| **El reset es manual, no automático** | Cualquier `animateSymbols` futuro que NO termine en tumble ni en spin vuelve a arrastrar el residuo. Hoy son 3 llamadas y solo esta lo necesita; si aparece una cuarta, la regla es "¿se reconstruyen los ReelSymbol después? si no, resetear". La alternativa —resetear siempre dentro de `boardWithAnimateSymbols`— rompería el tumble, que **depende** de que las celdas queden en `postWinStatic` para encadenar el `explosion`. |
+| **Barre el board entero por estado** | Si alguna vez se presentan dos clusters solapados en el tiempo (hoy no pasa: la presentación es secuencial y bloqueante), este reset apagaría también al otro. |
+| **`explosion` queda fuera del barrido** | Correcto hoy porque el Premium Accent nunca coexiste con un pop de salida. Si eso cambiara, una celda en `explosion` sobreviviría al reset hasta que su propio outro la apague. |
