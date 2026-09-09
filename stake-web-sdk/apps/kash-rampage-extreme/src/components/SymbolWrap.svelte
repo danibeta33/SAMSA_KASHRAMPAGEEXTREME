@@ -46,7 +46,11 @@
 </script>
 
 {#if show && inFrame}
-	<Container x={props.x} y={props.y} scale={invScale}>
+	<!-- `sortableChildren` (drop 09-09): dentro de la celda conviven el MARCO de
+	     victoria (zIndex −1, al fondo) y el símbolo (zIndex 0). El marco monta
+	     al ganar, o sea DESPUÉS del símbolo, y `addChild` apendea — sin orden
+	     por profundidad quedaría dibujado ENCIMA del ícono en vez de detrás. -->
+	<Container x={props.x} y={props.y} scale={invScale} sortableChildren={true}>
 		{@render props.children()}
 	</Container>
 {/if}

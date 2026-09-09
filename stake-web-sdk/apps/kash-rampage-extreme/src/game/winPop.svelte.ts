@@ -24,7 +24,13 @@ import type { SymbolStateInfo } from './constants';
 // las claves de ANIM_SPECIAL en SymbolSprite.svelte — ese mapa está tipado
 // contra `SelfAnimatedAssetKey`, así que agregar/quitar acá rompe la compilación
 // allá si se desincronizan.
-export const SELF_ANIMATED_ASSET_KEYS = ['sym_w', 'sym_s', 'sym_h4'] as const;
+// ⚠ `sym_h4` → `sym_l4` el 09-09. El tercer especial NO es el premium de la
+// math: el clip `anim_sym_premium` es `Special_Billetes` (fajo de billetes) y
+// según `game_config.py` el fajo es **L4 = Cash Stack**; H4 es KASH, que en el
+// drop de ese día recibió arte propio (`h4.png`, medallón de cadena) y volvió a
+// ser un símbolo estático normal. El nombre del asset quedó mal rotulado en el
+// export y se conserva para no invalidar claves; la identidad la manda la math.
+export const SELF_ANIMATED_ASSET_KEYS = ['sym_w', 'sym_s', 'sym_l4'] as const;
 export type SelfAnimatedAssetKey = (typeof SELF_ANIMATED_ASSET_KEYS)[number];
 
 const SELF_ANIMATED = new Set<string>(SELF_ANIMATED_ASSET_KEYS);

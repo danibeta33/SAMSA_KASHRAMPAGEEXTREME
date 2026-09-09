@@ -109,16 +109,23 @@ export default {
 		src: new URL('../../assets/sprites/anim/anim_win_max.json', import.meta.url).href,
 	},
 	// Iconos especiales ANIMADOS (Export/IconoEspecial_*, 6 frames c/u, disco
-	// giratorio + llamas + grafiti). Reemplazan el sprite estático en el board
-	// para W (bate WILD), S (barra de oro SCATTER) y H4 (grafiti KASH PREMIUM).
-	// Sin preload: cargan de fondo; hasta entonces SymbolSprite usa el estático.
+	// giratorio + llamas + grafiti). Cubren W (bate WILD), S (barra de oro
+	// SCATTER) y L4 (fajo CASH STACK — ver la nota del re-mapeo más abajo).
+	//
+	// PRELOAD desde el drop 09-09: ese drop borró `w.png` y `s.png`, así que
+	// estos clips dejaron de ser un reemplazo del estático para pasar a ser la
+	// ÚNICA representación de W y S. Sin preload, un board pintado antes de que
+	// terminen de bajar deja la celda vacía — el mismo motivo por el que
+	// `anim_sym_premium` ya iba preloaded. Son 0.54 MB entre los dos.
 	anim_sym_wild: {
 		type: 'spriteSheet',
 		src: new URL('../../assets/sprites/anim/anim_sym_wild.json', import.meta.url).href,
+		preload: true,
 	},
 	anim_sym_scatter: {
 		type: 'spriteSheet',
 		src: new URL('../../assets/sprites/anim/anim_sym_scatter.json', import.meta.url).href,
+		preload: true,
 	},
 	// PREMIUM (H4) — drop 08-09: el clip `Special_Billetes` (fajo de billetes,
 	// 25 frames de 256²) reemplazó al `Special_Graffiti` bajo el mismo nombre de
@@ -161,6 +168,25 @@ export default {
 		type: 'spriteSheet',
 		src: new URL('../../assets/sprites/anim/anim_sym_premium_luz.json', import.meta.url).href,
 	},
+	// MARCO de victoria (drop 09-09, `Marco_Icono`) — 21 frames de un marco
+	// cómic rojo/amarillo que estalla DETRÁS del símbolo ganador. Va en TODOS
+	// los símbolos que anotan, no solo en los especiales.
+	//
+	// Re-empaquetado con `.scripts/repack_spritesheet.py --size 192`: llegó como
+	// 486² por frame en un atlas de 1994², o sea 15.9 MB de textura
+	// DESCOMPRIMIDA en VRAM para algo que se dibuja en una celda de ~100 px.
+	// A 192² el atlas queda en 960² = 3.7 MB de VRAM y 0.13 MB de descarga.
+	// (El `--verify` marca un Δ de 0.6 % en `fill` — el arte ya era casi a
+	// sangre y al bajar de escala el antialias llena el último píxel. El centro
+	// no se movió y acá se dibuja a sangre igual, así que es inocuo.)
+	//
+	// PRELOAD: se ve en la PRIMERA victoria de la sesión; sin él la primera
+	// ronda ganadora saldría sin marco. 0.13 MB.
+	marco: {
+		type: 'spriteSheet',
+		src: new URL('../../assets/sprites/anim/marco.json', import.meta.url).href,
+		preload: true,
+	},
 	// Symbols — 12 sprites, set KASH RAMPAGE (Drive ICONS PNG, kit 26-08).
 	// Los 10 regulares vienen del canvas 1080×970 del artista (Juanda) con la
 	// escala relativa normalizada; pipeline: crop cuadrado centrado 900px →
@@ -169,23 +195,42 @@ export default {
 	// STAND-INS del kit (Vial-rampage y Dinero) hasta que lleguen los recolors
 	// de Bluff y del grafiti KASH; w/s son los SPECIAL_* rojos del drop 25-08
 	// del mismo Drive.
-	sym_l1: { type: 'sprite', src: new URL('../../assets/sprites/symbols/l1.png', import.meta.url).href }, // Crowbar
-	sym_l2: { type: 'sprite', src: new URL('../../assets/sprites/symbols/l2.png', import.meta.url).href }, // Brass Knuckles
-	sym_l3: { type: 'sprite', src: new URL('../../assets/sprites/symbols/l3.png', import.meta.url).href }, // Molotov
-	sym_l4: { type: 'sprite', src: new URL('../../assets/sprites/symbols/l4.png', import.meta.url).href }, // Dye-Pack Cash
+	//
+	// ⚠ RE-MAPEADO 09-09 tras el drop de arte (commit "Nuevas mejoras…"), que
+	// re-exportó los 8 estáticos que quedan, agregó `h4.png` y BORRÓ `l4.png`,
+	// `w.png`, `s.png` y `luz/l4_luz.png`. El registro seguía apuntando a esos 4
+	// archivos: los 404 dejaban la celda de L4 VACÍA en el board (el bug que
+	// reportó el usuario con captura) y ensuciaban la consola con 3 reintentos
+	// por asset.
+	//
+	// La identidad de cada símbolo la manda la math, no el nombre del archivo
+	// (`stake-math-sdk/games/kash_rampage_extreme/game_config.py`):
+	//     H1=Bluff · H2=Syl · H3=Rookie · H4=KASH (premium_symbol)
+	//     L1=Drill · L2=Keycard · L3=Smoke Grenade · L4=Cash Stack
+	// El clip `anim_sym_premium` es `Special_Billetes` (fajo de billetes) = el
+	// CASH STACK, o sea **L4**, no H4. Lo confirma el arte del propio drop:
+	// `h4_luz.png` es el medallón de cadena iluminado, no el fajo. El nombre del
+	// asset ("premium") es un error de rotulado del export, y se conserva para
+	// no invalidar las claves del laboratorio.
+	sym_l1: { type: 'sprite', src: new URL('../../assets/sprites/symbols/l1.png', import.meta.url).href }, // Drill (palancas cruzadas)
+	sym_l2: { type: 'sprite', src: new URL('../../assets/sprites/symbols/l2.png', import.meta.url).href }, // Keycard → manopla
+	sym_l3: { type: 'sprite', src: new URL('../../assets/sprites/symbols/l3.png', import.meta.url).href }, // Smoke Grenade → molotov
+	// (sym_l4 sin estático desde el drop 09-09: el CASH STACK se dibuja SIEMPRE
+	// con `anim_sym_premium`, que va preloaded. La clave `sym_l4` sigue viva como
+	// IDENTIDAD en constants.ts y winPop.ts; lo que no existe es su textura, y
+	// `STATIC_LESS` en SymbolSprite.svelte impide que alguien la pida.)
 	sym_m1: { type: 'sprite', src: new URL('../../assets/sprites/symbols/m1.png', import.meta.url).href }, // Nitro
-	sym_m2: { type: 'sprite', src: new URL('../../assets/sprites/symbols/m2.png', import.meta.url).href }, // Blueprint
-	sym_h1: { type: 'sprite', src: new URL('../../assets/sprites/symbols/h1.png', import.meta.url).href }, // Rampage Vial (stand-in de Bluff)
-	sym_h2: { type: 'sprite', src: new URL('../../assets/sprites/symbols/h2.png', import.meta.url).href }, // UZI
-	sym_h3: { type: 'sprite', src: new URL('../../assets/sprites/symbols/h3.png', import.meta.url).href }, // Bomb (Dinamita)
-	// (sym_h4 eliminado 08-09 junto con symbols/h4.png — el fajo estático era el
-	// fallback del grafiti mientras cargaba su clip. Ahora H4 se dibuja SIEMPRE
-	// con `anim_sym_premium`, que va preloaded. La clave `sym_h4` sigue viva como
-	// IDENTIDAD del símbolo en constants.ts, winPop.ts y LUZ_KEY — lo que
-	// desapareció es su textura, y `STATIC_LESS` en SymbolSprite.svelte impide
-	// que alguien la pida.)
-	sym_w: { type: 'sprite', src: new URL('../../assets/sprites/symbols/w.png', import.meta.url).href }, // Bat WILD
-	sym_s: { type: 'sprite', src: new URL('../../assets/sprites/symbols/s.png', import.meta.url).href }, // Gold Bar SCATTER
+	sym_m2: { type: 'sprite', src: new URL('../../assets/sprites/symbols/m2.png', import.meta.url).href }, // ACCESS keycard
+	sym_h1: { type: 'sprite', src: new URL('../../assets/sprites/symbols/h1.png', import.meta.url).href }, // Bluff — tag "12"
+	sym_h2: { type: 'sprite', src: new URL('../../assets/sprites/symbols/h2.png', import.meta.url).href }, // Syl — tag "FT?"
+	sym_h3: { type: 'sprite', src: new URL('../../assets/sprites/symbols/h3.png', import.meta.url).href }, // Rookie — tapa "RAT"
+	// KASH (premium de la math). Llegó en el drop 09-09 como `h4.png` (arte
+	// nuevo: medallón de cadena con la X, NO el fajo — ver `h4_luz.png`), pero
+	// nadie lo registró: el archivo estaba en disco y el juego no lo pedía.
+	sym_h4: { type: 'sprite', src: new URL('../../assets/sprites/symbols/h4.png', import.meta.url).href }, // KASH — medallón X
+	// (sym_w / sym_s sin estático desde el drop 09-09, mismo caso que sym_l4:
+	// sus clips `anim_sym_wild` / `anim_sym_scatter` pasaron a PRELOAD y son la
+	// única representación.)
 	// Iconos ILUMINADOS (Icons_Luz, kit 26-08) — carta full-bleed 1080×970
 	// (marco oscuro + glow horneado) → 512×460 conservando aspect. SymbolSprite
 	// los muestra en win/postWinStatic en lugar del estático + halo lima.
@@ -195,7 +240,8 @@ export default {
 	sym_l1_luz: { type: 'sprite', src: new URL('../../assets/sprites/symbols/luz/l1_luz.png', import.meta.url).href },
 	sym_l2_luz: { type: 'sprite', src: new URL('../../assets/sprites/symbols/luz/l2_luz.png', import.meta.url).href },
 	sym_l3_luz: { type: 'sprite', src: new URL('../../assets/sprites/symbols/luz/l3_luz.png', import.meta.url).href },
-	sym_l4_luz: { type: 'sprite', src: new URL('../../assets/sprites/symbols/luz/l4_luz.png', import.meta.url).href },
+	// (sym_l4_luz retirado 09-09 con `l4_luz.png`: el CASH STACK ilumina con su
+	// clip `anim_sym_premium_luz`, no con una carta estática.)
 	sym_m1_luz: { type: 'sprite', src: new URL('../../assets/sprites/symbols/luz/m1_luz.png', import.meta.url).href },
 	sym_m2_luz: { type: 'sprite', src: new URL('../../assets/sprites/symbols/luz/m2_luz.png', import.meta.url).href },
 	sym_h2_luz: { type: 'sprite', src: new URL('../../assets/sprites/symbols/luz/h2_luz.png', import.meta.url).href },

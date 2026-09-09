@@ -8,7 +8,10 @@
 		| {
 				type: 'boardWithAnimateSymbols';
 				symbolPositions: Position[];
-		  };
+		  }
+		// APAGAR una presentación de `boardWithAnimateSymbols` que NO termina en
+		// tumble. Ver el handler para el porqué.
+		| { type: 'boardAnimateSymbolsReset' };
 </script>
 
 <script lang="ts">
@@ -70,6 +73,43 @@
 				const reelSymbol = context.stateGame.board[position.reel]?.reelState.symbols[position.row];
 				if (reelSymbol) reelSymbol.symbolState = 'postWinStatic';
 			});
+		},
+		// ── APAGAR EL RESALTE (fix 09-09) ───────────────────────────────────────
+		// `boardWithAnimateSymbols` deja las celdas en `postWinStatic` A PROPÓSITO
+		// y no las devuelve solas: en el ciclo normal de cluster lo que sigue es
+		// `tumbleBoard`, que hace `boardHide` + `boardSettle`, y el settle
+		// RECONSTRUYE los ReelSymbol desde cero (`createReelSymbol` los nace en
+		// `initialSymbolState`). O sea: el ciclo de tumble se limpia solo.
+		//
+		// El problema son las presentaciones que NO terminan en tumble. Hoy hay
+		// una que corre sobre el MISMO board que después evalúa clusters: el
+		// **Premium Accent** del KASH RAMPAGE (`bookEventHandlerMap.kashRampage`),
+		// que pulsa las celdas convertidas a KASH/H4. Sin este apagado esas celdas
+		// se quedaban en `postWinStatic` hasta el siguiente settle, y como
+		// `isWinning` incluye ese estado, seguían mostrando su carta `_luz` y su
+		// marco de victoria SIN ser ganadoras:
+		//   · no hacen boing — `playWinFlash` ya se limpió, así que no tienen
+		//     celda de winFlash y `glowReplacesIcon` deja solo la carta, quieta;
+		//   · no explotan — no están en `explodingSymbols` del book;
+		//   · y `stateWinHighlight.active` quedaba prendido, atenuando al 30 % a
+		//     todo lo que no fuera ellas.
+		// Se leía como "hay X iluminadas y con marco que no revientan mientras el
+		// resto sí, y después se apagan solas" — el reporte del usuario con
+		// captura.
+		//
+		// Devolver a `static` alcanza para apagar TODO el paquete: la carta luz,
+		// el dim del resto y el marco (el `$effect` de SymbolSprite rearma
+		// `marcoPhase` a 'intro' en cuanto el estado sale de win/postWinStatic).
+		boardAnimateSymbolsReset: () => {
+			stateWinHighlight.active = false;
+			clearWinFlash();
+			context.stateGame.board.forEach((reel) =>
+				reel.reelState.symbols.forEach((reelSymbol) => {
+					if (reelSymbol.symbolState === 'win' || reelSymbol.symbolState === 'postWinStatic') {
+						reelSymbol.symbolState = 'static';
+					}
+				}),
+			);
 		},
 	});
 

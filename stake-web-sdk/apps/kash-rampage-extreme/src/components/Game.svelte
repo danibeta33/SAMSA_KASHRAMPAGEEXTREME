@@ -223,10 +223,6 @@
 			</MainContainer>
 
 			<MainContainer>
-				<FreeSpinCounter />
-			</MainContainer>
-
-			<MainContainer>
 				<MultiplierGrid />
 			</MainContainer>
 
@@ -252,6 +248,14 @@
 		     recipientes y el título son dos elementos distintos del laboratorio
 		     y cada uno lleva su propio par. -->
 		<TopHud />
+
+		<!-- Contador de FREE SPINS (drop 09-09 · Paso 8). Estaba DENTRO del
+		     wrapper del board, así que heredaba `boardTransform` y se movía y
+		     escalaba con la grilla — en los tamaños grandes se salía de pantalla.
+		     Ahora es un elemento suelto en coordenadas de canvas, igual que el
+		     HUD superior y el título, con sus propios X/Y/tamaño/opacidad/capa en
+		     el UI LAB. -->
+		<FreeSpinCounter />
 
 		<!-- La UI Pixi del SDK (bottom HUD default) sigue desmontada: abajo el
 		     HUD es el overlay HTML BottomBar.svelte (SPIN/STOP, TURBO, AUTO,

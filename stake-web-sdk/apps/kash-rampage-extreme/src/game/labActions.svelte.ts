@@ -15,6 +15,7 @@ import type { getContext } from './context';
 import { winLevelMap } from './winLevelMap';
 import { boardShake } from './boardShake.svelte';
 import { swingAlign } from './swingAlign.svelte';
+import { labPreview } from './stateTweak.svelte';
 import { SFX_MAP, type SoundEffectName, type MusicName } from './sound';
 
 type GameContext = ReturnType<typeof getContext>;
@@ -154,13 +155,47 @@ export const registerGameLabActions = (context: GameContext) => {
 
 	const emit = context.eventEmitter;
 
+	// Los toggles del panel son numéricos (1/0). `swingGhost` va contra
+	// `swingAlign`; los dos previews del drop 09-09 contra `labPreview`, que es
+	// el mismo objeto que SymbolSprite lee para forzar marco y `_luz` sin tener
+	// que esperar un cluster ganador.
+	const PREVIEW_TOGGLES: Record<string, string> = {
+		previewMarco: 'marco',
+		previewLuz: 'luz',
+	};
+
 	animInspector.configure({
 		title: 'ANIM LAB',
-		read: (id) => (id === 'swingGhost' ? (swingAlign.ghost ? 1 : 0) : 0),
+		read: (id) => {
+			if (id === 'swingGhost') return swingAlign.ghost ? 1 : 0;
+			const key = PREVIEW_TOGGLES[id];
+			if (key) return labPreview[key] ? 1 : 0;
+			return 0;
+		},
 		write: (id, value) => {
 			if (id === 'swingGhost') swingAlign.ghost = value >= 0.5;
+			const key = PREVIEW_TOGGLES[id];
+			if (key) labPreview[key] = value >= 0.5;
 		},
 		diagnostics: buildDiagnostics,
+	});
+
+	// ── Previsualización de MARCO + LUZ (drop 09-09) ──────────────────────
+	// Los dos efectos de victoria solo existen mientras dura la presentación
+	// del cluster, que en un cluster de puro especial son 250 ms. Estos toggles
+	// los dejan prendidos en TODO el board para poder revisar encuadre,
+	// tamaño y jerarquía (marco detrás del ícono, `_luz` detrás del clip) sin
+	// depender de que caiga la combinación.
+	animInspector.registerCategory('winfx', { label: 'MARCO + LUZ', order: 1.5 });
+	animInspector.registerToggle('previewMarco', {
+		label: 'MARCO fijo en todos los símbolos',
+		category: 'winfx',
+		order: 0,
+	});
+	animInspector.registerToggle('previewLuz', {
+		label: 'LUZ fija en W / S / CASH STACK',
+		category: 'winfx',
+		order: 1,
 	});
 
 	// ── Clips de Kash ─────────────────────────────────────────────────────

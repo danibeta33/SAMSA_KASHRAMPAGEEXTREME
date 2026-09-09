@@ -27,13 +27,19 @@ import type {
  * Subir el número invalida los overrides guardados con buckets viejos.
  *
  * 09-09: se agregan los 12 diales de opacidad + capa (uno por elemento de la
- * UI) y los 9 de geometría de los especiales. NO se bumpea a propósito — las
- * claves nuevas son ADITIVAS y `loadOverrides` copia solo las que encuentra,
- * así que un override viejo simplemente no las trae y caen al DEFAULT vía el
- * merge de `applyBucket`. Bumpear acá tiraría los ajustes locales del usuario
- * sin ganar nada.
+ * UI) y los 9 de geometría de los especiales. Eso NO bumpeó: las claves nuevas
+ * son ADITIVAS y `loadOverrides` copia solo las que encuentra, así que un
+ * override viejo no las trae y caen al DEFAULT vía el merge de `applyBucket`.
+ *
+ * v16 (09-09): SÍ bumpea. Se congelaron los 72 diales de íconos + marcos
+ * aprobados en Desktop y `specialScale` pasó a ser un valor ÚNICO (1.235) en
+ * los DEFAULTS, en vez de uno por bucket. Un override guardado con v15 trae el
+ * `specialScale` VIEJO de su bucket (1.165…1.33) y ganaría sobre el nuevo
+ * default — los especiales saldrían de otro tamaño justo en los tamaños que
+ * este drop viene a emparejar. El bump descarta esos overrides y deja mandar a
+ * los valores de código.
  */
-export const LAB_STORAGE_KEY = 'kash_tweak_v15';
+export const LAB_STORAGE_KEY = 'kash_tweak_v16';
 
 export const LAB_TITLE = 'UI LAB';
 
@@ -47,10 +53,50 @@ export const LAB_CATEGORIES: (InspectorCategoryConfig & { id: string })[] = [
 	{ id: 'kash', label: 'KASH', order: 3 },
 	{ id: 'tophud', label: 'HUD SUPERIOR', order: 4 },
 	{ id: 'title', label: 'TÍTULO', order: 5 },
-	// Geometría INDEPENDIENTE de W / S / H4 — el slider de grupo
-	// (`specialScale`) sigue viviendo en `hud`, junto al resto de los íconos.
-	{ id: 'specials', label: 'ESPECIALES', order: 6 },
+	{ id: 'freespin', label: 'CONTADOR FREE SPINS', order: 6 },
+	// Una categoría POR SÍMBOLO (drop 09-09 · Paso 8) — se generan más abajo a
+	// partir de `LAB_SYMBOLS`, a continuación de estas.
 ];
+
+/**
+ * Los 12 símbolos del board, en el orden en que se listan en el panel. El `id`
+ * es el `assetKey` SIN el prefijo `sym_`, y de ahí salen las claves del
+ * laboratorio: `h1` → `h1X`, `h1Y`, `h1Scale`, `h1MarcoX`, `h1MarcoY`,
+ * `h1MarcoScale`. `SymbolSprite` hace el camino inverso (`assetKey.slice(4)`),
+ * así que no hay ningún mapa que mantener sincronizado a mano.
+ *
+ * Las etiquetas llevan la identidad de la MATH y el arte entre paréntesis
+ * (`game_config.py`: H1=Bluff · H2=Syl · H3=Rookie · H4=KASH · L1=Drill ·
+ * L2=Keycard · L3=Smoke Grenade · L4=Cash Stack), porque el nombre del archivo
+ * no alcanza para saber cuál es cuál — fue justamente la confusión que dejó a
+ * L4 sin arte en el Paso 7.
+ */
+export const LAB_SYMBOLS = [
+	{ id: 'h4', label: 'H4 — KASH (medallón X)' },
+	{ id: 'h3', label: 'H3 — Rookie (RAT)' },
+	{ id: 'h2', label: 'H2 — Syl (FT?)' },
+	{ id: 'h1', label: 'H1 — Bluff (12)' },
+	{ id: 'm1', label: 'M1 — Nitro' },
+	{ id: 'm2', label: 'M2 — ACCESS' },
+	{ id: 'l1', label: 'L1 — Drill (palancas)' },
+	{ id: 'l2', label: 'L2 — Manopla' },
+	{ id: 'l3', label: 'L3 — Molotov' },
+	{ id: 'l4', label: 'L4 — Cash Stack ✦' },
+	{ id: 'w', label: 'W — WILD ✦' },
+	{ id: 's', label: 'S — SCATTER ✦' },
+] as const;
+
+export type SymbolLabId = (typeof LAB_SYMBOLS)[number]['id'];
+
+/** Sufijos de las 6 claves que tiene cada símbolo. */
+export const SYMBOL_GEOM_PROPS = ['X', 'Y', 'Scale', 'MarcoX', 'MarcoY', 'MarcoScale'] as const;
+
+export type SymbolGeomKey = `${SymbolLabId}${(typeof SYMBOL_GEOM_PROPS)[number]}`;
+
+// Las 12 categorías por símbolo, después de las globales (order 10 en adelante).
+for (const [i, symbol] of LAB_SYMBOLS.entries()) {
+	LAB_CATEGORIES.push({ id: `sym_${symbol.id}`, label: symbol.label, order: 10 + i });
+}
 
 export const LAB_TOGGLES: (InspectorToggleConfig & { id: string })[] = [
 	{
@@ -127,20 +173,55 @@ export const LAB_SLIDERS: (InspectorSliderConfig & { id: string })[] = [
 	{ id: 'titleScale', label: 'Título size', min: 0.2, max: 3, step: 0.005, category: 'title', order: 52 },
 	{ id: 'titleAlpha', label: 'Título opacidad', min: 0, max: 1, step: 0.01, category: 'title', order: 53 },
 	{ id: 'titleZ', label: 'Título capa', ...LAYER, category: 'title', order: 54 },
-	// ── ESPECIALES: 3 diales por ícono (drop 09-09) ─────────────────────────
-	// X/Y son fracciones de CELDA (× SYMBOL_SIZE) sobre la posición que ya le
-	// dio la grilla — ±0.5 es media celda, suficiente para reencuadrar un clip
-	// que cuelga sin sacarlo de su casilla. La escala multiplica al dial de
-	// grupo `specialScale` (categoría BOTONERA + ÍCONOS).
-	{ id: 'wildX', label: 'Wild X', min: -0.5, max: 0.5, step: 0.005, category: 'specials', order: 60 },
-	{ id: 'wildY', label: 'Wild Y', min: -0.5, max: 0.5, step: 0.005, category: 'specials', order: 61 },
-	{ id: 'wildScale', label: 'Wild size', min: 0.3, max: 2.5, step: 0.005, category: 'specials', order: 62 },
-	{ id: 'scatterX', label: 'Scatter X', min: -0.5, max: 0.5, step: 0.005, category: 'specials', order: 63 },
-	{ id: 'scatterY', label: 'Scatter Y', min: -0.5, max: 0.5, step: 0.005, category: 'specials', order: 64 },
-	{ id: 'scatterScale', label: 'Scatter size', min: 0.3, max: 2.5, step: 0.005, category: 'specials', order: 65 },
-	{ id: 'premiumX', label: 'Premium X', min: -0.5, max: 0.5, step: 0.005, category: 'specials', order: 66 },
-	{ id: 'premiumY', label: 'Premium Y', min: -0.5, max: 0.5, step: 0.005, category: 'specials', order: 67 },
-	{ id: 'premiumScale', label: 'Premium size', min: 0.3, max: 2.5, step: 0.005, category: 'specials', order: 68 },
+	// ── CONTADOR DE FREE SPINS (drop 09-09 · Paso 8) ────────────────────────
+	// Antes vivía dentro del wrapper del board, así que se movía y escalaba con
+	// la grilla y en los tamaños grandes se iba de pantalla. Ahora es un
+	// elemento suelto en coordenadas de canvas, como el HUD superior y el
+	// título: X/Y son fracciones del canvas.
+	{ id: 'fsX', label: 'FS X', min: 0, max: 1, step: 0.001, category: 'freespin', order: 55 },
+	{ id: 'fsY', label: 'FS Y', min: 0, max: 1, step: 0.001, category: 'freespin', order: 56 },
+	{ id: 'fsScale', label: 'FS size', min: 0.2, max: 3, step: 0.005, category: 'freespin', order: 57 },
+	{ id: 'fsAlpha', label: 'FS opacidad', min: 0, max: 1, step: 0.01, category: 'freespin', order: 58 },
+	{ id: 'fsZ', label: 'FS capa', ...LAYER, category: 'freespin', order: 59 },
 ];
+
+// ── GEOMETRÍA POR SÍMBOLO: 6 sliders × 12 símbolos (drop 09-09 · Paso 8) ────
+// Antes solo los 3 animados (W / S / Cash Stack) tenían diales propios; ahora
+// los 12 se ajustan individualmente, y cada uno lleva ADEMÁS los 3 del marco
+// de victoria que se dibuja sobre él.
+//
+// Convenciones (iguales a las que ya usaban los especiales):
+//   · X / Y      → fracciones de CELDA (× SYMBOL_SIZE) sobre la posición que
+//                  ya le dio la grilla. ±0.5 = media celda: alcanza para
+//                  reencuadrar un ícono que cuelga sin sacarlo de su casilla.
+//   · Scale      → multiplica al tamaño que le da su `box`. Para los 3
+//                  animados se multiplica además por el dial de grupo
+//                  `specialScale` (categoría BOTONERA + ÍCONOS).
+//   · Marco*     → lo mismo, pero para el clip `Marco_Icono` que estalla
+//                  SOBRE el símbolo al anotar. Van acá y no en una categoría
+//                  aparte porque el encuadre del marco depende del ícono que
+//                  enmarca: cada uno necesita el suyo.
+const SYMBOL_SLIDER_SPECS = [
+	{ prop: 'X', label: 'X', min: -0.5, max: 0.5, step: 0.005 },
+	{ prop: 'Y', label: 'Y', min: -0.5, max: 0.5, step: 0.005 },
+	{ prop: 'Scale', label: 'Tamaño', min: 0.3, max: 2.5, step: 0.005 },
+	{ prop: 'MarcoX', label: 'Marco X', min: -0.5, max: 0.5, step: 0.005 },
+	{ prop: 'MarcoY', label: 'Marco Y', min: -0.5, max: 0.5, step: 0.005 },
+	{ prop: 'MarcoScale', label: 'Marco tamaño', min: 0.3, max: 3, step: 0.005 },
+] as const;
+
+for (const [i, symbol] of LAB_SYMBOLS.entries()) {
+	for (const [j, spec] of SYMBOL_SLIDER_SPECS.entries()) {
+		LAB_SLIDERS.push({
+			id: `${symbol.id}${spec.prop}`,
+			label: spec.label,
+			min: spec.min,
+			max: spec.max,
+			step: spec.step,
+			category: `sym_${symbol.id}`,
+			order: 100 + i * 10 + j,
+		});
+	}
+}
 
 export type LabSliderKey = (typeof LAB_SLIDERS)[number]['id'];

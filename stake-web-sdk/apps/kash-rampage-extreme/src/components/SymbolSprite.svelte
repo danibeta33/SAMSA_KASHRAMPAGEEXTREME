@@ -1,3 +1,26 @@
+<script lang="ts" module>
+	// ── Constantes y estado COMPARTIDO del marco de victoria ─────────────────
+	// `Marco_Icono`: 21 frames (0..20). Los tramos los pidió dirección:
+	//   0..15  entrada, mientras el cluster se ilumina
+	//   4..15  bucle de espera hasta que termina de iluminarse TODO el cluster
+	//   …→18   salida, desde el frame en curso, al hacer el boing de desaparición
+	export const MARCO_INTRO_END = 15;
+	export const MARCO_LOOP_START = 4;
+	// La salida CIERRA en el 18 y no en el 20: los dos últimos frames del export
+	// son el marco ya relleno (amarillo pleno y después bloque rojo), que con el
+	// marco por ENCIMA del ícono taparían la celda entera justo cuando el
+	// símbolo se está yendo. Pedido de dirección: terminar en el 18.
+	export const MARCO_LAST_FRAME = 18;
+	const MARCO_ANIM_SPEED = 24 / 60; // entrada y bucle: 24 fps
+	const MARCO_CELL_RATIO = 1.12; // lado del marco en celdas, antes del dial
+
+	// Frame ABSOLUTO en el que va el bucle. Vive en el módulo (compartido por
+	// todas las celdas) a propósito: la salida se dibuja en componentes
+	// DISTINTOS de los que corrieron el bucle — la presentación es del board
+	// principal y el boing del tumble board. Ver la nota del `$effect`.
+	let marcoLoopFrame = MARCO_LOOP_START;
+</script>
+
 <script lang="ts">
 	// Wireframe-aware sprite renderer.
 	// - When `symbolInfo.assetKey === 'wireframe'` we draw a coloured Rectangle
@@ -8,8 +31,17 @@
 	//   firing synchronously would resolve the previous (stale) callback and
 	//   the round would hang forever on every win. We delay by 150ms and read
 	//   `props.oncomplete` inside the timeout — never via a captured closure.
-	import { onMount } from 'svelte';
-	import { Container, Rectangle, Sprite, SpriteSheet, Text, getContextApp } from 'pixi-svelte';
+	import { onMount, untrack } from 'svelte';
+	import type * as PIXI from 'pixi.js';
+	import {
+		AnimatedSprite,
+		Container,
+		Rectangle,
+		Sprite,
+		SpriteSheet,
+		Text,
+		getContextApp,
+	} from 'pixi-svelte';
 
 	import { SYMBOL_SIZE } from '../game/constants';
 	import { getSymbolInfo } from '../game/utils';
@@ -17,9 +49,14 @@
 	// Multiplicador global de tamaño de símbolos, tweakeable en vivo (UiLab).
 	import { stateUiTweak } from '../game/stateUiTweak.svelte';
 	// Multiplicador extra SOLO para los especiales (slider `specialScale`).
-	import { stateTweak } from '../game/stateTweak.svelte';
+	import { stateTweak, labPreview } from '../game/stateTweak.svelte';
 	import { stateWinHighlight } from '../game/stateWinHighlight.svelte';
-	import { type SelfAnimatedAssetKey, type WinPop } from '../game/winPop.svelte';
+	import {
+		SELF_ANIMATED_ASSET_KEYS,
+		WIN_POP_TOTAL_MS,
+		type SelfAnimatedAssetKey,
+		type WinPop,
+	} from '../game/winPop.svelte';
 	import type { WinFlashCell } from '../game/winFlash.svelte';
 
 	type Props = {
@@ -64,50 +101,48 @@
 
 	const isWireframe = $derived(props.symbolInfo.assetKey === 'wireframe');
 
-	// ── GEOMETRÍA INDEPENDIENTE DE LOS 3 ESPECIALES (drop 09-09) ────────────
-	// W (bate WILD), S (barra SCATTER) y H4 (fajo PREMIUM) dejan de compartir
-	// una sola perilla: cada uno trae del UI LAB su propio nudge X/Y y su propia
-	// escala, ajustables por bucket como el resto del layout.
+	// ── GEOMETRÍA INDIVIDUAL, LOS 12 SÍMBOLOS (drop 09-09 · Paso 8) ─────────
+	// En el Paso 6 solo los 3 animados tenían diales propios; ahora cada uno de
+	// los 12 trae del UI LAB su nudge X/Y, su escala, y los 3 equivalentes del
+	// MARCO de victoria que se dibuja sobre él.
 	//
-	// Tipado contra `SelfAnimatedAssetKey` (la lista canónica de "especial" del
-	// juego, la misma que usa winPop para saltear el pop): si esa lista cambia,
-	// este mapa deja de compilar hasta que se sincronice. Reemplaza al viejo
-	// `SPECIAL_TRIM`, que horneaba el 0.90 del bate en el componente — ese valor
-	// ahora es el DEFAULT de `wildScale` en stateTweak, así que el board arranca
-	// idéntico y el ajuste pasó a ser del laboratorio.
-	//
-	// La escala MULTIPLICA a `specialScale`: ese slider sigue siendo el dial del
-	// GRUPO (los tres crecen juntos contra los 10 regulares) y estos tres son el
-	// trim individual encima.
-	type SpecialGeometry = { x: number; y: number; scale: number };
-	const SPECIAL_GEOMETRY: Record<SelfAnimatedAssetKey, SpecialGeometry> = $derived({
-		sym_w: { x: stateTweak.wildX, y: stateTweak.wildY, scale: stateTweak.wildScale },
-		sym_s: { x: stateTweak.scatterX, y: stateTweak.scatterY, scale: stateTweak.scatterScale },
-		sym_h4: { x: stateTweak.premiumX, y: stateTweak.premiumY, scale: stateTweak.premiumScale },
-	});
-	const geometry = $derived(
-		SPECIAL_GEOMETRY[props.symbolInfo.assetKey as SelfAnimatedAssetKey] as
-			| SpecialGeometry
-			| undefined,
+	// El puente entre símbolo y clave es puramente el nombre: `sym_h1` → `h1X`,
+	// `h1Y`, `h1Scale`, `h1MarcoX`… No hay ningún mapa que mantener
+	// sincronizado — agregar un símbolo a `LAB_SYMBOLS` (labMeta.ts) le da
+	// sliders, persistencia por bucket y lectura acá, sin tocar este archivo.
+	// `wireframe` no arranca con `sym_` y cae a los valores neutros.
+	const tweakByKey = stateTweak as unknown as Record<string, number>;
+	const labId = $derived(
+		props.symbolInfo.assetKey.startsWith('sym_') ? props.symbolInfo.assetKey.slice(4) : '',
 	);
+	const geomOf = (suffix: string, fallback: number) => {
+		if (!labId) return fallback;
+		const value = tweakByKey[`${labId}${suffix}`];
+		return typeof value === 'number' ? value : fallback;
+	};
 
+	// Los 3 animados (W / S / CASH STACK) conservan ADEMÁS el dial de GRUPO
+	// `specialScale`, que es el que los hace resaltar juntos contra los 10
+	// regulares y está congelado por bucket en PER_BUCKET_SEED. El dial
+	// individual multiplica encima.
+	const SPECIAL_KEYS = new Set<string>(SELF_ANIMATED_ASSET_KEYS);
+	const isSpecial = $derived(SPECIAL_KEYS.has(props.symbolInfo.assetKey));
 	// Se aplica a los DOS caminos de render (el clip animado y el sprite
-	// estático de respaldo). Si solo escalara el animado, W y S —que van sin
-	// preload— darían un salto de tamaño en el momento en que su sheet termina
-	// de bajar y reemplaza al estático. Mismo motivo para el desplazamiento.
-	const specialMult = $derived(geometry ? stateTweak.specialScale * geometry.scale : 1);
+	// estático). Si solo escalara uno, el swap estático → animado daría un salto
+	// de tamaño. Mismo motivo para el desplazamiento.
+	const sizeMult = $derived((isSpecial ? stateTweak.specialScale : 1) * geomOf('Scale', 1));
 
 	// X/Y del laboratorio vienen en FRACCIONES DE CELDA — el símbolo ya está
 	// posicionado por la grilla y esto es un nudge fino sobre esa posición, así
 	// que escalan con SYMBOL_SIZE y no con el canvas.
-	const cx = $derived((props.x ?? 0) + (geometry ? geometry.x * SYMBOL_SIZE : 0));
-	const cy = $derived((props.y ?? 0) + (geometry ? geometry.y * SYMBOL_SIZE : 0));
+	const cx = $derived((props.x ?? 0) + geomOf('X', 0) * SYMBOL_SIZE);
+	const cy = $derived((props.y ?? 0) + geomOf('Y', 0) * SYMBOL_SIZE);
 
 	const w = $derived(
-		SYMBOL_SIZE * props.symbolInfo.sizeRatios.width * stateUiTweak.symScale * specialMult,
+		SYMBOL_SIZE * props.symbolInfo.sizeRatios.width * stateUiTweak.symScale * sizeMult,
 	);
 	const h = $derived(
-		SYMBOL_SIZE * props.symbolInfo.sizeRatios.height * stateUiTweak.symScale * specialMult,
+		SYMBOL_SIZE * props.symbolInfo.sizeRatios.height * stateUiTweak.symScale * sizeMult,
 	);
 
 	// Iconos especiales ANIMADOS: W (bate WILD), S (barra SCATTER), H4 (grafiti
@@ -164,7 +199,7 @@
 			center: { x: 127.5 / 256, y: 127 / 256 },
 			box: 0.95, // = sizeRatios de sym_s
 		},
-		// KASH premium — fajo de billetes (drop 08-09: el clip `Special_Billetes`
+		// CASH STACK (L4) — fajo de billetes (drop 08-09: el clip `Special_Billetes`
 		// reemplazó al `Special_Graffiti` bajo el mismo nombre de archivo). Arte
 		// 256×239 casi a sangre y centrado, contra el grafiti viejo que era
 		// 182×191 en (34,51) y colgaba abajo. Números medidos del .json con
@@ -180,15 +215,25 @@
 		// estaba mal era el CENTRADO: con center.y 0.5039 en vez de 0.5332 el
 		// offset compensaba 0.0039 de lienzo en lugar de 0.0332, así que el fajo
 		// se dibujaba ≈2.5 px de board (3 % de celda) por DEBAJO de su centro.
-		sym_h4: {
+		sym_l4: {
 			key: 'anim_sym_premium',
 			luzKey: 'anim_sym_premium_luz',
 			aspect: 1.07113,
 			fill: { w: 1.0, h: 0.933594 },
 			center: { x: 0.5, y: 0.533203 },
-			box: 0.8, // = sizeRatios de sym_h4
+			box: 0.8, // = sizeRatios de sym_l4 (default de mkSprite)
 		},
 	};
+	// Velocidad de reproducción de los clips especiales, en la unidad de PIXI
+	// (fracción de frame por tick a 60fps) = 10 fps. Es UNA constante y no dos
+	// literales sueltos a propósito: el clip base y su `_luz` tienen que correr
+	// exactamente igual o el glow se desfasa del ícono al que acompaña. Todo lo
+	// demás que comparten —ancho, alto, posición, offset y centro de
+	// composición— sale de las MISMAS variables derivadas (`specialW`,
+	// `specialH`, `specialOffsetX/Y`), así que no hay ningún número que puedan
+	// desincronizar.
+	const SPECIAL_ANIM_SPEED = 10 / 60;
+
 	const appContext = getContextApp();
 	const special = $derived(
 		ANIM_SPECIAL[props.symbolInfo.assetKey as SelfAnimatedAssetKey] as AnimSpecial | undefined,
@@ -220,11 +265,16 @@
 	// PIXI escupiría "Sprite key not found" — el motivo #1 de rechazo del
 	// `05-preflight-checklist.md`. Que hoy sea inalcanzable depende del orden de
 	// carga; acá se vuelve una invariante del componente.
-	const STATIC_LESS = new Set(['sym_h4']);
+	// 09-09: pasaron de 1 a 3. El drop de arte borró `l4.png`, `w.png` y `s.png`,
+	// así que los tres símbolos animados quedaron SIN estático de respaldo. Sus
+	// clips van los tres con `preload`, que es lo que garantiza que la celda
+	// nunca quede vacía (el bug de las celdas en blanco salía justamente de
+	// pedir `sym_l4`, que ya no existía como textura).
+	const STATIC_LESS = new Set(['sym_l4', 'sym_w', 'sym_s']);
 	const hasStatic = $derived(!STATIC_LESS.has(props.symbolInfo.assetKey));
 	// Lado mayor del ARTE (no del canvas) en px de board; el menor sale del aspect.
 	const specialSide = $derived(
-		special ? SYMBOL_SIZE * special.box * stateUiTweak.symScale * specialMult : 0,
+		special ? SYMBOL_SIZE * special.box * stateUiTweak.symScale * sizeMult : 0,
 	);
 	const artW = $derived(
 		special ? (special.aspect >= 1 ? specialSide : specialSide * special.aspect) : 0,
@@ -260,11 +310,13 @@
 	// Los 10 regulares tienen versión luz (h1/h4 desde el swap a stand-ins del
 	// kit); w/s (y cualquier símbolo cuyo luz aún no cargó — van sin preload)
 	// caen al halo de siempre.
+	// (sym_l4 salió de este mapa el 09-09: el CASH STACK ilumina con su clip
+	// `anim_sym_premium_luz`, por la rama de los especiales, y su carta estática
+	// `l4_luz.png` desapareció en el drop de arte.)
 	const LUZ_KEY: Record<string, string> = {
 		sym_l1: 'sym_l1_luz',
 		sym_l2: 'sym_l2_luz',
 		sym_l3: 'sym_l3_luz',
-		sym_l4: 'sym_l4_luz',
 		sym_m1: 'sym_m1_luz',
 		sym_m2: 'sym_m2_luz',
 		sym_h1: 'sym_h1_luz',
@@ -306,6 +358,137 @@
 	// el boing tenga algo que golpear.
 	const glowReplacesIcon = $derived(!props.winFlash && isWinning && luzReady);
 
+	// ── Ciclo de vida del brillo de los ESPECIALES (drop 09-09) ─────────────
+	// A diferencia de los 10 regulares —cuya carta `_luz` acompaña todo
+	// `isWinning`, o sea también `postWinStatic` y `explosion`— el clip de luz
+	// de W/S/H4 vive SOLO mientras dura el estado `win`.
+	//
+	// El brillo acompaña toda la PRESENTACIÓN del cluster (`win` +
+	// `postWinStatic`) y se apaga al explotar. `explosion` es el único estado
+	// que se excluye a propósito: ahí el símbolo ya está saliendo del board y
+	// dejar un clip en loop por detrás es justamente el overlay residual que se
+	// quiere evitar.
+	//
+	// Al caer este flag el bloque `{#if}` se desmonta y `createContextParent`
+	// destruye el nodo en su cleanup (`return () => node.destroy()`): no queda
+	// AnimatedSprite ni ticker colgando. Apagar el alpha NO alcanzaría — el
+	// sprite seguiría vivo y animando invisible.
+	//
+	// `postWinStatic` entra en la ventana (antes no estaba) porque sin él el
+	// brillo se veía apenas: `boardWithAnimateSymbols` deja el estado `win`
+	// solo lo que dura la cascada, con un piso de 250 ms, y un cluster de puro
+	// especial no anima nada en esa cascada — el clip de 6 frames a 10 fps ni
+	// llegaba a media vuelta.
+	// `labPreview.luz` lo fuerza desde el AnimLab sin tener que ganar.
+	const specialGlowOn = $derived(
+		labPreview.luz || props.symbolState === 'win' || props.symbolState === 'postWinStatic',
+	);
+
+	type MarcoPhase = 'intro' | 'loop' | 'outro' | 'done';
+	// Arranca YA en salida si el componente nace explotando. Es el caso normal
+	// del tumble board: sus símbolos se montan nuevos y pasan directo de
+	// `static` a `explosion` (nunca por `win`), así que sin esto el marco
+	// dibujaba un tick de la ENTRADA —frame 0, casi vacío— antes de que el
+	// efecto lo corrigiera, y se veía como un parpadeo.
+	let marcoPhase = $state<MarcoPhase>(props.symbolState === 'explosion' ? 'outro' : 'intro');
+
+	// ── MARCO DE VICTORIA (drop 09-09) ──────────────────────────────────────
+	// `Marco_Icono`: 21 frames de un marco cómic rojo/amarillo que estalla
+	// DETRÁS del símbolo. Va en TODOS los que anotan —regulares y especiales—,
+	// no solo en los tres animados, así que se dibuja fuera de las tres ramas
+	// de render, como hermano directo dentro de la celda.
+	//
+	// Se dibuja a sangre sobre la celda (el arte es cuadrado y centrado, fill
+	// 1.0 / center 0.5 tras el re-pack) y NO hereda la geometría de los
+	// especiales: el marco pertenece a la CELDA, no al ícono. Por eso usa
+	// `props.x/props.y` y no `cx/cy` — si siguiera el nudge de un especial, el
+	// marco se saldría de su casilla.
+	//
+	// `loop={false}`: es un burst de entrada, no un latido. Los últimos frames
+	// cierran el marco en un bloque lleno, que queda como fondo del símbolo
+	// mientras dura la presentación. Si dirección lo quiere pulsando, es
+	// cambiar esta prop.
+	const marcoTextures = $derived(
+		(appContext.stateApp.loadedAssets?.marco as unknown as PIXI.Texture[] | undefined) ?? [],
+	);
+	const marcoReady = $derived(marcoTextures.length > MARCO_INTRO_END);
+	// `labPreview.marco` lo fuerza desde el AnimLab sin tener que ganar.
+	const marcoOn = $derived(marcoReady && (labPreview.marco || isWinning) && marcoPhase !== 'done');
+	// Tamaño y posición salen de los 3 diales PROPIOS del símbolo
+	// (`<id>MarcoX/Y/Scale`): el encuadre del marco depende del ícono que
+	// enmarca, así que cada uno lleva el suyo. La base es la CELDA, no el ícono.
+	const marcoSide = $derived(
+		SYMBOL_SIZE * MARCO_CELL_RATIO * stateUiTweak.symScale * geomOf('MarcoScale', 1),
+	);
+	const marcoX = $derived((props.x ?? 0) + geomOf('MarcoX', 0) * SYMBOL_SIZE);
+	const marcoY = $derived((props.y ?? 0) + geomOf('MarcoY', 0) * SYMBOL_SIZE);
+
+	// ── Máquina de fases del marco ───────────────────────────────────────────
+	//   intro → frames 0..15 una vez, mientras el cluster se ilumina.
+	//   loop  → 4..15 en bucle: es el estado de espera, dura lo que tarden en
+	//           iluminarse TODOS los símbolos del cluster.
+	//   outro → desde el frame en el que estaba hasta el 20, una sola vez. Se
+	//           dispara con el `explosion` (el boing de salida de winPop) y al
+	//           terminar apaga el marco.
+	//
+	// `AnimatedSprite` no sabe reproducir un sub-rango, así que cada fase le
+	// pasa un SLICE distinto del array de texturas y `{#key}` lo remonta para
+	// que arranque en el frame 0 de ese slice. Por eso se usa `AnimatedSprite`
+	// directo y no `SpriteSheet`, que resuelve las texturas por `key` y no deja
+	// recortarlas.
+	// Se inicializa con el frame COMPARTIDO, no con el inicio del bucle: si este
+	// componente nace ya en `explosion` (tumble board), la salida tiene que
+	// retomar donde lo dejaron las celdas del board principal.
+	let marcoOutroStart = $state(marcoLoopFrame);
+	const marcoSlice = $derived(
+		marcoPhase === 'intro'
+			? marcoTextures.slice(0, MARCO_INTRO_END + 1)
+			: marcoPhase === 'loop'
+				? marcoTextures.slice(MARCO_LOOP_START, MARCO_INTRO_END + 1)
+				: marcoTextures.slice(marcoOutroStart, MARCO_LAST_FRAME + 1),
+	);
+
+	// La SALIDA se reproduce a la velocidad que haga falta para entrar en la
+	// ventana del boing, en vez de a los 24 fps fijos de la entrada.
+	//
+	// Es lo que hacía que el marco nunca llegara al frame 18: `tumbleBoardExplode`
+	// espera el pop y enseguida `tumbleBoardRemoveExploded` DESMONTA el símbolo,
+	// así que el marco se destruye a los ~480 ms (WIN_POP_TOTAL_MS). A 24 fps,
+	// arrancando en el frame 4, en ese tiempo apenas pasaban ~11 frames y la
+	// animación se cortaba a mitad de camino.
+	//
+	// Atándola a `WIN_POP_TOTAL_MS` el cierre cae SIEMPRE junto con el símbolo,
+	// sin importar en qué frame del bucle lo agarre el boing.
+	const marcoOutroSpeed = $derived(
+		(MARCO_LAST_FRAME + 1 - marcoOutroStart) / (WIN_POP_TOTAL_MS / 1000) / 60,
+	);
+
+	// El frame del bucle es COMPARTIDO entre instancias (ver el `<script
+	// module>`): la presentación del cluster corre en el board principal y el
+	// boing en el TUMBLE board, que monta componentes nuevos. Sin ese puente el
+	// marco del tumble arrancaría su salida desde el frame 4 en vez de "desde
+	// donde estaba". Todos los marcos arrancan a la vez —
+	// `boardWithAnimateSymbols` pone en `win` a TODO el cluster de una, la
+	// cascada solo escalona el GLOW — así que un único contador los describe a
+	// todos y además los hace salir sincronizados.
+	$effect(() => {
+		const state = props.symbolState;
+		if (state === 'explosion') {
+			untrack(() => {
+				if (marcoPhase === 'intro' || marcoPhase === 'loop') {
+					marcoOutroStart = marcoLoopFrame;
+					marcoPhase = 'outro';
+				}
+			});
+		} else if (state !== 'win' && state !== 'postWinStatic') {
+			// Vuelta a reposo (nuevo spin): el componente del board principal NO
+			// se remonta entre rondas, así que hay que rearmar la secuencia.
+			untrack(() => {
+				marcoPhase = 'intro';
+			});
+		}
+	});
+
 	// POP de aparición SOLO para WILD y SCATTER (resaltan al caer). Bounce de
 	// escala al montar el símbolo (~250ms). Premium/H4 no popea.
 	let pop = $state(1);
@@ -326,8 +509,55 @@
 	});
 </script>
 
+{#if marcoOn}
+	<!-- MARCO POR ENCIMA del símbolo (zIndex 1 · pedido de dirección). Hermano
+	     de las tres ramas de render, no hijo: pertenece a la CELDA, así que no
+	     hereda el nudge ni el tamaño del ícono — lleva sus propios tres diales.
+	     El `{#key}` remonta el AnimatedSprite en cada cambio de fase para que
+	     arranque en el frame 0 del slice nuevo (gotoAndPlay(0) al montar).
+
+	     Lo que SÍ hereda son las DOS transformaciones del ícono, multiplicadas:
+	       · `flashScale` — el golpe de `winFlash` (0.85 → 1.15) que da el
+	         símbolo al ILUMINARSE, cuando le llega su turno en la cascada.
+	       · `winScale` / `winRotation` — el boing de `winPop` que lo encoge,
+	         gira y desvanece al DESAPARECER.
+	     Sin esto el marco quedaba clavado mientras el ícono respiraba y después
+	     se iba. En reposo los tres tweens valen 1, 1 y 0, así que la entrada y
+	     el bucle no se ven afectados. Los 3 animados (W/S/CASH STACK) no reciben
+	     ni winFlash ni winPop, de modo que su marco no se transforma. -->
+	<Container
+		x={marcoX}
+		y={marcoY}
+		zIndex={1}
+		scale={winScale * flashScale}
+		rotation={winRotation}
+	>
+		{#key marcoPhase}
+			<AnimatedSprite
+				anchor={0.5}
+				textures={marcoSlice}
+				width={marcoSide}
+				height={marcoSide}
+				animationSpeed={marcoPhase === 'outro' ? marcoOutroSpeed : MARCO_ANIM_SPEED}
+				loop={marcoPhase === 'loop'}
+				play
+				onFrameChange={(frame: number) => {
+					// Solo el bucle publica el frame compartido: es el que hay que
+					// retomar cuando arranque la salida.
+					if (marcoPhase === 'loop') marcoLoopFrame = MARCO_LOOP_START + frame;
+				}}
+				onComplete={() => {
+					// intro → bucle de espera · salida → apagar (destruye el nodo)
+					if (marcoPhase === 'intro') marcoPhase = 'loop';
+					else if (marcoPhase === 'outro') marcoPhase = 'done';
+				}}
+			/>
+		{/key}
+	</Container>
+{/if}
+
 {#if isWireframe}
-	<Container x={cx} y={cy} scale={winScale} rotation={winRotation}>
+	<Container x={cx} y={cy} zIndex={0} scale={winScale} rotation={winRotation}>
 		<!-- filled tile -->
 		<Rectangle
 			x={-w / 2}
@@ -365,15 +595,24 @@
 	     glow terminaría dibujado ENCIMA del ícono, justo al revés de lo que
 	     pide la jerarquía. Con estos dos valores el reparto es por profundidad
 	     declarada y no por orden de montaje. -->
+	<!-- winFlash / winPop DESACTIVADOS para W, S y H4 (drop 09-09).
+	     La animación DUAL (clip base + `_luz` detrás) reemplaza al efecto
+	     genérico, así que acá NO entran ni `winScale`/`winRotation` (el boing y
+	     la rotación de winPop) ni `flashScale` (el golpe de winFlash): el
+	     Container va con el `pop` de aparición y nada más.
+	     El bloqueo ya existe RÍO ARRIBA —`hasOwnClip()` saca a los tres del
+	     filtro de `playWinFlash` y del guard de `winPop.play()`— pero repetirlo
+	     acá lo vuelve una invariante LOCAL del render: si mañana alguien les
+	     pasa un tween igual, el clip especial no se deforma. -->
 	<Container
 		x={cx}
 		y={cy}
-		scale={pop * winScale}
-		rotation={winRotation}
+		zIndex={0}
+		scale={pop}
 		alpha={dimmed ? 0.3 : 1}
 		sortableChildren={true}
 	>
-		{#if specialLuzReady && glowAlpha > 0}
+		{#if specialLuzReady && specialGlowOn}
 			<!-- ILUMINACIÓN DE VICTORIA del especial (drop 09-09). Misma
 			     jerarquía que la carta `_luz` de los 10 regulares: va PRIMERA =
 			     DETRÁS del clip base, que se dibuja encima y queda nítido
@@ -393,8 +632,7 @@
 				key={special.luzKey}
 				width={specialW}
 				height={specialH}
-				animationSpeed={10 / 60}
-				alpha={glowAlpha}
+				animationSpeed={SPECIAL_ANIM_SPEED}
 				loop
 				play
 			/>
@@ -407,7 +645,7 @@
 			key={special.key}
 			width={specialW}
 			height={specialH}
-			animationSpeed={10 / 60}
+			animationSpeed={SPECIAL_ANIM_SPEED}
 			loop
 			play
 		/>
@@ -422,6 +660,7 @@
 	<Container
 		x={cx}
 		y={cy}
+		zIndex={0}
 		scale={winScale}
 		rotation={winRotation}
 		alpha={dimmed ? 0.3 : 1}

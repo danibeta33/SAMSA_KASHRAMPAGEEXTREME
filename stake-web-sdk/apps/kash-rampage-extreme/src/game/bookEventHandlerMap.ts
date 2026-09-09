@@ -426,6 +426,17 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		if (premium.length) {
 			eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_wild_explode' });
 			await animateSymbols({ positions: premium });
+			// APAGAR el acento antes de que corra la detección de clusters.
+			// Este es el único `animateSymbols` que presenta sobre el MISMO board
+			// que después se evalúa: no hay tumble ni spin en el medio que
+			// reconstruya los ReelSymbol, así que sin esto las celdas KASH se
+			// quedaban en `postWinStatic` —iluminadas y con marco— sin ser
+			// ganadoras, no reventaban con el cluster y dejaban al resto del board
+			// atenuado. Ver el handler `boardAnimateSymbolsReset` en Board.svelte.
+			// (Los otros dos casos —freeSpinTrigger/Retrigger sobre los SCATTER—
+			// no lo necesitan: ahí sigue una transición y un spin nuevo, y el spin
+			// crea ReelSymbol nuevos en `static`.)
+			eventEmitter.broadcast({ type: 'boardAnimateSymbolsReset' });
 		}
 		// Settle (beat 5): respiro para leer el board nuevo antes de los clusters.
 		await waitForTimeout(300);

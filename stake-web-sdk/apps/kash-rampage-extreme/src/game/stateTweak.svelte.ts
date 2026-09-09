@@ -6,13 +6,19 @@
 // La clave de persistencia vive en el manifiesto del juego (`labMeta.ts`) —
 // es la misma que se le pasa al inspector genérico vía `storageKey`, para que
 // el panel no tenga ninguna constante propia del juego.
-import { LAB_STORAGE_KEY } from './labMeta';
+import {
+	LAB_STORAGE_KEY,
+	LAB_SYMBOLS,
+	SYMBOL_GEOM_PROPS,
+	type SymbolGeomKey,
+	type SymbolLabId,
+} from './labMeta';
 
 const KEY = LAB_STORAGE_KEY; // { overrides: { [bucket]: {…claves tweakeables} } }
 
 import { stateUiTweak } from './stateUiTweak.svelte';
 
-type Tweak = {
+type TweakBase = {
 	boardH: number; // Board height as ratio of canvas height (drives frame + grid)
 	boardX: number; // Board center X as ratio of canvas width
 	boardY: number; // Board center Y as ratio of canvas height
@@ -83,28 +89,80 @@ type Tweak = {
 	stackZ: number;
 	iconAlpha: number; // fila config + BONUS — HTML
 	iconZ: number;
-	// ── GEOMETRÍA INDEPENDIENTE DE LOS 3 ESPECIALES (drop 09-09) ────────────
-	// Antes los tres se movían JUNTOS: la única perilla era `specialScale` y la
-	// posición salía tal cual de la celda, con un trim por símbolo horneado en
-	// `SPECIAL_TRIM` (SymbolSprite.svelte). Ahora cada uno trae su propio
-	// desplazamiento y su propia escala, ajustables por bucket desde el UI LAB.
-	//
-	// X/Y son FRACCIONES DE CELDA (× SYMBOL_SIZE) relativas al centro de la
-	// celda, no fracciones de canvas como boardX/hudX: el símbolo ya está
-	// posicionado por la grilla y esto es un nudge fino sobre esa posición.
-	// La escala MULTIPLICA a `specialScale`, que sigue siendo el dial del grupo
-	// — `wildScale` arranca en 0.90 justamente para reproducir el `SPECIAL_TRIM`
-	// que reemplaza, así que el board no cambia de aspecto al actualizar.
-	wildX: number;
-	wildY: number;
-	wildScale: number;
-	scatterX: number;
-	scatterY: number;
-	scatterScale: number;
-	premiumX: number;
-	premiumY: number;
-	premiumScale: number;
+	// ── CONTADOR DE FREE SPINS (drop 09-09 · Paso 8) ────────────────────────
+	// Se independizó del board: X/Y son fracciones de CANVAS, como hudX/titleX.
+	fsX: number;
+	fsY: number;
+	fsScale: number;
+	fsAlpha: number;
+	fsZ: number;
 };
+
+// ── GEOMETRÍA POR SÍMBOLO (drop 09-09 · Paso 8) ─────────────────────────────
+// 6 claves × 12 símbolos. En el Paso 6 solo los 3 animados tenían diales
+// propios; ahora los 12 se ajustan individualmente y cada uno lleva además los
+// del MARCO de victoria que se dibuja sobre él.
+//
+// Las claves se derivan del `assetKey` sin el prefijo `sym_` (`sym_h1` → `h1X`,
+// `h1Y`, `h1Scale`, `h1MarcoX`, `h1MarcoY`, `h1MarcoScale`), así que no hay
+// ningún mapa que mantener a mano: `SymbolSprite` hace `assetKey.slice(4)`.
+//
+// X/Y son FRACCIONES DE CELDA (× SYMBOL_SIZE) sobre la posición que ya le dio
+// la grilla — no fracciones de canvas como boardX/hudX.
+type Tweak = TweakBase & Record<SymbolGeomKey, number>;
+
+/** Las 72 claves por símbolo, en el mismo orden que las genera el panel. */
+export const SYMBOL_GEOM_KEYS = LAB_SYMBOLS.flatMap((symbol) =>
+	SYMBOL_GEOM_PROPS.map((prop) => `${symbol.id}${prop}` as SymbolGeomKey),
+);
+
+// ── ÍCONOS + MARCOS APROBADOS — UN SOLO JUEGO PARA LOS 7 BUCKETS (09-09) ────
+// El usuario ajustó los 72 diales a dedo en el UI LAB sobre el viewport de
+// Desktop (1200×675) y aprobó el resultado. Se congelan en los DEFAULTS —y NO
+// en PER_BUCKET_SEED— porque son INDEPENDIENTES DE LA RESOLUCIÓN:
+//
+//   · X / Y              → fracciones de CELDA (× SYMBOL_SIZE), no de canvas
+//                          como boardX/hudX/fsX.
+//   · Scale / MarcoScale → multiplican el tamaño que ya le dio el `box` del
+//                          símbolo, que también deriva de SYMBOL_SIZE.
+//
+// SYMBOL_SIZE lo fija la grilla de cada bucket, así que el MISMO número da el
+// MISMO encuadre relativo en los 7 tamaños del ACP: con esta tabla los íconos
+// y los marcos quedan idénticos en desktop, laptop, los 2 popouts y los 3
+// mobile, sin repetir 72 claves × 7 buckets. Si algún tamaño necesitara una
+// excepción, alcanza con pisar ESA clave suelta en PER_BUCKET_SEED — el merge
+// de `applyBucket` la deja ganar sobre el default.
+//
+// Nota sobre `wScale` 0.82 / `sScale` 0.935: son el sucesor del viejo
+// `SPECIAL_TRIM` — el bate WILD y el scatter entran en su box con más sangrado
+// que el resto, así que a igual `specialScale` se veían más grandes que L4.
+//
+// Orden de la tupla = SYMBOL_GEOM_PROPS → [X, Y, Scale, MarcoX, MarcoY, MarcoScale].
+type SymbolGeomTuple = readonly [number, number, number, number, number, number];
+
+const SYMBOL_GEOM_APPROVED: Record<SymbolLabId, SymbolGeomTuple> = {
+	h4: [0, 0, 1, -0.105, 0, 1.13],
+	h3: [0, 0, 1, -0.105, 0, 1],
+	h2: [0, 0, 1, -0.105, 0, 0.99],
+	h1: [0, 0, 1, -0.115, -0.035, 1],
+	m1: [0, 0, 1, -0.095, 0, 1],
+	m2: [0.01, 0, 1, -0.045, 0, 1],
+	l1: [0, 0, 1, -0.095, -0.035, 1],
+	l2: [0, 0, 1, -0.105, 0, 1],
+	l3: [0, 0, 1, -0.13, 0, 1],
+	l4: [0, 0, 1, -0.095, 0, 1.225],
+	w: [0, 0, 0.82, -0.095, 0.01, 1.175],
+	s: [0, 0, 0.935, -0.095, 0.115, 1.105],
+};
+
+const SYMBOL_GEOM_DEFAULTS = Object.fromEntries(
+	LAB_SYMBOLS.flatMap((symbol) =>
+		SYMBOL_GEOM_PROPS.map((prop, i) => [
+			`${symbol.id}${prop}`,
+			SYMBOL_GEOM_APPROVED[symbol.id][i],
+		]),
+	),
+) as Record<SymbolGeomKey, number>;
 
 // Board height at which the reels grid matches the engine-native scale (1:1).
 // DO NOT re-point this to the visual default — this is the anchor for the
@@ -164,8 +222,12 @@ const DEFAULTS: Tweak = {
 	titleX: 0.1,
 	titleY: 0.17,
 	titleScale: 1,
-	// 1.3 = los especiales entran 30 % más grandes que su box actual.
-	specialScale: 1.3,
+	// Multiplicador de GRUPO de W / S / L4 (Cash Stack), encima del `Scale`
+	// individual de cada uno. Va acá y ya NO por bucket: los `wScale`/`sScale`
+	// de SYMBOL_GEOM_APPROVED se ajustaron CONTRA este 1.235, así que si un
+	// bucket trajera otro valor sus tres especiales saldrían de tamaño distinto
+	// al aprobado. Un solo número → los especiales resaltan igual en los 7.
+	specialScale: 1.235,
 	// Opacidad/capa por elemento: los defaults REPRODUCEN el apilado histórico,
 	// que hasta ahora salía del orden de montaje. En canvas, de atrás hacia
 	// adelante: fondo (−5, fijo) → Kash (−4) → grilla (0) → HUD superior (1) →
@@ -183,19 +245,21 @@ const DEFAULTS: Tweak = {
 	stackZ: 2,
 	iconAlpha: 1,
 	iconZ: 1,
-	// Especiales: sin desplazamiento y con la escala que YA tenían. `wildScale`
-	// 0.9 es el viejo `SPECIAL_TRIM.sym_w` (el bate entra en su box con más
-	// sangrado que el scatter y el H4, así que a `specialScale` igual se veía
-	// más grande que los otros dos). Scatter y premium no llevaban trim → 1.
-	wildX: 0,
-	wildY: 0,
-	wildScale: 0.9,
-	scatterX: 0,
-	scatterY: 0,
-	scatterScale: 1,
-	premiumX: 0,
-	premiumY: 0,
-	premiumScale: 1,
+	// Contador de free spins. `fsScale` mide en SYMBOL_SIZE × uiScale (ver
+	// FreeSpinCounter), o sea que es relativo como los diales de símbolo → el
+	// 1.16 aprobado sirve para los 7 buckets. `fsX`/`fsY` en cambio SÍ son
+	// fracciones de canvas: acá va la posición aprobada en Desktop (arriba a la
+	// derecha) como punto de partida común, y el bucket que la necesite
+	// distinta la pisa en PER_BUCKET_SEED. FreeSpinCounter ya clampea contra
+	// los bordes, así que en portrait no se sale de pantalla.
+	fsX: 0.833,
+	fsY: 0.167,
+	fsScale: 1.16,
+	fsAlpha: 1,
+	// −1 = por DETRÁS de la grilla (boardZ 0) y por delante de Kash (−4).
+	fsZ: -1,
+	// Las 72 claves de geometría por símbolo (ver SYMBOL_GEOM_DEFAULTS).
+	...SYMBOL_GEOM_DEFAULTS,
 };
 
 // ── Buckets de resolución — 1:1 con los tamaños del ACP de Stake ────────
@@ -231,9 +295,18 @@ export const bucketFor = (w: number, h: number): ResBucketKey =>
 // Punto de partida por bucket (antes de los overrides del usuario) — acá se
 // congelan los JSON aprobados del UI LAB. Los 7 buckets del ACP quedaron
 // congelados el 08-09 con el drop del HUD superior + título: cada uno trae
-// ahora, además de board/kash/botonera, sus propios hud*/title*/specialScale
-// (la rama portrait de hudLayout lee boardX/boardY tweakeables, así que el
-// board vertical se posiciona desde acá y no con constantes fijas).
+// además de board/kash/botonera sus propios hud*/title* (la rama portrait de
+// hudLayout lee boardX/boardY tweakeables, así que el board vertical se
+// posiciona desde acá y no con constantes fijas).
+//
+// ⚠ ACÁ VA SOLO LO QUE DEPENDE DE LA RESOLUCIÓN: posiciones y tamaños medidos
+// en fracciones de CANVAS o en px de pantalla (board*, kash*, stack*, icon*,
+// hud*, title*, fsX/fsY). Lo que se mide en fracciones de CELDA o como
+// multiplicador —los 72 diales de íconos + marcos, `specialScale`, `fsScale`,
+// y los alpha/capa— vive en DEFAULTS y es UNO SOLO para los 7: así el mismo
+// ajuste a dedo hecho en Desktop se ve igual en laptop, popouts y los 3
+// mobile. No re-listar esas claves acá salvo que un tamaño necesite una
+// excepción real.
 const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 	// Aprobado por el usuario en /sizes (08-09, viewport 425×812 — Mobile L).
 	portrait_l: {
@@ -242,14 +315,13 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		boardH: 0.92,
 		boardX: 0.485,
 		boardY: 0.316,
-		// botonera + iconos + especiales
+		// botonera + iconos
 		stackScale: 1.35,
 		stackRight: -36,
 		stackBottom: 6,
 		iconScale: 0.655,
 		iconX: 22,
 		iconY: 118,
-		specialScale: 1.3,
 		// Kash
 		kashH: 0.68,
 		kashX: 0.106,
@@ -272,14 +344,13 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		boardH: 0.92,
 		boardX: 0.485,
 		boardY: 0.34,
-		// botonera + iconos + especiales
+		// botonera + iconos
 		stackScale: 1.035,
 		stackRight: -36,
 		stackBottom: 14,
 		iconScale: 0.625,
 		iconX: 22,
 		iconY: 118,
-		specialScale: 1.3,
 		// Kash
 		kashH: 0.68,
 		kashX: 0.106,
@@ -302,14 +373,13 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		boardH: 0.908,
 		boardX: 0.482,
 		boardY: 0.346,
-		// botonera + iconos + especiales
+		// botonera + iconos
 		stackScale: 0.945,
 		stackRight: -36,
 		stackBottom: 18,
 		iconScale: 0.665,
 		iconX: 22,
 		iconY: 118,
-		specialScale: 1.3,
 		// Kash
 		kashH: 0.68,
 		kashX: 0.106,
@@ -325,21 +395,22 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		titleY: 0.237,
 		titleScale: 0.865,
 	},
-	// Aprobado por el usuario en /sizes (08-09, viewport 1200×675 — Desktop).
+	// Aprobado por el usuario en /sizes (viewport 1200×675 — Desktop). Board /
+	// Kash / botonera / título son del 08-09; el HUD superior se re-ajustó el
+	// 09-09 junto con el drop de íconos + marcos.
 	desktop: {
 		// board + layout libre
 		freeScale: 1,
 		boardH: 0.974,
 		boardX: 0.504,
 		boardY: 0.538,
-		// botonera + iconos + especiales
+		// botonera + iconos
 		stackScale: 0.88,
 		stackRight: 37,
 		stackBottom: 10,
 		iconScale: 0.675,
 		iconX: 9,
 		iconY: 16,
-		specialScale: 1.235,
 		// Kash
 		kashH: 0.702,
 		kashX: 0.108,
@@ -347,9 +418,9 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		// HUD superior
 		hudVertical: 1,
 		hudX: 0.909,
-		hudY: 0.193,
-		hudScale: 1.205,
-		hudGap: -12,
+		hudY: 0.36,
+		hudScale: 1.17,
+		hudGap: 1,
 		// titulo
 		titleX: 0.133,
 		titleY: 0.147,
@@ -362,14 +433,13 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		boardH: 1.078,
 		boardX: 0.512,
 		boardY: 0.498,
-		// botonera + iconos + especiales
+		// botonera + iconos
 		stackScale: 0.96,
 		stackRight: 45,
 		stackBottom: 14,
 		iconScale: 0.785,
 		iconX: 22,
 		iconY: 18,
-		specialScale: 1.305,
 		// Kash
 		kashH: 0.73,
 		kashX: 0.1,
@@ -392,14 +462,13 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		boardH: 1.126,
 		boardX: 0.506,
 		boardY: 0.5,
-		// botonera + iconos + especiales
+		// botonera + iconos
 		stackScale: 0.94,
 		stackRight: 44,
 		stackBottom: 4,
 		iconScale: 0.655,
 		iconX: 22,
 		iconY: 18,
-		specialScale: 1.165,
 		// Kash
 		kashH: 0.702,
 		kashX: 0.079,
@@ -422,14 +491,13 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		boardH: 1.028,
 		boardX: 0.516,
 		boardY: 0.509,
-		// botonera + iconos + especiales
+		// botonera + iconos
 		stackScale: 0.88,
 		stackRight: 41,
 		stackBottom: 6,
 		iconScale: 0.755,
 		iconX: 22,
 		iconY: 18,
-		specialScale: 1.33,
 		// Kash
 		kashH: 0.708,
 		kashX: 0.093,
@@ -483,16 +551,24 @@ const TWEAKABLE_KEYS = [
 	'stackZ',
 	'iconAlpha',
 	'iconZ',
-	'wildX',
-	'wildY',
-	'wildScale',
-	'scatterX',
-	'scatterY',
-	'scatterScale',
-	'premiumX',
-	'premiumY',
-	'premiumScale',
+	'fsX',
+	'fsY',
+	'fsScale',
+	'fsAlpha',
+	'fsZ',
+	// …más las 72 de geometría por símbolo, que se agregan abajo.
 ] as const;
+
+/**
+ * Claves editables/persistidas por bucket. Las de símbolo se concatenan en vez
+ * de listarse a mano: son 72 y salen del mismo generador que los sliders, así
+ * que agregar un símbolo a `LAB_SYMBOLS` alcanza para que aparezca en el panel
+ * Y se guarde, sin tocar este archivo.
+ */
+const ALL_TWEAKABLE_KEYS: readonly (keyof Tweak)[] = [
+	...TWEAKABLE_KEYS,
+	...SYMBOL_GEOM_KEYS,
+];
 
 type Overrides = Partial<Record<ResBucketKey, Partial<Tweak>>>;
 
@@ -505,7 +581,7 @@ const loadOverrides = (): Overrides => {
 			const src = parsed?.overrides?.[bucket.key];
 			if (!src) continue;
 			const dst: Partial<Tweak> = {};
-			for (const k of TWEAKABLE_KEYS) {
+			for (const k of ALL_TWEAKABLE_KEYS) {
 				if (typeof src[k] === 'number') dst[k] = src[k];
 			}
 			out[bucket.key] = dst;
@@ -553,7 +629,7 @@ export const saveTweak = () => {
 	syncUi();
 	const snap = $state.snapshot(stateTweak);
 	overrides[labState.bucket] = Object.fromEntries(
-		TWEAKABLE_KEYS.map((k) => [k, snap[k]]),
+		ALL_TWEAKABLE_KEYS.map((k) => [k, snap[k]]),
 	) as Partial<Tweak>;
 	if (typeof localStorage === 'undefined') return;
 	localStorage.setItem(KEY, JSON.stringify({ overrides }));
@@ -597,7 +673,13 @@ if (typeof window !== 'undefined') {
 // Preview del METER LAB: fuerza el Smash Meter visible fuera de free spins
 // (con un multiplicador de muestra) para poder posicionarlo sin comprar un
 // bonus. Solo dev — no se persiste.
-export const labPreview = $state({} as Record<string, boolean>); // KRE: sin previews (el meter se eliminó)
+// Claves vivas (drop 09-09) — las consume SymbolSprite.svelte y las alterna el
+// AnimLab (tecla `A`, categoría "MARCO + LUZ"):
+//   · marco → fuerza el clip `Marco_Icono` detrás de TODOS los símbolos.
+//   · luz   → fuerza el `_luz` de W / S / CASH STACK sin tener que ganar.
+// Sirven para revisar encuadre y jerarquía sin depender de que caiga un
+// cluster; no se persisten y solo existen en DEV.
+export const labPreview = $state({ marco: false, luz: false } as Record<string, boolean>);
 if (import.meta.env.DEV && typeof window !== 'undefined') {
 	(globalThis as Record<string, unknown>).__labPreview = labPreview;
 }

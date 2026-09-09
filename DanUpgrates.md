@@ -1319,14 +1319,70 @@ punto.
 <SpriteSheet zIndex={1} key={special.key}    width={specialW} height={specialH} … />
 ```
 
+**Herencia exacta e inmutable.** El `_luz` no calcula NADA propio: ancho, alto,
+posición, offset y centro de composición salen de las mismas variables derivadas
+que el clip base (`specialW`, `specialH`, `specialOffsetX/Y`), y la velocidad de
+reproducción de una constante compartida:
+
+```ts
+// 10 fps en la unidad de PIXI. UNA constante y no dos literales sueltos: si el
+// base y su `_luz` no corren igual, el glow se desfasa del ícono que acompaña.
+const SPECIAL_ANIM_SPEED = 10 / 60;
+```
+
+No queda ningún número que los dos puedan desincronizar — es la razón por la que
+el `_luz` tampoco trae sus propios `aspect`/`fill`/`center` en `ANIM_SPECIAL`.
+
 **Simultaneidad:** el bloque monta cuando el símbolo entra en `win` y
 `AnimatedSprite` arranca con `gotoAndPlay(0)`, así que el clip de luz empieza en
-su frame 0 en el mismo instante que la animación de victoria. Los especiales
-quedan fuera de la cascada de `winFlash` (tienen clip propio y el boing se lo
-pisaría), así que su `glowAlpha` cae al fallback `isWinning ? 1 : 0` — que es
-exactamente el disparo instantáneo que se pedía.
+su frame 0 en el mismo instante que la animación de victoria.
 
-**f) El bug de jerarquía que esto destapó.**
+**g) `winFlash` y `winPop` bloqueados para los tres, en dos niveles.**
+
+RÍO ARRIBA ya estaban: `hasOwnClip()` (`winPop.svelte.ts`) devuelve true para
+`sym_w`/`sym_s`/`sym_h4`, y con eso `playWinFlash` los saca de su lista de
+targets y `winPop.play()` sale por el guard antes de tocar ningún tween.
+
+RÍO ABAJO se agregó el bloqueo LOCAL: el Container de la rama especial ya no
+aplica `winScale`/`winRotation` (boing + rotación de winPop) ni `flashScale`
+(golpe de winFlash) — va con el `pop` de aparición y nada más:
+
+```svelte
+<Container x={cx} y={cy} scale={pop} alpha={dimmed ? 0.3 : 1} sortableChildren>
+```
+
+Funcionalmente es un no-op hoy (esos tweens valen 1 y 0 justamente porque el
+guard de arriba nunca los mueve), pero convierte "los especiales no reciben el
+efecto genérico" en una **invariante del render** en vez de una consecuencia de
+otro módulo: si mañana alguien les pasa un tween igual, el clip no se deforma.
+
+**h) Limpieza al salir de `win`: sin overlays residuales.**
+
+Los 10 regulares mantienen su carta `_luz` durante todo `isWinning` — o sea
+también en `postWinStatic` y `explosion`; ese es el look aprobado el 26-08. Los
+especiales **no**, y no es una preferencia: su brillo es un sprite ANIMADO en
+loop dibujado detrás del ícono, así que dejarlo prendido durante el post-win y la
+explosión deja un clip corriendo debajo de un símbolo que ya está saliendo del
+board.
+
+```ts
+const specialGlowOn = $derived(props.symbolState === 'win');
+```
+
+Al caer el flag, el bloque `{#if}` se desmonta y `createContextParent` destruye
+el nodo en su cleanup (`return () => node.destroy()`): no queda AnimatedSprite ni
+ticker colgando. Es la diferencia entre apagar el alpha —que dejaría el sprite
+vivo y animando invisible— y limpiar el nodo, que es lo que se pidió.
+
+⚠ Efecto lateral a tener en cuenta al ajustar: cuánto se LEE el brillo lo decide
+el piso de 250 ms de `Board.svelte` (`waitForTimeout(250)` en
+`boardWithAnimateSymbols`). En un cluster mixto la cascada de `winFlash` estira
+el estado `win` y el glow dura más; en un cluster de PURO especial —el caso de
+los SCATTER, que no animan nada en la cascada— son esos 250 ms exactos, menos de
+media vuelta del clip de 6 frames a 10 fps (600 ms). Si dirección quiere que se
+lea entero, es subir ese piso: una línea.
+
+**f) El bug de jerarquía que esto destapó — el `_luz` va ESTRICTAMENTE detrás.**
 
 El brillo trasero **no estaba quedando detrás**. `addToParent` hace `addChild`,
 que APENDEA, y el bloque del glow monta al entrar en `win`, o sea DESPUÉS del
@@ -1391,6 +1447,7 @@ nada.
 | Re-pack | ✅ `--verify`: ratios normalizados estables (tol 5e-3), 0.83 → 0.15 MB |
 | Alineación de los `_luz` | ✅ contact sheet contra el clip base: mismo encuadre, mismo canvas 256², el glow es lo único que cambia |
 | Comportamiento con defaults | ✅ los 6 alpha en 1, las 6 capas en su valor histórico y `wildScale` 0.9 → apilado y tamaños idénticos a antes del paso |
+| `vite build` | ✅ `✓ built in 7.51s`, adapter-static `✔ done`, `200 /` y `200 /sizes` |
 
 ### 6. Análisis de riesgos
 
@@ -1420,3 +1477,413 @@ nada.
 - Los `_luz` de W y S dependen de que su clip base ya haya bajado (comparten la
   rama `specialReady`): si el sheet base todavía no está, el símbolo gana con el
   sprite estático y sin glow. Dura lo que tarda la descarga.
+
+---
+
+## Paso 7 — Celdas vacías, re-mapeo del CASH STACK y marco de victoria
+
+**Fecha:** 2026-09-09
+**App:** `stake-web-sdk/apps/kash-rampage-extreme`
+**Objetivo:** tres bugs reportados con captura — huecos en la grilla, los
+especiales que no cambiaban a su animación de luz al anotar, y la integración
+del clip `Marco_Icono` detrás de cada símbolo ganador, con previsualización en el
+AnimLab.
+
+Los tres resultaron ser **el mismo problema de fondo**: el drop de arte del
+commit `6715db2` reasignó símbolos y borró archivos, y el registro de assets
+quedó apuntando a lo viejo.
+
+### 1. La causa raíz
+
+`6715db2` re-exportó los estáticos, **agregó `h4.png`** y **borró** `l4.png`,
+`w.png`, `s.png` y `luz/l4_luz.png`. `assets.ts` seguía registrando esos cuatro:
+
+```text
+sym_l4      → symbols/l4.png        404  ← CELDA VACÍA
+sym_w       → symbols/w.png         404
+sym_s       → symbols/s.png         404
+sym_l4_luz  → symbols/luz/l4_luz.png 404
+sym_h4      → (sin registrar)            ← h4.png en disco, nadie lo pedía
+```
+
+`AssetsLoader` reintenta 3 veces por asset y sigue, así que el juego arrancaba
+igual — pero con la textura ausente. Y en `SymbolSprite` la rama estática está
+guardada por `hasStatic`, que solo excluía a `sym_h4`: para `sym_l4` pedía un
+`<Sprite key="sym_l4">` inexistente y **no dibujaba nada**. Los tres huecos de la
+captura son tres L4.
+
+### 2. Quién es quién (lo dice la math, no el nombre del archivo)
+
+`stake-math-sdk/games/kash_rampage_extreme/game_config.py`:
+
+```python
+# H1=Bluff, H2=Syl, H3=Rookie, H4=KASH (premium)
+# L1=Drill, L2=Keycard, L3=Smoke Grenade, L4=Cash Stack
+"premium_symbol": "H4",
+```
+
+El clip `anim_sym_premium` es `Special_Billetes` — un fajo de billetes. Eso es
+**L4 = Cash Stack**, no H4. Lo confirma el arte del mismo drop: `h4_luz.png` es
+un **medallón de cadena con la X**, no el fajo; y los cuatro H son tags de
+grafiti ("12", "FT?", "RAT", "X") = Bluff / Syl / Rookie / KASH.
+
+O sea que el asset está **mal rotulado en el export**: se llama "premium" pero
+pinta el símbolo bajo. Estaba cableado a `sym_h4`, con dos consecuencias:
+
+- **H4 (el premium de verdad, 4900× a 30)** se dibujaba con el fajo, y su arte
+  propia —recién llegada— no se usaba.
+- **L4** se quedaba sin ninguna representación → celda vacía, y por lo tanto
+  nunca podía mostrar su `_luz`. Ese es el punto 2 del reporte: no es que el
+  brillo no dispare, es que el símbolo no existía.
+
+Se re-mapeó por identidad de math, no por nombre de archivo:
+
+| clave | antes | ahora |
+|---|---|---|
+| `SELF_ANIMATED_ASSET_KEYS` | `sym_w`, `sym_s`, **`sym_h4`** | `sym_w`, `sym_s`, **`sym_l4`** |
+| `ANIM_SPECIAL` / `SPECIAL_GEOMETRY` | `sym_h4` → `anim_sym_premium` | `sym_l4` → `anim_sym_premium` |
+| `STATIC_LESS` | `sym_h4` | `sym_l4`, `sym_w`, `sym_s` |
+| `LUZ_KEY` | tenía `sym_l4` → `sym_l4_luz` | sin `sym_l4` (ilumina por clip) |
+| `assets.ts` | `sym_l4`/`sym_w`/`sym_s`/`sym_l4_luz` rotos | fuera; **`sym_h4` → `h4.png`** |
+
+Las claves del laboratorio (`premiumX/Y/Scale`) **se dejaron con ese nombre**
+aunque ahora controlen el CASH STACK: renombrarlas invalidaría los overrides ya
+guardados por bucket, y el nombre viene del asset. Queda anotado en el código.
+
+**`anim_sym_wild` y `anim_sym_scatter` pasaron a `preload: true`.** Con `w.png` y
+`s.png` borrados dejaron de ser un reemplazo del estático para ser la ÚNICA
+representación de W y S — exactamente el motivo por el que `anim_sym_premium` ya
+iba preloaded. Sin eso, un board pintado antes de que bajen deja la celda vacía.
+Son 0.54 MB entre los dos.
+
+Verificación mecánica agregada al cierre: se recorren los `new URL(...)` de
+`assets.ts` y se comprueba que cada archivo exista en `static/`. **45 assets
+registrados, 0 faltantes.**
+
+### 3. Por qué el brillo casi no se veía (y qué cambió)
+
+Además del re-mapeo, la ventana del `_luz` de los especiales era demasiado
+corta. En el Paso 6 se había limitado a `symbolState === 'win'` para no dejar
+overlays residuales, pero:
+
+- `boardWithAnimateSymbols` mantiene `win` solo lo que dura la cascada de
+  `winFlash`, **con un piso de 250 ms**;
+- los especiales están EXCLUIDOS de esa cascada (`hasOwnClip`), así que un
+  cluster de puro especial no la estira: son los 250 ms pelados;
+- el clip son 6 frames a 10 fps = 600 ms → no llegaba ni a media vuelta.
+
+Ahora la ventana es `win` **+** `postWinStatic`, que es donde el símbolo se
+queda hasta que el tumble lo explota:
+
+```ts
+const specialGlowOn = $derived(
+    labPreview.luz || props.symbolState === 'win' || props.symbolState === 'postWinStatic',
+);
+```
+
+`explosion` sigue excluido a propósito — ahí el símbolo ya está saliendo del
+board y un clip en loop por detrás es justamente el overlay residual que se
+quería evitar. Al caer el flag el `{#if}` se desmonta y `createContextParent`
+destruye el nodo (`return () => node.destroy()`).
+
+Dato de arquitectura que salió de esto y conviene tener escrito: **el tumble
+board nunca pasa por `win`**. `tumbleBoardExplode` salta de `static` a
+`explosion` directo. Toda la presentación del cluster ocurre en el board
+principal (`Board.svelte`); el tumble es solo la salida.
+
+### 4. El marco de victoria
+
+`marco.json` / `marco.webp` (`Marco_Icono`, 21 frames) llegaron con el drop sin
+registrar ni consumir.
+
+**Re-empaquetado primero.** Venía a 486² por frame en un atlas de 1994²: son
+**15.9 MB de textura descomprimida en VRAM** para algo que se dibuja en una celda
+de ~100 px. Con `repack_spritesheet.py --size 192` queda en 960² = 3.7 MB de VRAM
+y 0.13 MB de descarga. El `--verify` marca Δ 0.6 % en `fill` (el arte ya era casi
+a sangre y al bajar de escala el antialias llena el último píxel); el centro no
+se movió y acá se dibuja a sangre igual, así que es inocuo. Verificado además a
+contact sheet antes/después.
+
+**Dónde vive.** El marco es de la CELDA, no del ícono: va como hermano de las
+tres ramas de render, con `props.x/props.y` y **no** con `cx/cy`. Si heredara el
+nudge de un especial se saldría de su casilla.
+
+```text
+SymbolWrap (sortableChildren)
+├── zIndex −1   MARCO        ← todos los símbolos que anotan
+└── zIndex  0   símbolo
+                ├── zIndex 0  _luz (solo especiales)
+                └── zIndex 1  ícono / clip base
+```
+
+`sortableChildren` en `SymbolWrap` no es opcional: el marco monta AL GANAR, o sea
+después del símbolo, y `addChild` apendea — sin orden por profundidad quedaría
+dibujado encima del ícono en lugar de detrás. Es el mismo bug que se corrigió en
+el Paso 6 dentro de la celda, un nivel más arriba.
+
+`loop={false}`: es un burst de entrada, no un latido. Los últimos frames cierran
+el marco en un bloque lleno que queda de fondo mientras dura la presentación.
+
+### 5. Previsualización en el AnimLab (tecla `A`)
+
+Categoría nueva **MARCO + LUZ** con dos toggles:
+
+| Toggle | Qué hace |
+|---|---|
+| `previewMarco` | Fija el marco en TODOS los símbolos del board |
+| `previewLuz` | Fija el `_luz` de W / S / CASH STACK |
+
+Van contra `labPreview` (el `$state` que ya existía en `stateTweak.svelte.ts`,
+hasta ahora vacío) y `SymbolSprite` los lee como un OR con el estado de victoria.
+Sirven justamente porque los dos efectos duran lo que dura la presentación del
+cluster: sin esto, revisar encuadre y jerarquía obliga a esperar la combinación.
+
+El puente es el mismo contrato de siempre — `animInspector.configure({read,
+write})` traduce el toggle numérico (1/0) a la clave booleana; el panel no conoce
+ni `marco` ni `luz`.
+
+### 6. Verificación
+
+| Chequeo | Resultado |
+|---|---|
+| `svelte.compile` de los 6 componentes tocados | ✅ sin errores ni warnings |
+| Assets registrados vs. disco | ✅ 45 registrados, 0 faltantes (antes 4 rotos) |
+| Identidad de símbolos | ✅ contrastada contra `game_config.py` y contra `h4_luz.png` |
+| Re-pack del marco | ✅ contact sheet antes/después idéntico; 1994² → 960² |
+| `vite build` | ✅ ver §7 |
+
+### 7. Riesgos
+
+| Riesgo | Estado / mitigación |
+|---|---|
+| **El re-mapeo H4 ↔ L4 toca símbolos que PAGAN** | Es el cambio de más impacto del paso. La evidencia es triple y coincide: el comentario de `game_config.py`, el `h4_luz.png` del drop (medallón, no fajo) y el hecho de que L4 se quedó sin arte. Si el artista quiso lo contrario, se revierte cambiando 4 líneas (`SELF_ANIMATED_ASSET_KEYS`, `ANIM_SPECIAL`, `SPECIAL_GEOMETRY`, `STATIC_LESS`) — pero entonces hay que entregar arte para L4, porque hoy no existe. |
+| **`premiumX/Y/Scale` controlan L4, no el premium** | Nombre heredado del asset mal rotulado. Se conserva para no invalidar overrides. Anotado en `stateTweak` y en `SymbolSprite`. |
+| **Se re-encodeó `marco.webp`** | Con backup en el historial de git y verificación visual a contact sheet. El `--verify` marca Δ 0.6 % en `fill`, explicado arriba. |
+| **+0.67 MB de preload** | `anim_sym_wild` (0.34) + `anim_sym_scatter` (0.20) + `marco` (0.13). No es opcional: los dos primeros son la única representación de W/S y el marco se ve en la primera victoria. Se compensa con los 0.67 MB que el Paso 6 le sacó a `anim_sym_premium`. |
+| **El marco no tiene slider** | Tamaño (`MARCO_CELL_RATIO` 1.12) y velocidad (24 fps) son constantes. Si hay que ajustarlos a dedo, son dos claves más siguiendo el patrón del Paso 6. |
+| **Los toggles de preview quedan prendidos** | No se persisten (`labPreview` es DEV-only y no pasa por `TWEAKABLE_KEYS`), así que un reload los apaga. Pero mientras están activos el board se ve con marco y luz permanentes — no confundirlo con el comportamiento real. |
+
+---
+
+## Paso 8 — Contador de FS independiente, geometría de los 12 símbolos y coreografía del marco
+
+**Fecha:** 2026-09-09
+**App:** `stake-web-sdk/apps/kash-rampage-extreme`
+**Objetivo:** cuatro pedidos de ajuste fino — sacar el contador de free spins del
+transform del board, extender los diales individuales de los 3 especiales a los
+**12** símbolos, subir el marco de victoria POR ENCIMA del ícono con sus propios
+diales por símbolo, y darle al marco una coreografía de tres tramos
+(entrada → bucle → salida) atada a la presentación del cluster.
+
+### 1. Contador de FREE SPINS: fuera del board
+
+Estaba montado en un `<MainContainer>` **dentro** del `<Container>` que aplica
+`boardTransform`, así que heredaba escala y posición de la grilla. Con el board
+grande el badge se iba fuera de pantalla y no había forma de recuperarlo — es el
+bug de la captura.
+
+Ahora es un elemento suelto en coordenadas de canvas, igual que el HUD superior y
+el título, con cinco diales propios: `fsX`, `fsY`, `fsScale`, `fsAlpha`, `fsZ`.
+
+Dos detalles que valen la pena:
+
+- **El alpha va en un Container INTERNO, no en el `FadeContainer`.** Ese
+  componente hace `<Container {...restProps} alpha={alpha.current}>` — el alpha
+  del tween se esparce DESPUÉS, así que un `alpha` propio se perdería contra la
+  entrada/salida. `zIndex` sí pasa derecho.
+- **El clamp se aplica siempre**, también en modo LIBRE. Es la misma excepción
+  que ya tenía `TopHud`: el contador de free spins es un dato obligatorio en
+  pantalla según `01-stake-approval-checklist.md`, así que "el usuario es el cap"
+  no aplica. Dentro del canvas se posiciona a gusto; el clamp solo garantiza que
+  no se salga.
+
+Los bordes naranjas pasaron de 2 px fijos a `panelH * 0.03`: con el slider de
+tamaño, 2 px desaparecían al achicar y se veían como una franja al agrandar.
+
+### 2. Los 12 símbolos, cada uno con su geometría
+
+El Paso 6 le dio diales propios a los 3 animados. Ahora los tienen **los 12**, y
+cada uno lleva además los 3 del marco que se dibuja sobre él:
+
+```text
+<id>X · <id>Y · <id>Scale · <id>MarcoX · <id>MarcoY · <id>MarcoScale
+```
+
+**72 claves nuevas, cero mapas que mantener.** El puente entre símbolo y clave es
+el propio nombre del asset: `sym_h1` → `h1X`, `h1Y`, … y `SymbolSprite` hace el
+camino inverso con `assetKey.slice(4)`. Agregar un símbolo a `LAB_SYMBOLS`
+(`labMeta.ts`) le da sliders, categoría, persistencia por bucket y lectura en el
+componente **sin tocar ningún otro archivo**.
+
+Ni las claves ni los sliders se escriben a mano: se generan del mismo par de
+listas.
+
+```ts
+// labMeta.ts — 12 símbolos × 6 specs
+for (const [i, symbol] of LAB_SYMBOLS.entries())
+    for (const [j, spec] of SYMBOL_SLIDER_SPECS.entries())
+        LAB_SLIDERS.push({ id: `${symbol.id}${spec.prop}`, … });
+
+// stateTweak.svelte.ts — las mismas 72, para defaults y persistencia
+export const SYMBOL_GEOM_KEYS = LAB_SYMBOLS.flatMap((s) =>
+    SYMBOL_GEOM_PROPS.map((p) => `${s.id}${p}`),
+);
+```
+
+`TWEAKABLE_KEYS` quedó como la lista escrita a mano de lo global, y
+`ALL_TWEAKABLE_KEYS` la concatena con las 72 — es la que usan `loadOverrides` y
+`saveTweak`, así que las nuevas se guardan por bucket como el resto.
+
+El tipo `Tweak` pasó a ser `TweakBase & Record<SymbolGeomKey, number>`, con
+`SymbolGeomKey` derivado por template literal de `LAB_SYMBOLS` × `SYMBOL_GEOM_PROPS`:
+si alguien agrega un símbolo y se olvida del default, TypeScript lo marca.
+
+**Las etiquetas llevan la identidad de la math entre paréntesis** ("H4 — KASH
+(medallón X)", "L4 — Cash Stack ✦"). No es cosmético: el nombre del archivo no
+alcanza para saber cuál es cuál, y esa confusión es exactamente lo que dejó a L4
+sin arte en el Paso 7. El ✦ marca a los tres que tienen clip propio.
+
+Se retiraron las 9 claves `wildX/scatterX/premiumX…` del Paso 6, absorbidas por
+el esquema genérico (`wX`, `sX`, `l4X`…). `wScale` conserva el default **0.9**,
+que viene arrastrado del `SPECIAL_TRIM` original — el bate WILD entra en su box
+con más sangrado que el resto y a igual `specialScale` se veía más grande.
+
+El dial de GRUPO `specialScale` sigue existiendo y sigue aplicándose solo a los 3
+animados: está congelado por bucket en `PER_BUCKET_SEED` (1.165 a 1.33) y es lo
+que los hace resaltar juntos contra los 10 regulares. El dial individual
+multiplica encima.
+
+Catálogo resultante, verificado en runtime evaluando `labMeta.ts`:
+
+| | antes | ahora |
+|---|---|---|
+| Categorías | 7 | **19** (7 globales + 12 por símbolo) |
+| Sliders | 46 | **109** (37 globales + 72 por símbolo) |
+| ids duplicados | — | 0 |
+| sliders sin categoría | — | 0 |
+
+### 3. El marco, por encima y con diales por símbolo
+
+`zIndex` del marco: **−1 → 1**. Pasa de fondo a primer plano dentro de la celda,
+por pedido de dirección. Encaja con la coreografía del punto 4: los últimos
+frames del clip cierran en un bloque lleno, y ese cierre ahora TAPA al símbolo
+justo cuando está saliendo del board.
+
+Su tamaño y posición salen de los 3 diales propios de cada símbolo
+(`<id>MarcoX/Y/Scale`) y **no** heredan la geometría del ícono: el marco
+pertenece a la CELDA. Por eso se dibuja en `props.x/props.y` (más su propio
+nudge) y no en `cx/cy`. Si siguiera el desplazamiento de un especial se saldría
+de su casilla.
+
+### 4. Coreografía en tres tramos
+
+```text
+intro   frames 0..15, una vez     — mientras el cluster se ilumina
+loop    frames 4..15, en bucle    — espera hasta que se ilumina TODO el cluster
+outro   desde el frame en curso hasta el 18, una vez — arranca con el boing
+```
+
+`AnimatedSprite` no sabe reproducir un sub-rango, así que **cada fase le pasa un
+SLICE distinto del array de texturas** y un `{#key marcoPhase}` lo remonta para
+que arranque en el frame 0 de ese slice (`gotoAndPlay(0)` al montar). Por eso el
+marco usa `AnimatedSprite` directo y no `SpriteSheet`, que resuelve las texturas
+por `key` y no deja recortarlas.
+
+**El puente entre boards.** La presentación del cluster corre en el board
+PRINCIPAL (`win` → `postWinStatic`) y el boing en el TUMBLE board, que monta
+componentes nuevos — el tumble nunca pasa por `win`, salta de `static` a
+`explosion` (ver Paso 7 §3). Sin un puente, el marco del tumble arrancaría su
+salida desde el frame 4 en vez de "desde donde estaba". Se resuelve con un
+contador en el `<script module>`, compartido por todas las celdas:
+
+```ts
+let marcoLoopFrame = MARCO_LOOP_START;
+```
+
+Un único contador describe a todos porque **todos los marcos van en fase**:
+`boardWithAnimateSymbols` pone en `win` a TODO el cluster de una sola vez y la
+cascada de `winFlash` escalona solo el GLOW, no el estado. Como efecto lateral
+deseable, los marcos también SALEN sincronizados.
+
+El `$effect` que cambia de fase usa `untrack` para escribir `marcoPhase` sin
+volver a dispararse, y rearma la secuencia a `intro` cuando el símbolo vuelve a
+reposo: el componente del board principal no se remonta entre rondas.
+
+### 4b. Corrección de la salida (mismo día, tras probarlo en juego)
+
+Dos cosas fallaban en el tramo de salida y se arreglaron juntas.
+
+**a) El marco no acompañaba las transformaciones del ícono.** El `<Container>`
+del marco es hermano del símbolo, no hijo, así que no heredaba nada. Ahora toma
+las DOS, multiplicadas:
+
+```svelte
+<Container x={marcoX} y={marcoY} zIndex={1}
+           scale={winScale * flashScale} rotation={winRotation}>
+```
+
+| Tween | De dónde sale | Cuándo |
+|---|---|---|
+| `flashScale` | `winFlash` (0.85 → 1.15, backOut) | al ILUMINARSE, cuando le llega su turno en la cascada |
+| `winScale` / `winRotation` | `winPop` (0.75 → 1.5 → 0, −12°→0) | al DESAPARECER, con el boing de salida |
+
+Sin esto el marco quedaba clavado mientras el ícono respiraba y después se iba.
+En reposo los tres tweens valen 1, 1 y 0, así que entrada y bucle no se ven
+afectados. Los 3 animados no reciben ni `winFlash` ni `winPop` (`hasOwnClip`),
+de modo que su marco no se transforma — igual que sus íconos.
+
+**b) La salida se cortaba a mitad y nunca llegaba al último frame.** No era que
+no arrancara: `tumbleBoardExplode` espera el pop y acto seguido
+`tumbleBoardRemoveExploded` **desmonta** el símbolo, así que el marco se destruye
+a los ~480 ms (`WIN_POP_TOTAL_MS`). A los 24 fps fijos, arrancando en el frame 4,
+en esa ventana apenas pasaban ~11 frames.
+
+La salida ya no usa una velocidad fija: se calcula para entrar EXACTA en la
+ventana del boing, arranque donde arranque.
+
+```ts
+const marcoOutroSpeed = $derived(
+    (MARCO_LAST_FRAME + 1 - marcoOutroStart) / (WIN_POP_TOTAL_MS / 1000) / 60,
+);
+```
+
+Desde el frame 4 son ~31 fps; desde el 15, ~8 fps. En los dos casos el cierre
+cae junto con el símbolo.
+
+**El último frame es el 18, no el 20.** Los dos que quedan afuera son el marco ya
+relleno (amarillo pleno y bloque rojo): con el marco POR ENCIMA del ícono taparían
+la celda entera justo en la salida.
+
+**Y el arranque en `explosion`.** `marcoPhase` y `marcoOutroStart` se inicializan
+leyendo el estado y el contador compartido en vez de constantes fijas:
+
+```ts
+let marcoPhase = $state<MarcoPhase>(props.symbolState === 'explosion' ? 'outro' : 'intro');
+let marcoOutroStart = $state(marcoLoopFrame);
+```
+
+Sin eso, los símbolos del tumble —que nacen y pasan directo de `static` a
+`explosion`, sin `win`— dibujaban un tick del frame 0 de la ENTRADA antes de que
+el efecto corrigiera la fase: se veía como un parpadeo.
+
+### 5. Verificación
+
+| Chequeo | Resultado |
+|---|---|
+| `svelte.compile` de los 4 componentes tocados | ✅ sin errores ni warnings |
+| Catálogo del lab evaluado en runtime | ✅ 12 símbolos · 19 categorías · 109 sliders · 0 duplicados · 0 huérfanos |
+| Claves generadas | ✅ `h4X h4Y h4Scale h4MarcoX h4MarcoY h4MarcoScale`, ídem los 12 |
+| `vite build` | ✅ ver §7 |
+| Defaults con valores neutros | ✅ board idéntico al arrancar (salvo `wScale` 0.9, heredado) |
+
+### 6. Riesgos
+
+| Riesgo | Estado / mitigación |
+|---|---|
+| **El panel pasó de 46 a 109 sliders** | El acordeón de `UiLab` los agrupa en 19 categorías plegables (solo la primera abierta), así que la lista sigue siendo navegable. `COPY VALUES` y el panel remoto de `/sizes` los incluyen a todos: el JSON de un bucket es ahora bastante más largo. |
+| **Los 72 diales no están sembrados por bucket** | Arrancan neutros en los 7 buckets. Cuando se ajusten hay que congelarlos en `PER_BUCKET_SEED`, igual que board/kash/stack. |
+| **`marcoLoopFrame` es global, no por celda** | Es correcto HOY porque todos los marcos arrancan juntos. Si alguna vez la presentación escalona el `symbolState` (y no solo el glow), los marcos se desfasarían y este contador describiría solo al último. Sería pasar a un mapa por posición, como hace `winFlash`. |
+| **El marco tapa el símbolo al final** | Mitigado cortando la salida en el frame 18: los dos frames rellenos del export quedaron afuera. Si aun así molesta, se baja el `zIndex` a −1 o se acorta más el tramo. |
+| **La salida está atada a `WIN_POP_TOTAL_MS`** | Si alguien cambia los tiempos de `WIN_POP_STEPS`, la velocidad del marco se reajusta sola — que es lo que se quiere. Pero si el desmontaje del símbolo dejara de coincidir con el pop (p.ej. otro orden en `tumbleBoardExplode`), el cierre volvería a cortarse. El acople está anotado en el componente. |
+| **`specialScale` y `<id>Scale` conviven** | Dos niveles de escala para los 3 animados. El de grupo está en "BOTONERA + ÍCONOS" y el individual en la categoría del símbolo, separados a propósito, pero hay que recordar que se multiplican. |
+| **El contador de FS quedó sin `PER_BUCKET_SEED`** | `fsX`/`fsY` arrancan en 0.18/0.14, que es un punto de partida medido a ojo. Hay que ajustarlo en los 7 buckets y congelarlo — es justamente lo que el pedido habilita. |

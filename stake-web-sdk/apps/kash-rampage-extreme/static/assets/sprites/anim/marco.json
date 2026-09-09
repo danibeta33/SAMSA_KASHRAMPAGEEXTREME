@@ -1,183 +1,461 @@
-{"frames": {
-
-"Marco_Icono_00000.png":
 {
-	"frame": {"x":482,"y":463,"w":3,"h":3},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":0,"y":0,"w":3,"h":3},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00001.png":
-{
-	"frame": {"x":1713,"y":1292,"w":270,"h":264},
-	"rotated": true,
-	"trimmed": true,
-	"spriteSourceSize": {"x":149,"y":116,"w":270,"h":264},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00002.png":
-{
-	"frame": {"x":1693,"y":1630,"w":300,"h":314},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":134,"y":97,"w":300,"h":314},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00003.png":
-{
-	"frame": {"x":1321,"y":1630,"w":342,"h":370},
-	"rotated": true,
-	"trimmed": true,
-	"spriteSourceSize": {"x":96,"y":62,"w":342,"h":370},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00004.png":
-{
-	"frame": {"x":459,"y":964,"w":427,"h":411},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":38,"y":52,"w":427,"h":411},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00005.png":
-{
-	"frame": {"x":460,"y":480,"w":461,"h":426},
-	"rotated": true,
-	"trimmed": true,
-	"spriteSourceSize": {"x":0,"y":16,"w":461,"h":426},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00006.png":
-{
-	"frame": {"x":1,"y":1,"w":479,"h":477},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":5,"y":2,"w":479,"h":477},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00007.png":
-{
-	"frame": {"x":1,"y":1430,"w":445,"h":466},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":26,"y":15,"w":445,"h":466},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00008.png":
-{
-	"frame": {"x":1412,"y":1,"w":450,"h":456},
-	"rotated": true,
-	"trimmed": true,
-	"spriteSourceSize": {"x":19,"y":14,"w":450,"h":456},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00009.png":
-{
-	"frame": {"x":948,"y":1,"w":462,"h":450},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":2,"y":4,"w":462,"h":450},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00010.png":
-{
-	"frame": {"x":888,"y":463,"w":456,"h":443},
-	"rotated": true,
-	"trimmed": true,
-	"spriteSourceSize": {"x":22,"y":31,"w":456,"h":443},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00011.png":
-{
-	"frame": {"x":888,"y":1323,"w":431,"h":408},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":33,"y":49,"w":431,"h":408},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00012.png":
-{
-	"frame": {"x":888,"y":921,"w":440,"h":400},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":7,"y":31,"w":440,"h":400},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00013.png":
-{
-	"frame": {"x":459,"y":1377,"w":421,"h":396},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":45,"y":33,"w":421,"h":396},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00014.png":
-{
-	"frame": {"x":1,"y":480,"w":457,"h":482},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":17,"y":3,"w":457,"h":482},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00015.png":
-{
-	"frame": {"x":1,"y":964,"w":456,"h":464},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":20,"y":15,"w":456,"h":464},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00016.png":
-{
-	"frame": {"x":482,"y":1,"w":464,"h":460},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":10,"y":22,"w":464,"h":460},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00017.png":
-{
-	"frame": {"x":1333,"y":453,"w":444,"h":432},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":33,"y":43,"w":444,"h":432},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00018.png":
-{
-	"frame": {"x":1333,"y":887,"w":443,"h":403},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":6,"y":30,"w":443,"h":403},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00019.png":
-{
-	"frame": {"x":1330,"y":1292,"w":381,"h":336},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":64,"y":62,"w":381,"h":336},
-	"sourceSize": {"w":486,"h":486}
-},
-"Marco_Icono_00020.png":
-{
-	"frame": {"x":482,"y":463,"w":3,"h":3},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":0,"y":0,"w":3,"h":3},
-	"sourceSize": {"w":486,"h":486}
-}},
-"animations": {
-	"Marco_Icono": ["Marco_Icono_00000.png","Marco_Icono_00001.png","Marco_Icono_00002.png","Marco_Icono_00003.png","Marco_Icono_00004.png","Marco_Icono_00005.png","Marco_Icono_00006.png","Marco_Icono_00007.png","Marco_Icono_00008.png","Marco_Icono_00009.png","Marco_Icono_00010.png","Marco_Icono_00011.png","Marco_Icono_00012.png","Marco_Icono_00013.png","Marco_Icono_00014.png","Marco_Icono_00015.png","Marco_Icono_00016.png","Marco_Icono_00017.png","Marco_Icono_00018.png","Marco_Icono_00019.png","Marco_Icono_00020.png"]
-},
-"meta": {
-	"app": "https://www.codeandweb.com/texturepacker",
-	"version": "1.1",
-	"image": "marco.webp",
-	"format": "RGBA8888",
-	"size": {"w":1994,"h":1994},
-	"scale": "0.45",
-	"smartupdate": "$TexturePacker:SmartUpdate:0bdf3782e83a1ec2a1e51a00893af8d9:e98ef03739f14535264aff5a8c7079b4:1607d673fb13b8d3f3b1cc50a0669e14$"
-}
+  "frames": {
+    "Marco_Icono_00000.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00001.png": {
+      "frame": {
+        "x": 192,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00002.png": {
+      "frame": {
+        "x": 384,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00003.png": {
+      "frame": {
+        "x": 576,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00004.png": {
+      "frame": {
+        "x": 768,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00005.png": {
+      "frame": {
+        "x": 0,
+        "y": 192,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00006.png": {
+      "frame": {
+        "x": 192,
+        "y": 192,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00007.png": {
+      "frame": {
+        "x": 384,
+        "y": 192,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00008.png": {
+      "frame": {
+        "x": 576,
+        "y": 192,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00009.png": {
+      "frame": {
+        "x": 768,
+        "y": 192,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00010.png": {
+      "frame": {
+        "x": 0,
+        "y": 384,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00011.png": {
+      "frame": {
+        "x": 192,
+        "y": 384,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00012.png": {
+      "frame": {
+        "x": 384,
+        "y": 384,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00013.png": {
+      "frame": {
+        "x": 576,
+        "y": 384,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00014.png": {
+      "frame": {
+        "x": 768,
+        "y": 384,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00015.png": {
+      "frame": {
+        "x": 0,
+        "y": 576,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00016.png": {
+      "frame": {
+        "x": 192,
+        "y": 576,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00017.png": {
+      "frame": {
+        "x": 384,
+        "y": 576,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00018.png": {
+      "frame": {
+        "x": 576,
+        "y": 576,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00019.png": {
+      "frame": {
+        "x": 768,
+        "y": 576,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    },
+    "Marco_Icono_00020.png": {
+      "frame": {
+        "x": 0,
+        "y": 768,
+        "w": 192,
+        "h": 192
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 192,
+        "h": 192
+      },
+      "sourceSize": {
+        "w": 192,
+        "h": 192
+      }
+    }
+  },
+  "meta": {
+    "app": "https://www.codeandweb.com/texturepacker",
+    "version": "1.1",
+    "image": "marco.webp",
+    "format": "RGBA8888",
+    "smartupdate": "$TexturePacker:SmartUpdate:0bdf3782e83a1ec2a1e51a00893af8d9:e98ef03739f14535264aff5a8c7079b4:1607d673fb13b8d3f3b1cc50a0669e14$",
+    "size": {
+      "w": 960,
+      "h": 960
+    },
+    "scale": "1"
+  },
+  "animations": {
+    "Marco_Icono": [
+      "Marco_Icono_00000.png",
+      "Marco_Icono_00001.png",
+      "Marco_Icono_00002.png",
+      "Marco_Icono_00003.png",
+      "Marco_Icono_00004.png",
+      "Marco_Icono_00005.png",
+      "Marco_Icono_00006.png",
+      "Marco_Icono_00007.png",
+      "Marco_Icono_00008.png",
+      "Marco_Icono_00009.png",
+      "Marco_Icono_00010.png",
+      "Marco_Icono_00011.png",
+      "Marco_Icono_00012.png",
+      "Marco_Icono_00013.png",
+      "Marco_Icono_00014.png",
+      "Marco_Icono_00015.png",
+      "Marco_Icono_00016.png",
+      "Marco_Icono_00017.png",
+      "Marco_Icono_00018.png",
+      "Marco_Icono_00019.png",
+      "Marco_Icono_00020.png"
+    ]
+  }
 }
