@@ -62,8 +62,8 @@
     },
     "Special_Billetes_00003.png": {
       "frame": {
-        "x": 768,
-        "y": 0,
+        "x": 0,
+        "y": 256,
         "w": 256,
         "h": 256
       },
@@ -82,8 +82,8 @@
     },
     "Special_Billetes_00004.png": {
       "frame": {
-        "x": 1024,
-        "y": 0,
+        "x": 256,
+        "y": 256,
         "w": 256,
         "h": 256
       },
@@ -102,388 +102,8 @@
     },
     "Special_Billetes_00005.png": {
       "frame": {
-        "x": 0,
-        "y": 256,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00006.png": {
-      "frame": {
-        "x": 256,
-        "y": 256,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00007.png": {
-      "frame": {
         "x": 512,
         "y": 256,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00008.png": {
-      "frame": {
-        "x": 768,
-        "y": 256,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00009.png": {
-      "frame": {
-        "x": 1024,
-        "y": 256,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00010.png": {
-      "frame": {
-        "x": 0,
-        "y": 512,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00011.png": {
-      "frame": {
-        "x": 256,
-        "y": 512,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00012.png": {
-      "frame": {
-        "x": 512,
-        "y": 512,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00013.png": {
-      "frame": {
-        "x": 768,
-        "y": 512,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00014.png": {
-      "frame": {
-        "x": 1024,
-        "y": 512,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00015.png": {
-      "frame": {
-        "x": 0,
-        "y": 768,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00016.png": {
-      "frame": {
-        "x": 256,
-        "y": 768,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00017.png": {
-      "frame": {
-        "x": 512,
-        "y": 768,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00018.png": {
-      "frame": {
-        "x": 768,
-        "y": 768,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00019.png": {
-      "frame": {
-        "x": 1024,
-        "y": 768,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00020.png": {
-      "frame": {
-        "x": 0,
-        "y": 1024,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00021.png": {
-      "frame": {
-        "x": 256,
-        "y": 1024,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00022.png": {
-      "frame": {
-        "x": 512,
-        "y": 1024,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00023.png": {
-      "frame": {
-        "x": 768,
-        "y": 1024,
-        "w": 256,
-        "h": 256
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 256,
-        "h": 256
-      },
-      "sourceSize": {
-        "w": 256,
-        "h": 256
-      }
-    },
-    "Special_Billetes_00024.png": {
-      "frame": {
-        "x": 1024,
-        "y": 1024,
         "w": 256,
         "h": 256
       },
@@ -506,10 +126,10 @@
     "version": "1.1",
     "image": "anim_sym_premium.webp",
     "format": "RGBA8888",
-    "smartupdate": "$TexturePacker:SmartUpdate:d7fb42c7a971a20b07227a90574474c4:c21c5d585249c23e7fd80fd1a1af881e:12b256bc16f0b53e3b1908fa77f50b9c$",
+    "smartupdate": "$TexturePacker:SmartUpdate:1003c878aa6bb001a83e2e77edbbd09c:710c2436fde9b326a479ae5571b29c5d:12b256bc16f0b53e3b1908fa77f50b9c$",
     "size": {
-      "w": 1280,
-      "h": 1280
+      "w": 768,
+      "h": 512
     },
     "scale": "1"
   },
@@ -520,26 +140,7 @@
       "Special_Billetes_00002.png",
       "Special_Billetes_00003.png",
       "Special_Billetes_00004.png",
-      "Special_Billetes_00005.png",
-      "Special_Billetes_00006.png",
-      "Special_Billetes_00007.png",
-      "Special_Billetes_00008.png",
-      "Special_Billetes_00009.png",
-      "Special_Billetes_00010.png",
-      "Special_Billetes_00011.png",
-      "Special_Billetes_00012.png",
-      "Special_Billetes_00013.png",
-      "Special_Billetes_00014.png",
-      "Special_Billetes_00015.png",
-      "Special_Billetes_00016.png",
-      "Special_Billetes_00017.png",
-      "Special_Billetes_00018.png",
-      "Special_Billetes_00019.png",
-      "Special_Billetes_00020.png",
-      "Special_Billetes_00021.png",
-      "Special_Billetes_00022.png",
-      "Special_Billetes_00023.png",
-      "Special_Billetes_00024.png"
+      "Special_Billetes_00005.png"
     ]
   }
 }

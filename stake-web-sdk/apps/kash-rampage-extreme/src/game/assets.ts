@@ -128,10 +128,38 @@ export default {
 	// dejaría la celda vacía. Re-empaquetado con `.scripts/repack_spritesheet.py`
 	// de 2027² / 4.67 MB a 1280² / 0.79 MB para que preloadearlo no castigue el
 	// arranque (el original a 701² pesaba 10.34 MB).
+	// Re-empaquetado otra vez el 09-09: el export nuevo del clip traía la MISMA
+	// secuencia de 6 frames DOS VECES (`Special_Billetes` y
+	// `Special_Billetes_00000`, 12 frames en total). PIXI solo reproduce la
+	// primera —`getSpriteSheetFrames` toma `Object.values(animations)[0]`—, así
+	// que la mitad del atlas eran píxeles que nadie pedía, en el único sheet de
+	// símbolos con `preload`. Sacada la copia y re-empaquetado: 0.83 → 0.15 MB.
 	anim_sym_premium: {
 		type: 'spriteSheet',
 		src: new URL('../../assets/sprites/anim/anim_sym_premium.json', import.meta.url).href,
 		preload: true,
+	},
+	// ILUMINACIÓN de los 3 especiales (drop 09-09) — el mismo clip de cada uno
+	// con el glow de victoria horneado, sobre el mismo canvas 256². Es el
+	// equivalente animado de las cartas `sym_*_luz` de los 10 regulares:
+	// SymbolSprite las dibuja DETRÁS del clip base mientras el símbolo está en
+	// `win`/`postWinStatic`/`explosion`.
+	//
+	// Sin preload, igual que sus clips base y que las cartas `_luz` estáticas:
+	// son 1.21 MB entre los tres y solo hacen falta cuando el símbolo GANA. Si
+	// todavía no bajaron, el especial gana con su clip de siempre y sin glow
+	// (`specialLuzReady` lo cubre) — el arranque no se castiga por un adorno.
+	anim_sym_wild_luz: {
+		type: 'spriteSheet',
+		src: new URL('../../assets/sprites/anim/anim_sym_wild_luz.json', import.meta.url).href,
+	},
+	anim_sym_scatter_luz: {
+		type: 'spriteSheet',
+		src: new URL('../../assets/sprites/anim/anim_sym_scatter_luz.json', import.meta.url).href,
+	},
+	anim_sym_premium_luz: {
+		type: 'spriteSheet',
+		src: new URL('../../assets/sprites/anim/anim_sym_premium_luz.json', import.meta.url).href,
 	},
 	// Symbols — 12 sprites, set KASH RAMPAGE (Drive ICONS PNG, kit 26-08).
 	// Los 10 regulares vienen del canvas 1080×970 del artista (Juanda) con la
@@ -156,8 +184,8 @@ export default {
 	// IDENTIDAD del símbolo en constants.ts, winPop.ts y LUZ_KEY — lo que
 	// desapareció es su textura, y `STATIC_LESS` en SymbolSprite.svelte impide
 	// que alguien la pida.)
-	sym_w:  { type: 'sprite', src: new URL('../../assets/sprites/symbols/w.png',  import.meta.url).href }, // Bat WILD
-	sym_s:  { type: 'sprite', src: new URL('../../assets/sprites/symbols/s.png',  import.meta.url).href }, // Gold Bar SCATTER
+	sym_w: { type: 'sprite', src: new URL('../../assets/sprites/symbols/w.png', import.meta.url).href }, // Bat WILD
+	sym_s: { type: 'sprite', src: new URL('../../assets/sprites/symbols/s.png', import.meta.url).href }, // Gold Bar SCATTER
 	// Iconos ILUMINADOS (Icons_Luz, kit 26-08) — carta full-bleed 1080×970
 	// (marco oscuro + glow horneado) → 512×460 conservando aspect. SymbolSprite
 	// los muestra en win/postWinStatic en lugar del estático + halo lima.

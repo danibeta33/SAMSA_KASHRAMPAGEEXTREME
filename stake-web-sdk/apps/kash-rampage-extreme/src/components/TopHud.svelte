@@ -146,8 +146,13 @@
 	);
 </script>
 
-<!-- Grupo de recipientes: un solo Container mueve/escala a los tres juntos. -->
-<Container x={originX} y={originY}>
+<!-- Grupo de recipientes: un solo Container mueve/escala a los tres juntos.
+     `hudAlpha`/`hudZ` van acá y no en Game.svelte porque el grupo y el título
+     son DOS elementos distintos del laboratorio, cada uno con su propio par de
+     opacidad y capa. Los dos Container son hermanos directos del stage, que ya
+     ordena por zIndex (`sortableChildren`, ver Background.svelte), así que
+     cualquiera de los dos puede meterse entre Kash y la grilla. -->
+<Container x={originX} y={originY} alpha={stateTweak.hudAlpha} zIndex={stateTweak.hudZ}>
 	{#each items as item, i (item.key)}
 		<Container x={vertical ? 0 : i * step} y={vertical ? i * step : 0}>
 			<Contenedor1 label={item.label} value={item.value} width={panelW} />
@@ -155,9 +160,12 @@
 	{/each}
 </Container>
 
-<!-- Título: Container hermano y controles propios — se mueve y escala sin
-     relación con el grupo de arriba (pedido explícito). -->
+<!-- Título: Container hermano y controles propios — se mueve, escala, se
+     transparenta y cambia de capa sin relación con el grupo de arriba
+     (pedido explícito). -->
 <Container
+	alpha={stateTweak.titleAlpha}
+	zIndex={stateTweak.titleZ}
 	x={clamp(cs.width * stateTweak.titleX, MARGIN + titleW / 2, cs.width - MARGIN - titleW / 2)}
 	y={clamp(cs.height * stateTweak.titleY, MARGIN + titleH / 2, cs.height - MARGIN - titleH / 2)}
 >

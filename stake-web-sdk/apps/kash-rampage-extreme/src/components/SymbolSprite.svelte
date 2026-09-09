@@ -19,11 +19,7 @@
 	// Multiplicador extra SOLO para los especiales (slider `specialScale`).
 	import { stateTweak } from '../game/stateTweak.svelte';
 	import { stateWinHighlight } from '../game/stateWinHighlight.svelte';
-	import {
-		SELF_ANIMATED_ASSET_KEYS,
-		type SelfAnimatedAssetKey,
-		type WinPop,
-	} from '../game/winPop.svelte';
+	import { type SelfAnimatedAssetKey, type WinPop } from '../game/winPop.svelte';
 	import type { WinFlashCell } from '../game/winFlash.svelte';
 
 	type Props = {
@@ -68,31 +64,44 @@
 
 	const isWireframe = $derived(props.symbolInfo.assetKey === 'wireframe');
 
-	// Escala extra de los ESPECIALES (W wild, S scatter, H4 premium). Se
-	// engancha a `SELF_ANIMATED_ASSET_KEYS` en vez de a `ANIM_SPECIAL` por dos
-	// razones: esa lista es la definición canónica de "especial" del juego (la
-	// misma que usa winPop para saltear el pop), y está declarada arriba — el
-	// mapa `ANIM_SPECIAL` recién existe más abajo y `w`/`h` se calculan acá.
+	// ── GEOMETRÍA INDEPENDIENTE DE LOS 3 ESPECIALES (drop 09-09) ────────────
+	// W (bate WILD), S (barra SCATTER) y H4 (fajo PREMIUM) dejan de compartir
+	// una sola perilla: cada uno trae del UI LAB su propio nudge X/Y y su propia
+	// escala, ajustables por bucket como el resto del layout.
 	//
+	// Tipado contra `SelfAnimatedAssetKey` (la lista canónica de "especial" del
+	// juego, la misma que usa winPop para saltear el pop): si esa lista cambia,
+	// este mapa deja de compilar hasta que se sincronice. Reemplaza al viejo
+	// `SPECIAL_TRIM`, que horneaba el 0.90 del bate en el componente — ese valor
+	// ahora es el DEFAULT de `wildScale` en stateTweak, así que el board arranca
+	// idéntico y el ajuste pasó a ser del laboratorio.
+	//
+	// La escala MULTIPLICA a `specialScale`: ese slider sigue siendo el dial del
+	// GRUPO (los tres crecen juntos contra los 10 regulares) y estos tres son el
+	// trim individual encima.
+	type SpecialGeometry = { x: number; y: number; scale: number };
+	const SPECIAL_GEOMETRY: Record<SelfAnimatedAssetKey, SpecialGeometry> = $derived({
+		sym_w: { x: stateTweak.wildX, y: stateTweak.wildY, scale: stateTweak.wildScale },
+		sym_s: { x: stateTweak.scatterX, y: stateTweak.scatterY, scale: stateTweak.scatterScale },
+		sym_h4: { x: stateTweak.premiumX, y: stateTweak.premiumY, scale: stateTweak.premiumScale },
+	});
+	const geometry = $derived(
+		SPECIAL_GEOMETRY[props.symbolInfo.assetKey as SelfAnimatedAssetKey] as
+			| SpecialGeometry
+			| undefined,
+	);
+
 	// Se aplica a los DOS caminos de render (el clip animado y el sprite
 	// estático de respaldo). Si solo escalara el animado, W y S —que van sin
 	// preload— darían un salto de tamaño en el momento en que su sheet termina
-	// de bajar y reemplaza al estático.
-	//
-	// `SPECIAL_TRIM` es un ajuste NATIVO por símbolo, encima del slider: el bate
-	// WILD entra en su box con más sangrado que el scatter y el H4, así que a
-	// `specialScale` igual se veía más grande que los otros dos. Como multiplica
-	// (no reemplaza) al slider, el W sigue creciendo y achicándose con los demás,
-	// solo que un poco más abajo. Los que no están en el mapa valen 1.
-	// El primer intento fue 0.75 y el usuario lo vio PASADO de chico contra el
-	// resto: 0.90 es el valor bueno (10 % abajo, no 25 %).
-	const SPECIAL_KEYS = new Set<string>(SELF_ANIMATED_ASSET_KEYS);
-	const SPECIAL_TRIM: Record<string, number> = { sym_w: 0.9 };
-	const specialMult = $derived(
-		SPECIAL_KEYS.has(props.symbolInfo.assetKey)
-			? stateTweak.specialScale * (SPECIAL_TRIM[props.symbolInfo.assetKey] ?? 1)
-			: 1,
-	);
+	// de bajar y reemplaza al estático. Mismo motivo para el desplazamiento.
+	const specialMult = $derived(geometry ? stateTweak.specialScale * geometry.scale : 1);
+
+	// X/Y del laboratorio vienen en FRACCIONES DE CELDA — el símbolo ya está
+	// posicionado por la grilla y esto es un nudge fino sobre esa posición, así
+	// que escalan con SYMBOL_SIZE y no con el canvas.
+	const cx = $derived((props.x ?? 0) + (geometry ? geometry.x * SYMBOL_SIZE : 0));
+	const cy = $derived((props.y ?? 0) + (geometry ? geometry.y * SYMBOL_SIZE : 0));
 
 	const w = $derived(
 		SYMBOL_SIZE * props.symbolInfo.sizeRatios.width * stateUiTweak.symScale * specialMult,
@@ -118,8 +127,17 @@
 	// El `box` replica el sizeRatio del estático correspondiente para que el
 	// swap estático → animado (los sheets van sin preload) no dé un salto de
 	// tamaño en el board.
+	//
+	// `luzKey` (drop 09-09) es el clip de ILUMINACIÓN del mismo símbolo. No es
+	// arte nuevo sino EL MISMO clip con el glow horneado encima, exportado desde
+	// el mismo canvas 256² y con el personaje en la misma posición — por eso se
+	// dibuja con el MISMO width/height/offset que el clip base (ver el render)
+	// en vez de traer sus propios ratios: compartir el lienzo de origen ES la
+	// alineación. Medir el `_luz` por su cuenta lo desalinearía, porque su
+	// bounding box es más grande (el glow sangra fuera del ícono).
 	type AnimSpecial = {
 		key: string;
+		luzKey: string;
 		aspect: number;
 		fill: { w: number; h: number };
 		center: { x: number; y: number };
@@ -131,6 +149,7 @@
 		// bate WILD — arte 169×205 en (41,51); cuelga abajo (center.y 0.600)
 		sym_w: {
 			key: 'anim_sym_wild',
+			luzKey: 'anim_sym_wild_luz',
 			aspect: 169 / 205,
 			fill: { w: 169 / 256, h: 205 / 256 },
 			center: { x: 125.5 / 256, y: 153.5 / 256 },
@@ -139,6 +158,7 @@
 		// barra SCATTER — arte 255×254 a sangre, prácticamente centrado
 		sym_s: {
 			key: 'anim_sym_scatter',
+			luzKey: 'anim_sym_scatter_luz',
 			aspect: 255 / 254,
 			fill: { w: 255 / 256, h: 254 / 256 },
 			center: { x: 127.5 / 256, y: 127 / 256 },
@@ -146,15 +166,26 @@
 		},
 		// KASH premium — fajo de billetes (drop 08-09: el clip `Special_Billetes`
 		// reemplazó al `Special_Graffiti` bajo el mismo nombre de archivo). Arte
-		// 256×248 casi a sangre y centrado, contra el grafiti viejo que era
+		// 256×239 casi a sangre y centrado, contra el grafiti viejo que era
 		// 182×191 en (34,51) y colgaba abajo. Números medidos del .json con
 		// `.scripts/repack_spritesheet.py --report`: si el sheet se vuelve a
 		// re-exportar hay que volver a correrlo y pegar los valores que imprime.
+		//
+		// RE-MEDIDOS el 09-09: el drop de ese día cambió el clip de 25 frames a
+		// 6 y con él la caja del arte (aspect 1.0323 → 1.0711, fill.h 0.96875 →
+		// 0.933594, center.y 0.503906 → 0.533203), pero los valores acá habían
+		// quedado colgados del sheet anterior.
+		// El TAMAÑO no se movía: `specialW`/`specialH` siempre dan el mismo
+		// cuadrado (aspect y fill salen de la misma bbox y se cancelan). Lo que
+		// estaba mal era el CENTRADO: con center.y 0.5039 en vez de 0.5332 el
+		// offset compensaba 0.0039 de lienzo en lugar de 0.0332, así que el fajo
+		// se dibujaba ≈2.5 px de board (3 % de celda) por DEBAJO de su centro.
 		sym_h4: {
 			key: 'anim_sym_premium',
-			aspect: 1.032258,
-			fill: { w: 1.0, h: 0.96875 },
-			center: { x: 0.5, y: 0.503906 },
+			luzKey: 'anim_sym_premium_luz',
+			aspect: 1.07113,
+			fill: { w: 1.0, h: 0.933594 },
+			center: { x: 0.5, y: 0.533203 },
 			box: 0.8, // = sizeRatios de sym_h4
 		},
 	};
@@ -167,6 +198,16 @@
 		!!special &&
 			!!appContext.stateApp.loadedAssets?.[
 				special.key as keyof typeof appContext.stateApp.loadedAssets
+			],
+	);
+	// Clip de ILUMINACIÓN del especial (drop 09-09). Va sin `preload` como el
+	// resto de los `_luz`, así que hay que esperarlo igual que al clip base: si
+	// todavía no bajó, el especial gana su ronda con el clip de siempre y sin
+	// glow — degrada, no rompe.
+	const specialLuzReady = $derived(
+		!!special &&
+			!!appContext.stateApp.loadedAssets?.[
+				special.luzKey as keyof typeof appContext.stateApp.loadedAssets
 			],
 	);
 	// Símbolos SIN sprite estático de respaldo: su .png se borró del registro
@@ -286,7 +327,7 @@
 </script>
 
 {#if isWireframe}
-	<Container x={props.x} y={props.y} scale={winScale} rotation={winRotation}>
+	<Container x={cx} y={cy} scale={winScale} rotation={winRotation}>
 		<!-- filled tile -->
 		<Rectangle
 			x={-w / 2}
@@ -318,9 +359,49 @@
 	     SCALE del Container wrapper — NUNCA en el width del SpriteSheet: bindear
 	     el width a un valor que cambia FRENA la animación (bug: wild/scatter
 	     quedaban estáticos). El width del sheet queda constante y sí anima. -->
-	<Container x={props.x} y={props.y} scale={pop * winScale} rotation={winRotation} alpha={dimmed ? 0.3 : 1}>
+	<!-- `sortableChildren` + `zIndex` explícito: el orden de las etiquetas NO
+	     alcanza. El brillo monta al ENTRAR en `win`, o sea DESPUÉS del clip
+	     base, y `addToParent` hace `addChild`, que APENDEA — sin z-index el
+	     glow terminaría dibujado ENCIMA del ícono, justo al revés de lo que
+	     pide la jerarquía. Con estos dos valores el reparto es por profundidad
+	     declarada y no por orden de montaje. -->
+	<Container
+		x={cx}
+		y={cy}
+		scale={pop * winScale}
+		rotation={winRotation}
+		alpha={dimmed ? 0.3 : 1}
+		sortableChildren={true}
+	>
+		{#if specialLuzReady && glowAlpha > 0}
+			<!-- ILUMINACIÓN DE VICTORIA del especial (drop 09-09). Misma
+			     jerarquía que la carta `_luz` de los 10 regulares: va PRIMERA =
+			     DETRÁS del clip base, que se dibuja encima y queda nítido
+			     mientras el glow sangra alrededor de la silueta.
+			     Comparte `width`/`height`/`x`/`y` con el clip base a propósito:
+			     los dos sheets salen del mismo canvas 256² con el personaje en
+			     la misma posición, así que la misma geometría ES el registro
+			     exacto (ver la nota de `luzKey` en ANIM_SPECIAL).
+			     El montaje ocurre al entrar en `win` y AnimatedSprite arranca
+			     con gotoAndPlay(0), así que el clip de luz empieza en su frame 0
+			     en el mismo instante que la animación de victoria. -->
+			<SpriteSheet
+				anchor={0.5}
+				zIndex={0}
+				x={specialOffsetX}
+				y={specialOffsetY}
+				key={special.luzKey}
+				width={specialW}
+				height={specialH}
+				animationSpeed={10 / 60}
+				alpha={glowAlpha}
+				loop
+				play
+			/>
+		{/if}
 		<SpriteSheet
 			anchor={0.5}
+			zIndex={1}
 			x={specialOffsetX}
 			y={specialOffsetY}
 			key={special.key}
@@ -332,18 +413,38 @@
 		/>
 	</Container>
 {:else}
-	<Container x={props.x} y={props.y} scale={winScale} rotation={winRotation} alpha={dimmed ? 0.3 : 1}>
+	<!-- Mismo `sortableChildren` que en la rama del especial y por el mismo
+	     motivo: la carta `_luz` monta al arrancar la cascada de victoria, o sea
+	     DESPUÉS del ícono, y `addChild` apendea. Sin z-index explícito el
+	     "brillo trasero" se dibujaba adelante y tapaba el boing que dice
+	     acompañar (se ve solo con `winFlash` activo — sin secuencia
+	     `glowReplacesIcon` desmonta el ícono y el solape no llega a existir). -->
+	<Container
+		x={cx}
+		y={cy}
+		scale={winScale}
+		rotation={winRotation}
+		alpha={dimmed ? 0.3 : 1}
+		sortableChildren={true}
+	>
 		{#if luzReady && glowAlpha > 0}
 			<!-- BRILLO TRASERO: la carta iluminada del kit (marco + glow
-			     horneado) va PRIMERA = detrás del ícono, con su propio alpha y
+			     horneado) va DETRÁS del ícono (zIndex 0), con su propio alpha y
 			     SIN escala — el boing es del ícono, no del halo. -->
-			<Sprite anchor={0.5} key={luzKey} width={luzW} height={luzH} alpha={glowAlpha} />
+			<Sprite
+				anchor={0.5}
+				zIndex={0}
+				key={luzKey}
+				width={luzW}
+				height={luzH}
+				alpha={glowAlpha}
+			/>
 		{/if}
 		{#if !glowReplacesIcon && hasStatic}
 			<!-- SPRITE PRINCIPAL en su propio Container: acá y solo acá vive la
 			     escala del boing (0.85 → 1.15). Se omite en los símbolos sin
 			     estático (ver STATIC_LESS): su clip preloaded ya cubre el hueco. -->
-			<Container scale={flashScale}>
+			<Container zIndex={1} scale={flashScale}>
 				<Sprite anchor={0.5} key={props.symbolInfo.assetKey} width={w} height={h} />
 			</Container>
 		{/if}

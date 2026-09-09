@@ -175,9 +175,19 @@
 		SpriteFactory.place(assetId, { x: kash.x, y: kash.y + kash.h / 2, height: kash.h });
 
 	const kashPlaced = $derived(placeKash(currentClip));
-	// El SMASH pasa por delante del board, salvo durante la celebración (que va
-	// encima de todo). `foreground` es un dato del asset, no un `isSwing`.
-	const kashLayer = $derived(kashPlaced.foreground && celebration.n === 0 ? 15 : -4);
+	// Capa del SMASH: pasa por delante del board, salvo durante la celebración
+	// (que va encima de todo). `foreground` es un dato del asset, no un
+	// `isSwing`. Es una constante y no un slider porque no es una decisión de
+	// layout sino la coreografía del batazo — tiene que quedar por debajo del
+	// techo de celebraciones (CELEBRATION_LAYER = 20 en Game.svelte).
+	const SWING_FRONT_LAYER = 15;
+	// Capa de REPOSO de Kash: tweakeable desde el UI LAB (drop 09-09). Es
+	// hermano directo del stage, igual que la grilla, el HUD y el título, así
+	// que este número lo ordena contra los tres. Default −4 = donde estaba
+	// clavado antes: detrás del board y delante del fondo (−5).
+	const kashLayer = $derived(
+		kashPlaced.foreground && celebration.n === 0 ? SWING_FRONT_LAYER : stateTweak.kashZ,
+	);
 
 	// DEV — el AnimLab sigue alineando el swing con dx/dy/dscale en píxeles de
 	// canvas. Eso ya NO toca el render: se traduce a un override del registro.
@@ -446,6 +456,7 @@
 				play
 				onComplete={onClipComplete}
 				onFrameChange={onFrame}
+				alpha={stateTweak.kashAlpha}
 				zIndex={kashLayer}
 			/>
 		{/key}
@@ -466,6 +477,7 @@
 				play
 				onComplete={onClipComplete}
 				onFrameChange={onFrame}
+				alpha={stateTweak.kashAlpha}
 				zIndex={kashLayer}
 			/>
 		{/key}
@@ -478,7 +490,8 @@
 			key="kash_side"
 			width={still.width}
 			height={still.height}
-			zIndex={-4}
+			alpha={stateTweak.kashAlpha}
+			zIndex={kashLayer}
 		/>
 	{/if}
 {/if}

@@ -50,6 +50,60 @@ type Tweak = {
 	// y H4 premium) sobre el tamaño que ya les da su `box`. Sirve para que los
 	// tres resalten contra los 10 regulares sin re-exportar arte.
 	specialScale: number;
+	// ── OPACIDAD Y CAPA, POR ELEMENTO (drop 09-09) ──────────────────────────
+	// Cada objeto de la UI decide SU alpha y SU número de capa por separado: la
+	// botonera puede ir en la capa 5 y Kash en la 6, con opacidades distintas.
+	//
+	// ⚠ Hay DOS espacios de capas, y no se mezclan — es una restricción del
+	// navegador, no una decisión de diseño:
+	//
+	//   · CANVAS (PixiJS) — Kash · grilla · HUD superior · título. Comparten el
+	//     stage, que ya va con `sortableChildren` (lo prende Background.svelte),
+	//     así que estos cuatro SÍ se interpolan libremente entre ellos. El fondo
+	//     está clavado en −5 y las celebraciones en +20 (constantes de
+	//     Game.svelte / Background.svelte): son el piso y el techo del rango
+	//     útil.
+	//   · HTML (overlay) — botonera · íconos config+BONUS. Viven en
+	//     `BottomBar.svelte`, que es un `position: fixed` con `z-index: 90`
+	//     ENCIMA del canvas. Su número de capa los ordena entre ellos, nunca
+	//     contra los elementos de canvas: ningún valor mete la botonera detrás
+	//     de la grilla. Para eso habría que portar la botonera a Pixi.
+	//
+	// Los alpha van 0..1 y los multiplica el propio elemento (alpha de PIXI /
+	// `opacity` de CSS), así que no se pisan entre sí.
+	boardAlpha: number; // grilla + marco (el wrapper del board en Game.svelte)
+	boardZ: number;
+	kashAlpha: number; // personaje lateral (Background.svelte)
+	kashZ: number;
+	hudAlpha: number; // los 3 recipientes del HUD superior
+	hudZ: number;
+	titleAlpha: number; // sprite del título, independiente del grupo de arriba
+	titleZ: number;
+	stackAlpha: number; // botonera derecha (BET pill + SPIN/TURBO/AUTO) — HTML
+	stackZ: number;
+	iconAlpha: number; // fila config + BONUS — HTML
+	iconZ: number;
+	// ── GEOMETRÍA INDEPENDIENTE DE LOS 3 ESPECIALES (drop 09-09) ────────────
+	// Antes los tres se movían JUNTOS: la única perilla era `specialScale` y la
+	// posición salía tal cual de la celda, con un trim por símbolo horneado en
+	// `SPECIAL_TRIM` (SymbolSprite.svelte). Ahora cada uno trae su propio
+	// desplazamiento y su propia escala, ajustables por bucket desde el UI LAB.
+	//
+	// X/Y son FRACCIONES DE CELDA (× SYMBOL_SIZE) relativas al centro de la
+	// celda, no fracciones de canvas como boardX/hudX: el símbolo ya está
+	// posicionado por la grilla y esto es un nudge fino sobre esa posición.
+	// La escala MULTIPLICA a `specialScale`, que sigue siendo el dial del grupo
+	// — `wildScale` arranca en 0.90 justamente para reproducir el `SPECIAL_TRIM`
+	// que reemplaza, así que el board no cambia de aspecto al actualizar.
+	wildX: number;
+	wildY: number;
+	wildScale: number;
+	scatterX: number;
+	scatterY: number;
+	scatterScale: number;
+	premiumX: number;
+	premiumY: number;
+	premiumScale: number;
 };
 
 // Board height at which the reels grid matches the engine-native scale (1:1).
@@ -112,6 +166,36 @@ const DEFAULTS: Tweak = {
 	titleScale: 1,
 	// 1.3 = los especiales entran 30 % más grandes que su box actual.
 	specialScale: 1.3,
+	// Opacidad/capa por elemento: los defaults REPRODUCEN el apilado histórico,
+	// que hasta ahora salía del orden de montaje. En canvas, de atrás hacia
+	// adelante: fondo (−5, fijo) → Kash (−4) → grilla (0) → HUD superior (1) →
+	// título (2) → celebraciones (20, fijo). En el overlay HTML los íconos van
+	// detrás de la botonera, como estaban.
+	boardAlpha: 1,
+	boardZ: 0,
+	kashAlpha: 1,
+	kashZ: -4,
+	hudAlpha: 1,
+	hudZ: 1,
+	titleAlpha: 1,
+	titleZ: 2,
+	stackAlpha: 1,
+	stackZ: 2,
+	iconAlpha: 1,
+	iconZ: 1,
+	// Especiales: sin desplazamiento y con la escala que YA tenían. `wildScale`
+	// 0.9 es el viejo `SPECIAL_TRIM.sym_w` (el bate entra en su box con más
+	// sangrado que el scatter y el H4, así que a `specialScale` igual se veía
+	// más grande que los otros dos). Scatter y premium no llevaban trim → 1.
+	wildX: 0,
+	wildY: 0,
+	wildScale: 0.9,
+	scatterX: 0,
+	scatterY: 0,
+	scatterScale: 1,
+	premiumX: 0,
+	premiumY: 0,
+	premiumScale: 1,
 };
 
 // ── Buckets de resolución — 1:1 con los tamaños del ACP de Stake ────────
@@ -387,6 +471,27 @@ const TWEAKABLE_KEYS = [
 	'titleY',
 	'titleScale',
 	'specialScale',
+	'boardAlpha',
+	'boardZ',
+	'kashAlpha',
+	'kashZ',
+	'hudAlpha',
+	'hudZ',
+	'titleAlpha',
+	'titleZ',
+	'stackAlpha',
+	'stackZ',
+	'iconAlpha',
+	'iconZ',
+	'wildX',
+	'wildY',
+	'wildScale',
+	'scatterX',
+	'scatterY',
+	'scatterScale',
+	'premiumX',
+	'premiumY',
+	'premiumScale',
 ] as const;
 
 type Overrides = Partial<Record<ResBucketKey, Partial<Tweak>>>;
@@ -428,6 +533,13 @@ export const syncUi = () => {
 	stateUiTweak.iconScale = stateTweak.iconScale;
 	stateUiTweak.iconX = stateTweak.iconX;
 	stateUiTweak.iconY = stateTweak.iconY;
+	// Opacidad + capa de los dos elementos HTML. Van por el mismo puente que el
+	// resto de lo que dibuja BottomBar (que lee `stateUiTweak`, no `stateTweak`)
+	// para no darle al componente una segunda fuente de verdad.
+	stateUiTweak.stackAlpha = stateTweak.stackAlpha;
+	stateUiTweak.stackZ = stateTweak.stackZ;
+	stateUiTweak.iconAlpha = stateTweak.iconAlpha;
+	stateUiTweak.iconZ = stateTweak.iconZ;
 };
 
 export const applyBucket = (bucket: ResBucketKey) => {

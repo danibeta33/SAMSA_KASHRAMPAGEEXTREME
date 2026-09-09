@@ -193,7 +193,7 @@
 		     bajo el TopBar; BONUS solo en la esquina inferior izquierda. -->
 		<div
 			class="bb__topicons"
-			style="top: {topH + 8}px; gap: {t.iconGap}px; transform: scale({uiScale * t.iconScale}); transform-origin: top left"
+			style="top: {topH + 8}px; gap: {t.iconGap}px; opacity: {t.iconAlpha}; z-index: {t.iconZ}; transform: scale({uiScale * t.iconScale}); transform-origin: top left"
 		>
 			{@render iconButtons()}
 		</div>
@@ -201,7 +201,7 @@
 		{#if buyAllowed && !isReplay}
 			<button
 				class="bb__bonus bb__bonus--top"
-				style="top: {topH + 8}px; transform: scale({uiScale * t.iconScale}) skew(-8deg); transform-origin: top right"
+				style="top: {topH + 8}px; opacity: {t.iconAlpha}; z-index: {t.iconZ}; transform: scale({uiScale * t.iconScale}) skew(-8deg); transform-origin: top right"
 				onclick={openBuyBonus}
 				disabled={bonusDisabled}><span>BONUS</span></button
 			>
@@ -211,7 +211,7 @@
 		     posición tweakeables por bucket (UI LAB: Config+Bonus / X / Y). -->
 		<div
 			class="bb__icons"
-			style="left: {t.iconX * uiScale}px; bottom: {t.iconY * uiScale}px; gap: {t.iconGap}px; transform: scale({uiScale * t.iconScale}); transform-origin: bottom left"
+			style="left: {t.iconX * uiScale}px; bottom: {t.iconY * uiScale}px; gap: {t.iconGap}px; opacity: {t.iconAlpha}; z-index: {t.iconZ}; transform: scale({uiScale * t.iconScale}); transform-origin: bottom left"
 		>
 			{@render iconButtons()}
 			{#if buyAllowed && !isReplay}
@@ -226,9 +226,10 @@
 	{#if !isReplay}
 	<div
 		class="bb__right"
-		style={isPortrait
-			? `width:${t.stackW}px; right:50%; bottom:${t.stackBottom * uiScale}px; transform: translateX(50%) scale(${t.stackScale * uiScale}); transform-origin: bottom center`
-			: `width:${t.stackW}px; right:${t.stackRight * uiScale}px; bottom:${t.stackBottom * uiScale}px; transform: scale(${t.stackScale * uiScale}); transform-origin: bottom right`}
+		style={`opacity:${t.stackAlpha}; z-index:${t.stackZ}; ` +
+			(isPortrait
+				? `width:${t.stackW}px; right:50%; bottom:${t.stackBottom * uiScale}px; transform: translateX(50%) scale(${t.stackScale * uiScale}); transform-origin: bottom center`
+				: `width:${t.stackW}px; right:${t.stackRight * uiScale}px; bottom:${t.stackBottom * uiScale}px; transform: scale(${t.stackScale * uiScale}); transform-origin: bottom right`)}
 	>
 		<div class="bb__pill" style="width:{t.pillW}%; margin-bottom:{t.pillGap}px">
 			{#if isSocial}

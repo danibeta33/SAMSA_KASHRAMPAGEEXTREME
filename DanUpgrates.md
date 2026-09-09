@@ -1100,3 +1100,323 @@ Playwright).
 | **Se tocó `UiLab.svelte`, compartido por 7 juegos** | DEV-only y sin cambios de contrato: sigue leyendo `registry.groups` y despachando a `read/write/step/toggle/commit/reset`. `AnimLab` e `InspectorRemotePanel` no se tocaron — el panel externo de `/sizes` sigue mostrando todo expandido. |
 | **La inclinación está horneada en el componente** | `CONTENEDOR1_TILT` sale del PNG actual. Si el arte del recipiente se re-exporta con otra inclinación hay que volver a medir la pendiente del borde superior. |
 | **El título no se rotó** | El pedido lo mencionaba, pero su arte ya trae ángulos propios y la referencia lo muestra derecho. Quedó sin rotar y sin slider de rotación; si se quiere, es una clave más en `stateTweak` + `labMeta`. |
+
+---
+
+## Paso 6 — Controles globales de UI, geometría propia de los especiales e iluminación de victoria
+
+**Fecha:** 2026-09-09
+**App:** `stake-web-sdk/apps/kash-rampage-extreme`
+**Objetivo:** tres cosas que el laboratorio todavía no podía tocar — la
+**opacidad y la capa DE CADA ELEMENTO de la UI por separado** (la botonera en la
+capa 5, Kash en la 6, cada uno con su propia transparencia), la **geometría
+individual** de los 3 símbolos especiales (hasta ahora se movían los tres juntos
+con un único slider), y el **feedback de iluminación de victoria** de esos mismos
+especiales, cuyo arte (`anim_sym_*_luz`) había llegado al repo sin que nadie lo
+registrara.
+
+### 1. Punto de partida
+
+| Área | Qué había |
+|---|---|
+| Alpha / capa por elemento | **Nada.** Ningún elemento tenía alpha propio, y las capas salían del **orden de montaje** más tres constantes sueltas repartidas por el código (`-5` el fondo, `-4`/`15` Kash, nada el resto). Cambiar el apilado era editar componentes. |
+| Especiales | **Un solo dial** (`specialScale`) para W + S + H4, más un trim por símbolo horneado en el componente (`SPECIAL_TRIM = { sym_w: 0.9 }`). Sin control de posición. |
+| `anim_sym_premium` | Registrado y con `preload`, pero el export del 09-09 traía **la misma secuencia de 6 frames dos veces** (12 frames, 0.83 MB) y las métricas de `ANIM_SPECIAL` seguían siendo las del sheet anterior (25 frames). |
+| `anim_sym_*_luz` | Los 3 `.json` + `.webp` estaban en `static/`, **sin registrar** en `assets.ts` y sin ningún consumidor. `git status` los daba como archivos nuevos sin trackear. |
+
+### 2. Archivos modificados
+
+| Archivo | Cambio |
+|---|---|
+| `src/game/stateTweak.svelte.ts` | +21 claves en `Tweak`, `DEFAULTS` y `TWEAKABLE_KEYS`; `syncUi()` propaga las 4 de HTML |
+| `src/game/stateUiTweak.svelte.ts` | +4 claves (alpha/capa de botonera e íconos) — es lo que lee `BottomBar` |
+| `src/game/labMeta.ts` | Categoría nueva `specials` ("ESPECIALES"); constante `LAYER`; +21 sliders |
+| `src/components/Game.svelte` | Alpha/capa de la grilla; techo de celebraciones |
+| `src/components/TopHud.svelte` | Alpha/capa del grupo de recipientes y del título, por separado |
+| `src/components/Background.svelte` | Alpha/capa de Kash (capa de reposo tweakeable) |
+| `src/components/BottomBar.svelte` | Alpha/capa de la botonera y de la fila config+BONUS (CSS) |
+| `src/components/SymbolSprite.svelte` | Geometría por especial, clip `_luz`, z-index explícito, métricas de H4 re-medidas |
+| `src/game/assets.ts` | 3 sheets `_luz` registrados |
+| `static/assets/sprites/anim/anim_sym_premium.{json,webp}` | De-duplicado y re-empaquetado |
+
+### 3. Cómo se hizo
+
+**a) Opacidad y capa, un par por elemento.**
+
+Seis elementos, doce claves: grilla, Kash, HUD superior, título, botonera y fila
+config+BONUS. Cada uno con `<algo>Alpha` y `<algo>Z`.
+
+La clave del diseño es **no envolver**. La primera versión metía board + HUD +
+overlays en un contenedor común con `sortableChildren`, y eso justamente
+impide lo que se pedía: los elementos quedan hijos de nodos distintos y ninguno
+puede meterse *entre* los otros. Los cuatro elementos de canvas son ahora
+**hermanos directos del stage**, que ya venía con `sortableChildren` — lo prende
+`Background.svelte`, que es también quien clava el fondo en −5:
+
+```ts
+$effect(() => {
+    const stage = appContext.stateApp.pixiApplication?.stage;
+    if (stage) stage.sortableChildren = true;
+});
+```
+
+Eso no es un detalle opcional. `createContextParent` (pixi-svelte) llama
+`sortChildren()` **solo al montar cada hijo**:
+
+```ts
+const addToParent = (node: PIXI.ContainerChild) => {
+    onMount(() => {
+        context.parent.addChild(node);
+        context.parent.sortChildren();
+        ...
+```
+
+Sin `sortableChildren` en el padre, un `zIndex` reactivo sería letra muerta:
+arrastrar el slider cambia la propiedad y nadie vuelve a ordenar. Con él, PIXI
+re-ordena en cada render (`collectRenderablesMixin`), que es lo que hace que el
+cambio se vea en vivo.
+
+Reparto del espacio de capas del canvas, con los defaults:
+
+```text
+ −5   fondo (constante, Background.svelte)
+ −4   Kash          ← kashZ    · kashAlpha
+  0   grilla        ← boardZ   · boardAlpha
+  1   HUD superior  ← hudZ     · hudAlpha
+  2   título        ← titleZ   · titleAlpha
+ 15   Kash durante el swing (constante SWING_FRONT_LAYER)
+ 20   celebraciones (constante CELEBRATION_LAYER, Game.svelte)
+```
+
+Los defaults **reproducen el apilado histórico**, que hasta ahora salía del orden
+de montaje: nada se mueve al actualizar. Los dos extremos quedaron como
+constantes y no como sliders porque son el piso y el techo del rango, no
+decisiones de layout — y el rango de los sliders (−20..40) los encierra a los dos
+para que se pueda pasar por encima o por debajo si hace falta.
+
+**⚠ Hay DOS espacios de capas y no se mezclan.** Es una restricción del
+navegador, no una decisión de diseño: la botonera y los íconos son HTML
+(`BottomBar.svelte`, un `position: fixed` con `z-index: 90`) **encima** del
+canvas. Su número de capa los ordena entre ellos — útil, porque en portrait la
+fila de íconos y el stack centrado compiten — pero **ningún valor mete la
+botonera detrás de la grilla**. Para eso habría que portar la botonera a Pixi.
+Está anotado en `stateTweak.svelte.ts` y en la etiqueta de los sliders, que dicen
+"capa (HTML)".
+
+Los dos pares de HTML viajan por `syncUi()` hasta `stateUiTweak`, que es lo que
+`BottomBar` ya leía (`const t = stateUiTweak`) — así el componente no gana una
+segunda fuente de verdad. Se aplican como `opacity` y `z-index` inline sobre
+`.bb__right`, `.bb__icons`, `.bb__topicons` y `.bb__bonus--top`; los cuatro son
+`position: absolute`, así que el `z-index` les corresponde.
+
+En canvas, `hudAlpha`/`hudZ` y `titleAlpha`/`titleZ` se aplican **dentro** de
+`TopHud.svelte` y no en `Game.svelte`: el grupo de recipientes y el título son
+dos elementos distintos del laboratorio, y ya eran dos `<Container>` hermanos.
+Kash aplica su alpha en las tres ramas de render (idle, swing y el estático de
+respaldo) para que el swap entre clips no dé un salto de opacidad — el mismo
+criterio que ya se usaba para la escala de los especiales.
+
+**b) Los 3 especiales dejan de compartir perilla.**
+
+```ts
+const SPECIAL_GEOMETRY: Record<SelfAnimatedAssetKey, SpecialGeometry> = $derived({
+    sym_w:  { x: stateTweak.wildX,    y: stateTweak.wildY,    scale: stateTweak.wildScale },
+    sym_s:  { x: stateTweak.scatterX, y: stateTweak.scatterY, scale: stateTweak.scatterScale },
+    sym_h4: { x: stateTweak.premiumX, y: stateTweak.premiumY, scale: stateTweak.premiumScale },
+});
+```
+
+Tipado contra `SelfAnimatedAssetKey` (`winPop.svelte.ts`), igual que
+`ANIM_SPECIAL`: si la lista canónica de "especial" cambia, esto deja de compilar
+hasta que se sincronice.
+
+Dos decisiones que vale la pena dejar escritas:
+
+- **X/Y son fracciones de CELDA, no de canvas.** `boardX`/`hudX` son fracciones
+  del viewport porque posicionan bloques enteros; acá el símbolo ya viene
+  colocado por la grilla y esto es un nudge fino encima, así que escala con
+  `SYMBOL_SIZE`. Rango ±0.5 = media celda, de sobra para reencuadrar un clip que
+  cuelga sin sacarlo de su casilla.
+- **La escala multiplica a `specialScale`, no lo reemplaza.** El pedido decía
+  "en lugar de los valores globales", pero `specialScale` está congelado con un
+  valor distinto en cada uno de los 7 buckets de `PER_BUCKET_SEED` (1.165 a
+  1.33). Hacer los tres diales absolutos obligaría a sembrarlos bucket por bucket
+  o a perder los 7 layouts aprobados. Con el esquema multiplicativo
+  `specialScale` queda como dial del GRUPO y los tres nuevos como trim
+  individual — que es la independencia que se pedía — **sin mover un solo píxel
+  al cargar**: `wildScale` arranca en 0.90, que es exactamente el `SPECIAL_TRIM`
+  que reemplaza, y los otros dos en 1.
+
+**c) `anim_sym_premium`: registrado sí, empaquetado mal.**
+
+El registro estaba bien (con `preload`, que es lo correcto: H4 ya no tiene sprite
+estático de respaldo). El empaquetado no. El `.json` traía dos animaciones:
+
+```text
+Special_Billetes          6 frames  Special_Billetes_0000N.png
+Special_Billetes_00000    6 frames  Special_Billetes_00000_0000N.png
+```
+
+Renderizadas las dos a contact sheet, son **el mismo clip**. PIXI reproduce solo
+la primera —`getSpriteSheetFrames` toma `Object.values(animations)[0]`—, así que
+la mitad del atlas eran píxeles que nadie iba a pedir, en el **único** sheet de
+símbolos con `preload`. Además el duplicado era una bomba de tiempo: el criterio
+de selección es "la primera clave del objeto", y cuál queda primera depende del
+orden de export.
+
+Se sacó la copia del `.json` y se re-empaquetó con la herramienta que ya existe
+para esto:
+
+```text
+python .scripts/repack_spritesheet.py …/anim_sym_premium.json --verify
+
+  ANTES   canvas 256×256  arte 256×239  aspect 1.071130  fill {w:1.000000, h:0.933594}
+          atlas 870×870  0.83 MB  6 frames
+  DESPUES atlas 768×512  0.15 MB  6 frames
+  → 5.3× más liviano (0.67 MB menos)
+  ✓ ratios normalizados estables (tol 0.005)
+```
+
+En VRAM son 3.03 MB → 1.57 MB de textura descomprimida, y 0.67 MB menos de
+loading screen bloqueante para todos los jugadores.
+
+**d) Las métricas de H4 estaban colgadas del sheet viejo.**
+
+El drop del 09-09 pasó el clip de 25 frames a 6 y con eso cambió la caja del
+arte, pero `ANIM_SPECIAL.sym_h4` seguía con los números del anterior. El efecto
+NO era de tamaño: `specialW`/`specialH` siempre dan el mismo cuadrado, porque
+`aspect` y `fill` salen de la misma bbox y se cancelan —
+
+```text
+specialH = (side / aspect) / fill.h = side · arth/artw · 256/arth = side · 256/artw
+```
+
+— era de **centrado**. Con `center.y` 0.503906 en vez de 0.533203 el offset
+compensaba 0.0039 del lienzo en lugar de 0.0332, así que el fajo se dibujaba
+≈2.5 px de board (3 % de celda) **por debajo** de su centro real.
+
+| | aspect | fill.h | center.y |
+|---|---|---|---|
+| Antes (sheet de 25 frames) | 1.032258 | 0.968750 | 0.503906 |
+| Ahora (sheet de 6, re-medido) | 1.071130 | 0.933594 | 0.533203 |
+
+**e) La iluminación de victoria de los especiales.**
+
+Los 3 `_luz` **no son arte nuevo**: son el mismo clip de cada símbolo con el glow
+horneado encima, exportados desde el mismo canvas 256² y con el ícono en la misma
+posición (verificado a contact sheet: el fajo, el bate con su "Win" y la barra
+con su "SCATTER" caen en el mismo lugar en las dos versiones; lo único que cambia
+es el destello).
+
+Eso resuelve el alineado sin medir nada: se dibujan con el **mismo**
+`width`/`height`/`x`/`y` que el clip base. Compartir el lienzo de origen **es** el
+registro. Medir el `_luz` por su cuenta lo desalinearía, justamente porque su
+bounding box es más grande — el glow sangra fuera del ícono, que es todo el
+punto.
+
+```svelte
+<SpriteSheet zIndex={0} key={special.luzKey} width={specialW} height={specialH} … alpha={glowAlpha} />
+<SpriteSheet zIndex={1} key={special.key}    width={specialW} height={specialH} … />
+```
+
+**Simultaneidad:** el bloque monta cuando el símbolo entra en `win` y
+`AnimatedSprite` arranca con `gotoAndPlay(0)`, así que el clip de luz empieza en
+su frame 0 en el mismo instante que la animación de victoria. Los especiales
+quedan fuera de la cascada de `winFlash` (tienen clip propio y el boing se lo
+pisaría), así que su `glowAlpha` cae al fallback `isWinning ? 1 : 0` — que es
+exactamente el disparo instantáneo que se pedía.
+
+**f) El bug de jerarquía que esto destapó.**
+
+El brillo trasero **no estaba quedando detrás**. `addToParent` hace `addChild`,
+que APENDEA, y el bloque del glow monta al entrar en `win`, o sea DESPUÉS del
+ícono. El `sortChildren()` que corre justo después no arregla nada: con los dos
+hijos en `zIndex` 0 el sort es estable y respeta el orden del array — el glow
+recién agregado al final.
+
+O sea que el comentario "va PRIMERA = detrás del ícono" describía el orden de las
+etiquetas, no el resultado. En la rama de los 10 regulares el síntoma estaba
+enmascarado: sin secuencia activa `glowReplacesIcon` desmonta el ícono y el
+solape no llega a existir; solo con `winFlash` corriendo los dos conviven, y ahí
+la carta iluminada se dibujaba sobre el ícono y le tapaba el boing que dice
+acompañar.
+
+Se arregló declarando la profundidad en vez de confiar en el orden de montaje:
+`sortableChildren` en el Container de la celda y `zIndex` 0 / 1 explícitos, en
+**las dos** ramas (la del especial animado y la del sprite estático).
+
+### 4. Controles nuevos en el UI LAB (tecla `T` y `/sizes`)
+
+Los 12 diales de opacidad + capa quedaron **en la categoría de su propio
+elemento**, junto a los sliders de posición y tamaño que ya tenía cada uno — no
+en un bloque aparte:
+
+| Categoría | Slider | Rango · paso | Default |
+|---|---|---|---|
+| GRILLA | Grilla opacidad / capa (`boardAlpha`, `boardZ`) | 0 – 1 · 0.01 / −20 – 40 · 1 | 1 / 0 |
+| BOTONERA + ÍCONOS | Botonera opacidad / capa **(HTML)** (`stackAlpha`, `stackZ`) | ídem | 1 / 2 |
+| BOTONERA + ÍCONOS | Config opacidad / capa **(HTML)** (`iconAlpha`, `iconZ`) | ídem | 1 / 1 |
+| KASH | Kash opacidad / capa (`kashAlpha`, `kashZ`) | ídem | 1 / −4 |
+| HUD SUPERIOR | HUD opacidad / capa (`hudAlpha`, `hudZ`) | ídem | 1 / 1 |
+| TÍTULO | Título opacidad / capa (`titleAlpha`, `titleZ`) | ídem | 1 / 2 |
+
+Y los 9 de geometría de los especiales, en su categoría nueva:
+
+| Categoría | Slider | Rango · paso | Default |
+|---|---|---|---|
+| ESPECIALES | Wild X / Y (`wildX`, `wildY`) | ±0.5 celda · 0.005 | 0 |
+| ESPECIALES | Wild size (`wildScale`) | 0.3 – 2.5 · 0.005 | **0.9** |
+| ESPECIALES | Scatter X / Y (`scatterX`, `scatterY`) | ±0.5 celda · 0.005 | 0 |
+| ESPECIALES | Scatter size (`scatterScale`) | 0.3 – 2.5 · 0.005 | 1 |
+| ESPECIALES | Premium X / Y (`premiumX`, `premiumY`) | ±0.5 celda · 0.005 | 0 |
+| ESPECIALES | Premium size (`premiumScale`) | 0.3 – 2.5 · 0.005 | 1 |
+
+Los 6 sliders de capa comparten la constante `LAYER` de `labMeta.ts`, con
+`decimals: 0`: tanto el `zIndex` de PIXI como el `z-index` de CSS son enteros, y
+sin eso el paso fino (− / +) del inspector guardaría `3.0000` en vez de `3`.
+
+**`LAB_STORAGE_KEY` NO se bumpeó** (sigue en `kash_tweak_v15`), a diferencia de
+los pasos anteriores. Las 21 claves son **aditivas**: `loadOverrides` copia solo
+las que encuentra, así que un override viejo simplemente no las trae y caen al
+default por el merge de `applyBucket` (`DEFAULTS` → `PER_BUCKET_SEED` →
+`overrides`). Bumpear habría tirado los ajustes locales del usuario sin ganar
+nada.
+
+### 5. Verificación ejecutada
+
+| Chequeo | Resultado |
+|---|---|
+| `svelte.compile` de los 5 componentes tocados | ✅ sin errores ni warnings |
+| Duplicado del sheet de premium | ✅ contact sheet de las dos secuencias: idénticas frame a frame |
+| Re-pack | ✅ `--verify`: ratios normalizados estables (tol 5e-3), 0.83 → 0.15 MB |
+| Alineación de los `_luz` | ✅ contact sheet contra el clip base: mismo encuadre, mismo canvas 256², el glow es lo único que cambia |
+| Comportamiento con defaults | ✅ los 6 alpha en 1, las 6 capas en su valor histórico y `wildScale` 0.9 → apilado y tamaños idénticos a antes del paso |
+
+### 6. Análisis de riesgos
+
+| Riesgo | Estado / mitigación |
+|---|---|
+| **Se re-encodeó un `.webp` de arte entregado** | Es el único cambio binario del paso. Mitigado con `--verify` (invariantes de escala) **y** con inspección visual a contact sheet antes/después: los 6 frames del fajo son indistinguibles. El original está en el historial de git. |
+| **Una capa alta tapa las celebraciones** | Es el efecto pedido: el techo está en 20, así que a partir de 21 ese elemento pasa por delante de Win / FreeSpin / Transition. Documentado en `stateTweak` y en `LAYER`; ningún default lo hace. |
+| **`hudAlpha` / `stackAlpha` bajos esconden BALANCE, LAST WIN o el SPIN** | ⚠ **Riesgo de approval, no cosmético.** El `01-stake-approval-checklist.md` exige los 4 datos del HUD SIEMPRE visibles, y estos sliders los pueden llevar a 0 — lo mismo vale para dejar la botonera bajo otro elemento. Es DEV-only (los sliders no existen en producción) y es por bucket, pero **los valores que se congelen en `PER_BUCKET_SEED` no pueden bajar de 1** salvo decisión explícita de dirección. |
+| **Botonera e íconos no pueden ir detrás del canvas** | Restricción del navegador: son HTML sobre el canvas. Su capa los ordena entre ellos y nada más. Los sliders lo dicen ("capa (HTML)") y está anotado en `stateTweak`. Si dirección quiere la botonera *detrás* de la grilla, hay que portarla a Pixi — es un rework, no un slider. |
+| **`kashZ` no aplica durante el swing** | El batazo sube a la constante `SWING_FRONT_LAYER` (15) para pasar por delante del board; el dial manda en reposo. Es deliberado —esa capa es coreografía del golpe, no layout— pero puede confundir al ajustar si se mira justo en el frame del swing. |
+| **Los 3 `_luz` van sin `preload`** | Un especial que gane en los primeros segundos gana sin glow (cae al clip de siempre). Es deliberado: son 1.21 MB y el criterio del repo es no castigar el arranque por un adorno — el mismo que ya siguen las cartas `sym_*_luz`. Si dirección lo quiere garantizado, es agregar `preload: true` a las 3 entradas. |
+| **El apilado pasó de implícito a declarado** | Antes lo decidía el orden de montaje; ahora son números. Los defaults lo reproducen 1:1, pero cualquier componente NUEVO que se monte sin `zIndex` cae en 0 — o sea, entre Kash y el HUD, no arriba de todo como antes. Quien agregue una capa tiene que elegir su número. |
+| **Fondo y velo de portrait quedaron sin dial** | Siguen clavados en −5 / −4.5. Son escena, no UI, y el velo depende del fondo. Si hace falta, son dos claves más siguiendo el mismo patrón. |
+| **`specialScale` sigue existiendo** | Ahora hay dos niveles de escala para el mismo símbolo (grupo × individual) y es fácil confundirse al ajustar. El de grupo quedó en "BOTONERA + ÍCONOS" y los individuales en "ESPECIALES", separados a propósito. |
+| **Los 9 diales nuevos no están sembrados por bucket** | Arrancan neutros en los 7 buckets. Cuando el usuario los ajuste en `/sizes` hay que congelar los valores en `PER_BUCKET_SEED`, igual que se hizo con board/kash/stack. |
+
+### 7. Pendiente
+
+- Congelar en `PER_BUCKET_SEED` los valores de los 9 diales de especiales y de
+  los 12 de opacidad/capa una vez ajustados bucket por bucket.
+- Si dirección pide que la botonera pueda ir POR DEBAJO de elementos del canvas,
+  hay que portar `BottomBar.svelte` a Pixi. Hoy el overlay HTML lo impide.
+- Sacar el sheet duplicado desde el ORIGEN: el export de TexturePacker sigue
+  produciendo las dos secuencias. Mientras eso no se corrija, cada re-export del
+  premium hay que pasarlo por `repack_spritesheet.py` después de borrar la copia
+  del `.json`.
+- Los `_luz` de W y S dependen de que su clip base ya haya bajado (comparten la
+  rama `specialReady`): si el sheet base todavía no está, el símbolo gana con el
+  sprite estático y sin glow. Dura lo que tarda la descarga.

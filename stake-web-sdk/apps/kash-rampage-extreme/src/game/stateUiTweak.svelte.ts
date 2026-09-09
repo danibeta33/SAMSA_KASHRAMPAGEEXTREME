@@ -20,6 +20,14 @@ type UiTweak = {
 	iconScale: number; // escala de la fila config + BONUS (por bucket, via stateTweak)
 	iconX: number; // separación al borde izquierdo (px, por bucket via stateTweak)
 	iconY: number; // separación al borde inferior (px, por bucket via stateTweak)
+	// ── Opacidad + capa de los 2 elementos HTML (por bucket, via stateTweak) ──
+	// El overlay `.bb` es un `position: fixed` con `z-index: 90`, así que estos
+	// dos números ordenan botonera vs íconos ENTRE ELLOS. Contra los elementos
+	// de canvas no compiten: el overlay HTML siempre va por encima.
+	stackAlpha: number;
+	stackZ: number;
+	iconAlpha: number;
+	iconZ: number;
 	// ── Board frame (imagen de la cuadrícula) + símbolos ──
 	frameW: number; // ancho del frame (× board width)
 	frameH: number; // alto del frame (× board height)
@@ -51,6 +59,10 @@ export const stateUiTweak: UiTweak = $state({
 	iconScale: 1,
 	iconX: 22,
 	iconY: 18,
+	stackAlpha: 1,
+	stackZ: 2,
+	iconAlpha: 1,
+	iconZ: 1,
 	frameW: 1.1408,
 	frameH: 1.307,
 	frameX: 0.018,

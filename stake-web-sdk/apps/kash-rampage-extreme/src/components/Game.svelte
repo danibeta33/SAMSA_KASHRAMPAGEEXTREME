@@ -16,6 +16,12 @@
 
 	import { getContext } from '../game/context';
 
+	// TECHO del espacio de capas del canvas. Las celebraciones y la transición
+	// no se tweakean: son lo último que se lee en pantalla. Vive acá y no en
+	// `stateTweak` porque no es un valor de ajuste sino el borde del rango que
+	// documentan los sliders de capa (ver `LAYER` en labMeta.ts).
+	const CELEBRATION_LAYER = 20;
+
 	// Override the shared bet-mode metadata so the BuyBonus modal lists ONLY
 	// the four modes the math actually supports: base + 3 buys
 	// (100×, 250×, 500×). The SDK default (state-shared/constants.ts)
@@ -184,10 +190,26 @@
 		     board centrado con topes contra TopBar+iconos y contra el stack
 		     centrado de abajo. -->
 		{@const bt = boardTransform(cs.width, cs.height, context.stateLayoutDerived.mainLayout().scale)}
+		<!-- ESPACIO DE CAPAS DEL CANVAS (drop 09-09) — Kash, grilla, HUD superior
+		     y título son HERMANOS en el stage de PixiJS, cada uno con su propio
+		     `zIndex` tweakeable, así que se interpolan libremente entre ellos
+		     (poner Kash en la capa 6 y la botonera en la 5 es exactamente esto).
+		     NO se los envuelve en un contenedor común a propósito: un wrapper
+		     los volvería un solo nodo y ninguno podría meterse entre los otros.
+		     El stage ya va con `sortableChildren` — lo prende Background.svelte,
+		     que es también quien clava el fondo en −5. Sin eso el `zIndex`
+		     reactivo sería letra muerta: `createContextParent` solo llama
+		     `sortChildren()` AL MONTAR cada hijo, así que arrastrar un slider no
+		     reordenaría nada.
+		     Con los defaults (Kash −4 · grilla 0 · HUD 1 · título 2 · overlays
+		     20) el apilado queda EXACTAMENTE como antes de este drop, cuando lo
+		     decidía el orden de montaje. -->
 		<!-- KRE: sin SMASH Meter (el persistent mult se eliminó). El countdown
 		     de free spins lo muestra FreeSpinCounter, montado dentro del
 		     wrapper del board (abajo). -->
 		<Container
+			alpha={stateTweak.boardAlpha}
+			zIndex={stateTweak.boardZ}
 			x={cs.width * bt.bx + boardShake.x}
 			y={cs.height * bt.by + boardShake.y}
 			scale={{
@@ -221,22 +243,30 @@
 		</Container>
 
 		<!-- HUD superior (08-09): título + los 3 recipientes, EN EL CANVAS. Va
-		     fuera del <Container> de arriba a propósito — ese aplica
+		     fuera del <Container> del board a propósito — ese aplica
 		     boardTransform y arrastraría al HUD con la escala del board. Acá
 		     queda en coordenadas de canvas y los sliders del UI LAB lo mueven
 		     libre. Al estar dentro de este {:else}, no existe mientras el
-		     loading screen está al frente (era el `topbar--hidden` de TopBar). -->
+		     loading screen está al frente (era el `topbar--hidden` de TopBar).
+		     Su alpha/capa se aplican ADENTRO, en TopHud.svelte: el grupo de
+		     recipientes y el título son dos elementos distintos del laboratorio
+		     y cada uno lleva su propio par. -->
 		<TopHud />
 
 		<!-- La UI Pixi del SDK (bottom HUD default) sigue desmontada: abajo el
 		     HUD es el overlay HTML BottomBar.svelte (SPIN/STOP, TURBO, AUTO,
 		     BET ±, iconos, BONUS) con los assets del pack "Asset 2@4x". Los
 		     broadcasts uiShow/uiHide del bookEventHandlerMap los consume
-		     BottomBar. -->
-		<Win />
-		<FreeSpinIntro />
-		<FreeSpinOutro />
-		<Transition />
+		     BottomBar.
+		     Las celebraciones son el TECHO del espacio de capas: son lo último
+		     que se lee y no se tweakean. El 20 le deja aire al swing de Kash,
+		     que pasa por delante del board en 15 (ver Background.svelte). -->
+		<Container zIndex={CELEBRATION_LAYER}>
+			<Win />
+			<FreeSpinIntro />
+			<FreeSpinOutro />
+			<Transition />
+		</Container>
 	{/if}
 </App>
 
