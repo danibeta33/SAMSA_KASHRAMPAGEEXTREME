@@ -12,6 +12,14 @@
 		// APAGAR una presentación de `boardWithAnimateSymbols` que NO termina en
 		// tumble. Ver el handler para el porqué.
 		| { type: 'boardAnimateSymbolsReset' };
+
+	// Piso de presentación del cluster: un cluster de PURO especial (SCATTER) no
+	// anima nada en `playWinFlash`, y sin este mínimo la presentación pasaría de
+	// largo sin leerse.
+	export const WIN_HIGHLIGHT_FLOOR_MS = 250;
+	// Tiempo que el cluster queda ENCENDIDO una vez terminada la cascada, antes
+	// de que el tumble lo reviente.
+	export const WIN_HIGHLIGHT_HOLD_MS = 1500;
 </script>
 
 <script lang="ts">
@@ -54,9 +62,9 @@
 			});
 			// Brillo + flash + boing en cascada (winFlash.svelte.ts). Los
 			// especiales quedan afuera: corren su propio spritesheet.
-			// Piso de 250ms (el hold que había antes): un cluster de PURO especial
-			// —el caso de los SCATTER— no anima nada acá y sin el piso la
-			// presentación pasaría de largo sin que se lea.
+			// Piso `WIN_HIGHLIGHT_FLOOR_MS`: un cluster de PURO especial —el caso de
+			// los SCATTER— no anima nada acá y sin el piso la presentación pasaría
+			// de largo sin que se lea.
 			await Promise.all([
 				playWinFlash({
 					positions: symbolPositions,
@@ -67,8 +75,14 @@
 						return getSymbolInfo({ rawSymbol: reelSymbol.rawSymbol, state: 'win' });
 					},
 				}),
-				waitForTimeout(250),
+				waitForTimeout(WIN_HIGHLIGHT_FLOOR_MS),
 			]);
+			// HOLD extra: el cluster se queda ENCENDIDO (carta `_luz` + marco de
+			// victoria + dim del resto) un rato más antes de pasar a
+			// `postWinStatic` y que el tumble lo reviente. Pedido de dirección
+			// 09-09: +1.5s sobre lo que duraba la cascada, para que el jugador
+			// alcance a leer QUÉ símbolos ganaron.
+			await waitForTimeout(WIN_HIGHLIGHT_HOLD_MS);
 			symbolPositions.forEach((position) => {
 				const reelSymbol = context.stateGame.board[position.reel]?.reelState.symbols[position.row];
 				if (reelSymbol) reelSymbol.symbolState = 'postWinStatic';
