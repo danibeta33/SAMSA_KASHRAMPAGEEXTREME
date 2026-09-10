@@ -7,6 +7,7 @@ import { SYMBOL_SIZE, REEL_PADDING, SYMBOL_INFO_MAP, BOARD_DIMENSIONS } from './
 import { eventEmitter } from './eventEmitter';
 import type { Bet, BookEventOfType } from './typesBookEvent';
 import { bookEventHandlerMap } from './bookEventHandlerMap';
+import { hasOwnClip } from './winPop.svelte';
 import type { RawSymbol, SymbolState } from './types';
 
 // general utils
@@ -73,3 +74,16 @@ export const getSymbolInfo = ({
 	const entry = SYMBOL_INFO_MAP[symbolKey] ?? SYMBOL_INFO_MAP[FALLBACK_KEY];
 	return entry[state];
 };
+
+// ── CAPA SUPERIOR DEL BOARD (drop 10-09) ────────────────────────────────────
+// ¿Esta celda va dibujada POR ENCIMA de las demás? Pedido de dirección: los
+// especiales (WILD, SCATTER y KASH/fajo) con su marco tienen que quedar
+// siempre arriba de los símbolos normales, no depender del orden de montaje.
+// Importa porque se solapan de verdad: el `Marco_Icono` mide 1.12 celdas y el
+// boing de salida los estira hasta 1.5×, así que invaden a los cuatro vecinos.
+//
+// Es el MISMO conjunto que `hasOwnClip` (W / S / H4 + cualquier Spine), leído
+// con `state: 'static'` porque el assetKey no cambia entre estados — la capa
+// es una propiedad del SÍMBOLO, no de en qué momento de la ronda está.
+export const isTopLayerSymbol = ({ rawSymbol }: { rawSymbol?: RawSymbol }) =>
+	hasOwnClip({ symbolInfo: getSymbolInfo({ rawSymbol, state: 'static' }) });

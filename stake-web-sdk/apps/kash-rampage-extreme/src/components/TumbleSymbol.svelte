@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Symbol from './Symbol.svelte';
 	import SymbolWrap from './SymbolWrap.svelte';
-	import { getSymbolX, getSymbolInfo } from '../game/utils';
+	import { getSymbolX, getSymbolInfo, isTopLayerSymbol } from '../game/utils';
 	import type { TumbleSymbol } from '../game/stateGame.svelte';
 
 	type Props = {
@@ -21,6 +21,7 @@
 <SymbolWrap
 	x={getSymbolX(props.reelIndex)}
 	y={props.tumbleSymbol.symbolY.current}
+	zIndex={isTopLayerSymbol({ rawSymbol: props.tumbleSymbol.rawSymbol }) ? 1 : 0}
 	animating={symbolInfo.type === 'spine'}
 >
 	<Symbol

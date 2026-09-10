@@ -18,8 +18,9 @@
 	// largo sin leerse.
 	export const WIN_HIGHLIGHT_FLOOR_MS = 250;
 	// Tiempo que el cluster queda ENCENDIDO una vez terminada la cascada, antes
-	// de que el tumble lo reviente.
-	export const WIN_HIGHLIGHT_HOLD_MS = 1500;
+	// de que el tumble lo reviente. 09-09: recortado 0.6s (1500 → 900) por
+	// pedido de dirección — el hold se sentía largo.
+	export const WIN_HIGHLIGHT_HOLD_MS = 900;
 </script>
 
 <script lang="ts">
@@ -80,7 +81,7 @@
 			// HOLD extra: el cluster se queda ENCENDIDO (carta `_luz` + marco de
 			// victoria + dim del resto) un rato más antes de pasar a
 			// `postWinStatic` y que el tumble lo reviente. Pedido de dirección
-			// 09-09: +1.5s sobre lo que duraba la cascada, para que el jugador
+			// 09-09: +0.9s sobre lo que duraba la cascada, para que el jugador
 			// alcance a leer QUÉ símbolos ganaron.
 			await waitForTimeout(WIN_HIGHLIGHT_HOLD_MS);
 			symbolPositions.forEach((position) => {

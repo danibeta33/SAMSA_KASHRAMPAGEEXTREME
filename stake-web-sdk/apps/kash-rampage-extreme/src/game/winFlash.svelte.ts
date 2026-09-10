@@ -29,7 +29,7 @@ import { waitForTimeout } from 'utils-shared/wait';
 
 import type { Position } from './types';
 import type { SymbolStateInfo } from './constants';
-import { hasOwnClip } from './winPop.svelte';
+import { hasOwnClip, TWEEN_ABORT_GUARD_MS } from './winPop.svelte';
 
 export const WIN_FLASH = {
 	// Estado inicial del brillo para TODO el cluster (paso 0).
@@ -67,6 +67,12 @@ export const getWinFlashCell = ({ reel, row }: Position) => cells.get(`${reel}:$
 
 /** Apaga el feedback: al asentar el board, al ocultarlo y antes de cada cluster. */
 export const clearWinFlash = () => cells.clear();
+
+// Misma red de seguridad que el pop de salida: la promesa de un `Tween.set()`
+// ABORTADO no resuelve NUNCA (ver TWEEN_ABORT_GUARD_MS en winPop.svelte.ts) y la
+// presentación del cluster —que la ronda ESPERA— se quedaría colgada ahí.
+const settleTween = (tween: Promise<unknown>, durationMs: number) =>
+	Promise.race([tween, waitForTimeout(durationMs + TWEEN_ABORT_GUARD_MS)]);
 
 /**
  * Reparte los símbolos del cluster en el tiempo sin estirar la ronda: el
@@ -139,18 +145,24 @@ export const playWinFlash = async ({
 
 			const boing = (async () => {
 				// Anticipación: -15%.
-				await cell.scale.set(WIN_FLASH.anticipation.scale, {
-					duration: WIN_FLASH.anticipation.duration,
-					easing: WIN_FLASH.anticipation.easing,
-				});
+				await settleTween(
+					cell.scale.set(WIN_FLASH.anticipation.scale, {
+						duration: WIN_FLASH.anticipation.duration,
+						easing: WIN_FLASH.anticipation.easing,
+					}),
+					WIN_FLASH.anticipation.duration,
+				);
 				// Impacto: +15% con rebote elástico.
-				await cell.scale.set(WIN_FLASH.impact.scale, {
-					duration: WIN_FLASH.impact.duration,
-					easing: WIN_FLASH.impact.easing,
-				});
+				await settleTween(
+					cell.scale.set(WIN_FLASH.impact.scale, {
+						duration: WIN_FLASH.impact.duration,
+						easing: WIN_FLASH.impact.easing,
+					}),
+					WIN_FLASH.impact.duration,
+				);
 			})();
 
-			await Promise.all([flash, boing]);
+			await Promise.all([settleTween(flash, WIN_FLASH.flashDuration), boing]);
 		}),
 	);
 

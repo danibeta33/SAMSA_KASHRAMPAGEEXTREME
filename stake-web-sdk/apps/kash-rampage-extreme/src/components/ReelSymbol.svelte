@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Symbol from './Symbol.svelte';
 	import SymbolWrap from './SymbolWrap.svelte';
-	import { getSymbolInfo, getSymbolX } from '../game/utils';
+	import { getSymbolInfo, getSymbolX, isTopLayerSymbol } from '../game/utils';
 	import { stateRampage } from '../game/stateRampage.svelte';
 	import { getWinFlashCell } from '../game/winFlash.svelte';
 	import { getAnticipationGlow, getAnticipationAlpha } from '../game/stateAnticipation.svelte';
@@ -37,6 +37,11 @@
 		getAnticipationGlow({ reelIndex: props.reelIndex, y: props.reelSymbol.symbolY() }),
 	);
 	const antAlpha = $derived(getAnticipationAlpha({ reelIndex: props.reelIndex }));
+	// Los especiales (W / S / KASH) y su marco se dibujan SIEMPRE encima de los
+	// símbolos normales — ver `isTopLayerSymbol`. El ordenamiento lo hace el
+	// `sortableChildren` de BoardBase (dentro de la columna) más el zIndex del
+	// contenedor de la columna (entre columnas).
+	const onTopLayer = $derived(isTopLayerSymbol({ rawSymbol: props.reelSymbol.rawSymbol }));
 </script>
 
 {#if rampageHidden}
@@ -45,6 +50,7 @@
 	<SymbolWrap
 	x={getSymbolX(props.reelIndex)}
 	y={props.reelSymbol.symbolY()}
+	zIndex={onTopLayer ? 1 : 0}
 	animating={symbolInfo.type === 'spine' &&
 		(props.reelSymbol.symbolState === 'land' || props.reelSymbol.symbolState === 'win')}
 >

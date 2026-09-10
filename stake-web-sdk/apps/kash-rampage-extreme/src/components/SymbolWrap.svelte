@@ -22,6 +22,11 @@
 		x: number;
 		y: number;
 		animating: boolean;
+		// Profundidad de la CELDA entre sus hermanas (drop 10-09). Los
+		// especiales van en 1 para quedar siempre por encima de los símbolos
+		// normales — ver `isTopLayerSymbol`. Requiere `sortableChildren` en el
+		// contenedor padre (BoardBase / TumbleBoardBase).
+		zIndex?: number;
 		children: Snippet;
 	};
 
@@ -50,7 +55,13 @@
 	     victoria (zIndex −1, al fondo) y el símbolo (zIndex 0). El marco monta
 	     al ganar, o sea DESPUÉS del símbolo, y `addChild` apendea — sin orden
 	     por profundidad quedaría dibujado ENCIMA del ícono en vez de detrás. -->
-	<Container x={props.x} y={props.y} scale={invScale} sortableChildren={true}>
+	<Container
+		x={props.x}
+		y={props.y}
+		zIndex={props.zIndex ?? 0}
+		scale={invScale}
+		sortableChildren={true}
+	>
 		{@render props.children()}
 	</Container>
 {/if}

@@ -11,8 +11,11 @@
 	// decisión de dirección.
 </script>
 
-<!-- Símbolos -->
-<Container>
+<!-- Símbolos. `sortableChildren` (drop 10-09): las celdas son hermanas planas
+     acá, así que el zIndex que trae cada SymbolWrap alcanza para que los
+     especiales (y su marco) queden por encima de los normales durante el boing
+     de salida, que los estira hasta 1.5× e invade a los vecinos. -->
+<Container sortableChildren={true}>
 	{#each context.stateGameDerived.tumbleBoardCombined() as tumbleSymbols, reelIndex (reelIndex)}
 		{#each tumbleSymbols as tumbleSymbol}
 			<TumbleSymbol {reelIndex} {tumbleSymbol} />

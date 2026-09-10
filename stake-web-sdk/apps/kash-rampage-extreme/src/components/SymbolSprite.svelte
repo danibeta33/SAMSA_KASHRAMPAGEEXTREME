@@ -56,7 +56,7 @@
 	import { ANTICIPATION, stateAnticipation } from '../game/stateAnticipation.svelte';
 	import {
 		SELF_ANIMATED_ASSET_KEYS,
-		WIN_POP_TOTAL_MS,
+		getWinPopTotalMs,
 		type SelfAnimatedAssetKey,
 		type WinPop,
 	} from '../game/winPop.svelte';
@@ -551,10 +551,16 @@
 	// arrancando en el frame 4, en ese tiempo apenas pasaban ~11 frames y la
 	// animación se cortaba a mitad de camino.
 	//
-	// Atándola a `WIN_POP_TOTAL_MS` el cierre cae SIEMPRE junto con el símbolo,
-	// sin importar en qué frame del bucle lo agarre el boing.
+	// Atándola al total del pop el cierre cae SIEMPRE junto con el símbolo, sin
+	// importar en qué frame del bucle lo agarre el boing.
+	//
+	// El total es POR SÍMBOLO (`getWinPopTotalMs`) y no la constante global: los
+	// especiales cuelgan 200ms más en el boing, así que su marco tiene que ir
+	// proporcionalmente más lento o cerraría en el 18 antes de que el ícono
+	// termine de irse.
+	const winPopTotalMs = $derived(getWinPopTotalMs({ symbolInfo: props.symbolInfo }));
 	const marcoOutroSpeed = $derived(
-		(MARCO_LAST_FRAME + 1 - marcoOutroStart) / (WIN_POP_TOTAL_MS / 1000) / 60,
+		(MARCO_LAST_FRAME + 1 - marcoOutroStart) / (winPopTotalMs / 1000) / 60,
 	);
 
 	// El frame del bucle es COMPARTIDO entre instancias (ver el `<script
@@ -620,8 +626,9 @@
 	         gira y desvanece al DESAPARECER.
 	     Sin esto el marco quedaba clavado mientras el ícono respiraba y después
 	     se iba. En reposo los tres tweens valen 1, 1 y 0, así que la entrada y
-	     el bucle no se ven afectados. Los 3 animados (W/S/CASH STACK) no reciben
-	     ni winFlash ni winPop, de modo que su marco no se transforma. -->
+	     el bucle no se ven afectados. Los 3 animados (W/S/KASH) reciben winPop
+	     desde el 10-09 —su marco boinguea con ellos, más lento— pero NO winFlash,
+	     así que su `flashScale` queda en 1. -->
 	<Container
 		x={marcoX}
 		y={marcoY}
@@ -712,20 +719,22 @@
 	     glow terminaría dibujado ENCIMA del ícono, justo al revés de lo que
 	     pide la jerarquía. Con estos dos valores el reparto es por profundidad
 	     declarada y no por orden de montaje. -->
-	<!-- winFlash / winPop DESACTIVADOS para W, S y H4 (drop 09-09).
-	     La animación DUAL (clip base + `_luz` detrás) reemplaza al efecto
-	     genérico, así que acá NO entran ni `winScale`/`winRotation` (el boing y
-	     la rotación de winPop) ni `flashScale` (el golpe de winFlash): el
-	     Container va con el `pop` de aparición y nada más.
-	     El bloqueo ya existe RÍO ARRIBA —`hasOwnClip()` saca a los tres del
-	     filtro de `playWinFlash` y del guard de `winPop.play()`— pero repetirlo
-	     acá lo vuelve una invariante LOCAL del render: si mañana alguien les
-	     pasa un tween igual, el clip especial no se deforma. -->
+	<!-- BOING DE SALIDA también en W, S y H4 (drop 10-09).
+	     `winScale`/`winRotation` son el pop de `winPop`, que desde este drop SÍ
+	     corre en los tres especiales — con el paso 2 estirado 200ms para que su
+	     salida se lea distinta de la de los regulares (ver winPop.svelte.ts).
+	     Se multiplica con el `pop` de aparición: los dos escalan el MISMO
+	     Container y nunca coinciden en el tiempo (uno es al montar, el otro al
+	     explotar), así que el producto es siempre uno de los dos.
+	     Lo que sigue afuera es `flashScale` (el golpe de winFlash): la cascada
+	     de brillo la resuelven con su clip `_luz`, y `hasOwnClip()` los sigue
+	     sacando del filtro de `playWinFlash`. -->
 	<Container
 		x={cx}
 		y={cy}
 		zIndex={0}
-		scale={pop}
+		scale={pop * winScale}
+		rotation={winRotation}
 		alpha={cellAlpha}
 		sortableChildren={true}
 	>
