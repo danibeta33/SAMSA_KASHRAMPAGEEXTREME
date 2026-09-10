@@ -9,12 +9,20 @@
 	// existe para anunciar. Ahora el foco lo dan los SÍMBOLOS iluminándose
 	// (ver stateAnticipation.svelte.ts + SymbolSprite.svelte).
 	//
-	// Lo que queda —y hay que conservar— es el CONTRATO DE TIMING: a los 900 ms
-	// se llama `oncomplete`, que es lo que apaga `reel.reelState.anticipating`
-	// en Anticipations.svelte. Sin eso la secuencia del spin se cuelga.
-	// El reloj VISUAL (intensity / breath / barrido) no vive acá: es uno solo,
-	// compartido, y lo corre Anticipations.svelte — con un driver por columna
-	// cada uno arrancaría en su propio t0 y el barrido temblaría.
+	// Lo que queda —y hay que conservar— es el CONTRATO DE TIMING: al cumplirse
+	// `ANTICIPATION.durationMs` se llama `oncomplete`, que es lo que apaga
+	// `reel.reelState.anticipating` en Anticipations.svelte. Sin eso la
+	// secuencia del spin se cuelga.
+	//
+	// Esa duración ya no es un número elegido a mano: sale de los tramos del
+	// clip `Marco_2` (1733 ms = sus 26 frames a 15 fps), porque el pedido de
+	// dirección del 10-09 es que la anticipación ESPERE a que la animación
+	// termine. Antes eran 1300 ms contra un clip de 1733 y se cortaba en pleno
+	// idle, así que la salida de la barra no se veía nunca.
+	//
+	// El reloj VISUAL no vive acá: es uno solo, compartido, y lo corre
+	// Anticipations.svelte — con un driver por columna cada uno arrancaría en su
+	// propio t0 y la barra quedaría desfasada de la iluminación.
 	import { onMount, onDestroy } from 'svelte';
 
 	import type { Reel } from '../game/stateGame.svelte';

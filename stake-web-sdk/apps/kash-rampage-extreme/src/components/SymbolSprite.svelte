@@ -11,8 +11,7 @@
 	// marco por ENCIMA del ícono taparían la celda entera justo cuando el
 	// símbolo se está yendo. Pedido de dirección: terminar en el 18.
 	export const MARCO_LAST_FRAME = 18;
-	export const MARCO_FPS = 24; // entrada y bucle
-	const MARCO_ANIM_SPEED = MARCO_FPS / 60;
+	const MARCO_ANIM_SPEED = 24 / 60; // entrada y bucle: 24 fps
 	const MARCO_CELL_RATIO = 1.12; // lado del marco en celdas, antes del dial
 
 	// Frame ABSOLUTO en el que va el bucle. Vive en el módulo (compartido por
@@ -36,7 +35,6 @@
 	import type * as PIXI from 'pixi.js';
 	import {
 		AnimatedSprite,
-		BaseSprite,
 		Container,
 		Rectangle,
 		Sprite,
@@ -53,7 +51,7 @@
 	// Multiplicador extra SOLO para los especiales (slider `specialScale`).
 	import { stateTweak, labPreview } from '../game/stateTweak.svelte';
 	import { stateWinHighlight } from '../game/stateWinHighlight.svelte';
-	import { ANTICIPATION, stateAnticipation } from '../game/stateAnticipation.svelte';
+	import { ANTICIPATION } from '../game/stateAnticipation.svelte';
 	import {
 		SELF_ANIMATED_ASSET_KEYS,
 		getWinPopTotalMs,
@@ -469,45 +467,12 @@
 		(appContext.stateApp.loadedAssets?.marco as unknown as PIXI.Texture[] | undefined) ?? [],
 	);
 	const marcoReady = $derived(marcoTextures.length > MARCO_INTRO_END);
-	// ── El marco TAMBIÉN en la anticipación (pedido de dirección 09-09) ─────
-	// Las columnas que siguen girando encienden el mismo `Marco_Icono` que el
-	// cluster ganador: entra con su burst (frames 0..15) y se queda en el bucle
-	// de espera (4..15) mientras dure la anticipación.
-	//
-	// `marcoIsAnticipation` distingue los dos usos, y hace falta en dos lugares
-	// —el alpha y el frame compartido— porque el marco de win tiene contratos
-	// que el de anticipación NO debe tocar (ver abajo).
-	const marcoIsAnticipation = $derived(!isWinning && !labPreview.marco && antGlow > 0);
-	// El marco RESPIRA CON EL BARRIDO: su alpha es el mismo `antGlow` de la
-	// celda, así que la luz que baja de arriba hacia abajo enciende marco e
-	// ícono a la vez y se lee como UN solo pulso recorriendo la columna. En
-	// win queda en 1, como estaba.
-	const marcoAlpha = $derived(marcoIsAnticipation ? antGlow : 1);
-	// El marco de anticipación NO usa la máquina de fases de abajo: se dibuja
-	// como UN frame suelto, elegido por el reloj COMPARTIDO de la anticipación.
-	// El porqué está en `stateAnticipation.elapsedMs` — resumido: la columna
-	// gira, cada celda vive ~133 ms y una entrada de 666 ms por celda no
-	// llegaría a formarse nunca. Con el reloj compartido la celda que entra por
-	// arriba ya aparece con el marco armado y la animación se lee como una
-	// sola, corriendo en toda la columna.
-	//
-	// Recorre los MISMOS tramos que el marco de victoria: entrada 0..15 una vez
-	// y después el bucle de espera 4..15.
-	const antMarcoFrame = $derived.by(() => {
-		const f = Math.floor((stateAnticipation.elapsedMs / 1000) * MARCO_FPS);
-		if (f <= MARCO_INTRO_END) return f;
-		const loopLength = MARCO_INTRO_END - MARCO_LOOP_START + 1;
-		return MARCO_LOOP_START + ((f - MARCO_INTRO_END - 1) % loopLength);
-	});
-	// `marcoReady` ya garantiza que el array llega hasta MARCO_INTRO_END.
-	const antMarcoTexture = $derived(marcoTextures[antMarcoFrame]);
+	// El marco `Marco_Icono` es EXCLUSIVO de la victoria. La anticipación tuvo
+	// el suyo por un rato (09-09) y se retiró: ahora usa `Marco_2`, un clip de
+	// COLUMNA entera que dibuja Anticipations.svelte — un nodo por reel en vez
+	// de uno por celda. Ver AnticipationColumnFrame.svelte.
 	// `labPreview.marco` lo fuerza desde el AnimLab sin tener que ganar.
-	// El de anticipación queda FUERA del guard de `marcoPhase`: esa máquina es
-	// del marco de victoria y acá no corre.
-	const marcoOn = $derived(
-		marcoReady &&
-			(marcoIsAnticipation || ((labPreview.marco || isWinning) && marcoPhase !== 'done')),
-	);
+	const marcoOn = $derived(marcoReady && (labPreview.marco || isWinning) && marcoPhase !== 'done');
 	// Tamaño y posición salen de los 3 diales PROPIOS del símbolo
 	// (`<id>MarcoX/Y/Scale`): el encuadre del marco depende del ícono que
 	// enmarca, así que cada uno lleva el suyo. La base es la CELDA, no el ícono.
@@ -614,10 +579,8 @@
 	     de las tres ramas de render, no hijo: pertenece a la CELDA, así que no
 	     hereda el nudge ni el tamaño del ícono — lleva sus propios tres diales.
 
-	     Adentro hay DOS marcos distintos: el de VICTORIA (máquina de fases +
-	     `{#key}`, que remonta el AnimatedSprite en cada cambio para que arranque
-	     en el frame 0 del slice nuevo) y el de ANTICIPACIÓN (un frame suelto
-	     movido por el reloj compartido). Ver el `{#if}` de abajo.
+	     El `{#key}` remonta el AnimatedSprite en cada cambio de fase para que
+	     arranque en el frame 0 del slice nuevo (gotoAndPlay(0) al montar).
 
 	     Lo que SÍ hereda son las DOS transformaciones del ícono, multiplicadas:
 	       · `flashScale` — el golpe de `winFlash` (0.85 → 1.15) que da el
@@ -635,48 +598,28 @@
 		zIndex={1}
 		scale={winScale * flashScale}
 		rotation={winRotation}
-		alpha={marcoAlpha}
 	>
-		{#if marcoIsAnticipation}
-			<!-- ANTICIPACIÓN: un frame SUELTO, el que dicte el reloj compartido
-			     (`antMarcoFrame`). `BaseSprite` y no `AnimatedSprite` porque acá
-			     no hay reproducción propia que mantener — la animación la marca
-			     el reloj, y así la celda que entra girando por arriba aparece en
-			     EL MISMO frame que sus vecinas en vez de rearrancar su entrada.
-			     Tampoco toca `marcoLoopFrame`: ese contador es del marco de
-			     victoria (lo lee la salida del tumble board para retomar donde
-			     lo dejó la presentación del cluster) y un marco de anticipación
-			     —que nunca tiene salida, se desmonta con el reveal— no tiene por
-			     qué moverlo y desincronizar el boing del win siguiente. -->
-			<BaseSprite
+		{#key marcoPhase}
+			<AnimatedSprite
 				anchor={0.5}
-				texture={antMarcoTexture}
+				textures={marcoSlice}
 				width={marcoSide}
 				height={marcoSide}
+				animationSpeed={marcoPhase === 'outro' ? marcoOutroSpeed : MARCO_ANIM_SPEED}
+				loop={marcoPhase === 'loop'}
+				play
+				onFrameChange={(frame: number) => {
+					// Solo el bucle publica el frame compartido: es el que hay que
+					// retomar cuando arranque la salida.
+					if (marcoPhase === 'loop') marcoLoopFrame = MARCO_LOOP_START + frame;
+				}}
+				onComplete={() => {
+					// intro → bucle de espera · salida → apagar (destruye el nodo)
+					if (marcoPhase === 'intro') marcoPhase = 'loop';
+					else if (marcoPhase === 'outro') marcoPhase = 'done';
+				}}
 			/>
-		{:else}
-			{#key marcoPhase}
-				<AnimatedSprite
-					anchor={0.5}
-					textures={marcoSlice}
-					width={marcoSide}
-					height={marcoSide}
-					animationSpeed={marcoPhase === 'outro' ? marcoOutroSpeed : MARCO_ANIM_SPEED}
-					loop={marcoPhase === 'loop'}
-					play
-					onFrameChange={(frame: number) => {
-						// Solo el bucle publica el frame compartido: es el que hay
-						// que retomar cuando arranque la salida.
-						if (marcoPhase === 'loop') marcoLoopFrame = MARCO_LOOP_START + frame;
-					}}
-					onComplete={() => {
-						// intro → bucle de espera · salida → apagar (destruye el nodo)
-						if (marcoPhase === 'intro') marcoPhase = 'loop';
-						else if (marcoPhase === 'outro') marcoPhase = 'done';
-					}}
-				/>
-			{/key}
-		{/if}
+		{/key}
 	</Container>
 {/if}
 

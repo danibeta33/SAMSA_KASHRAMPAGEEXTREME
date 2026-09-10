@@ -196,6 +196,27 @@ export default {
 		src: new URL('../../assets/sprites/anim/marco.json', import.meta.url).href,
 		preload: true,
 	},
+	// MARCO DE COLUMNA (drop 10-09, `Marco_2` / animación `Marco_Columna`) — 26
+	// frames de un marco que envuelve la COLUMNA entera. Es el reemplazo del
+	// recuadro amarillo de la anticipación: se dibuja UNO por reel anticipado
+	// (AnticipationColumnFrame.svelte), no uno por celda.
+	//
+	// SIN preload, y no por elección de diseño: el atlas llegó en 4095² con
+	// frames de 644×1426, o sea 3.2 MB de descarga y ~67 MB de VRAM
+	// DESCOMPRIMIDA para algo que en pantalla mide ~180×400 px. Bloquear el
+	// loading screen con eso es justo el motivo de rechazo que documenta
+	// `05-preflight-checklist.md`. Mientras no haya bajado, la anticipación
+	// corre sin marco de columna (el brillo de los símbolos ya la sostiene):
+	// degrada, no rompe.
+	//
+	// ⚠ PENDIENTE antes de entregar: re-empaquetar con
+	// `.scripts/repack_spritesheet.py`, igual que se hizo con `marco` (que
+	// llegó en 1994² y quedó en 960² / 0.13 MB). Con eso puede pasar a
+	// `preload: true` y dejar de ser un riesgo de aprobación.
+	anim_marco_columna: {
+		type: 'spriteSheet',
+		src: new URL('../../assets/sprites/anim/Marco_2.json', import.meta.url).href,
+	},
 	// Symbols — 12 sprites, set KASH RAMPAGE (Drive ICONS PNG, kit 26-08).
 	// Los 10 regulares vienen del canvas 1080×970 del artista (Juanda) con la
 	// escala relativa normalizada; pipeline: crop cuadrado centrado 900px →

@@ -162,6 +162,7 @@ export const registerGameLabActions = (context: GameContext) => {
 	const PREVIEW_TOGGLES: Record<string, string> = {
 		previewMarco: 'marco',
 		previewLuz: 'luz',
+		previewMarcoColumna: 'marcoColumna',
 	};
 
 	animInspector.configure({
@@ -196,6 +197,16 @@ export const registerGameLabActions = (context: GameContext) => {
 		label: 'LUZ fija en W / S / CASH STACK',
 		category: 'winfx',
 		order: 1,
+	});
+	// Marco de COLUMNA de la anticipación (`Marco_2`, drop 10-09). En juego solo
+	// existe mientras una columna está anticipando —1.3 s, y con el board
+	// girando encima—, así que encuadrarlo contra la grilla era imposible. Este
+	// toggle lo deja en BUCLE y en las 7 columnas, con el board quieto, para
+	// ajustarlo con los sliders del UI LAB (tecla T → MARCO COLUMNA).
+	animInspector.registerToggle('previewMarcoColumna', {
+		label: 'MARCO COLUMNA en bucle (todas las columnas)',
+		category: 'winfx',
+		order: 2,
 	});
 
 	// ── Clips de Kash ─────────────────────────────────────────────────────

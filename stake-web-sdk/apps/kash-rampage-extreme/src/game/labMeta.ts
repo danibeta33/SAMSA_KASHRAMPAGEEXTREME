@@ -60,6 +60,7 @@ export const LAB_CATEGORIES: (InspectorCategoryConfig & { id: string })[] = [
 	{ id: 'tophud', label: 'HUD SUPERIOR', order: 4 },
 	{ id: 'title', label: 'TÍTULO', order: 5 },
 	{ id: 'freespin', label: 'CONTADOR FREE SPINS', order: 6 },
+	{ id: 'antmarco', label: 'MARCO COLUMNA (anticipación)', order: 7 },
 	// Una categoría POR SÍMBOLO (drop 09-09 · Paso 8) — se generan más abajo a
 	// partir de `LAB_SYMBOLS`, a continuación de estas.
 ];
@@ -193,6 +194,19 @@ export const LAB_SLIDERS: (InspectorSliderConfig & { id: string })[] = [
 	{ id: 'fsScale', label: 'FS size', min: 0.2, max: 3, step: 0.005, category: 'freespin', order: 57 },
 	{ id: 'fsAlpha', label: 'FS opacidad', min: 0, max: 1, step: 0.01, category: 'freespin', order: 58 },
 	{ id: 'fsZ', label: 'FS capa', ...LAYER, category: 'freespin', order: 59 },
+	// ── MARCO DE COLUMNA de la anticipación (drop 10-09, `Marco_2`) ─────────
+	// Mismas convenciones que los diales por símbolo: X/Y son FRACCIONES DE
+	// CELDA (× SYMBOL_SIZE) sobre el centro de la columna, y `Scale` multiplica
+	// el tamaño base — que se ata al ALTO del board, porque el arte es un
+	// pilar. El rango de X/Y es ±1.5 celdas y no ±0.5 como el de los símbolos:
+	// acá se encuadra un objeto de 400 px de alto contra la grilla, no se hace
+	// un nudge fino dentro de una casilla.
+	//
+	// Para verlo mientras se ajusta: ANIM LAB (tecla A) → MARCO + LUZ →
+	// "MARCO COLUMNA en bucle". Deja el clip prendido en las 7 columnas.
+	{ id: 'antMarcoX', label: 'Marco col. X', min: -1.5, max: 1.5, step: 0.005, category: 'antmarco', order: 60 },
+	{ id: 'antMarcoY', label: 'Marco col. Y', min: -1.5, max: 1.5, step: 0.005, category: 'antmarco', order: 61 },
+	{ id: 'antMarcoScale', label: 'Marco col. tamaño', min: 0.3, max: 2.5, step: 0.005, category: 'antmarco', order: 62 },
 ];
 
 // ── GEOMETRÍA POR SÍMBOLO: 6 sliders × 12 símbolos (drop 09-09 · Paso 8) ────

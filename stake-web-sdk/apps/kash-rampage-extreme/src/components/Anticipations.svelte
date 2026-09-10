@@ -1,25 +1,31 @@
 <script lang="ts">
-	// Anticipación v5 (09-09): sin `Rectangle` — ni el scrim negro que oscurecía
-	// las columnas frenadas ni los halos lima de Anticipation.svelte. Este
-	// componente queda como ORQUESTADOR: sonido, pulso del marco, y el ÚNICO
-	// reloj del efecto (intensity / breath / barrido de luz), que los símbolos
-	// leen desde stateAnticipation para iluminarse ellos mismos.
+	// Anticipación v6 (10-09): sin `Rectangle` y sin barrido propio. Este
+	// componente es el ORQUESTADOR: sonido, marco de columna, y el ÚNICO reloj
+	// del efecto — que ahora es EL FRAME DEL CLIP `Marco_2`. De ese único número
+	// salen el frame que dibuja el marco, qué objetos se iluminan y cuánto se
+	// atenúa el resto de la grilla, así que las tres cosas van en lockstep.
 	import { OnMount } from 'components-shared';
 	import { SECOND } from 'constants-shared/time';
 
 	import { getContext } from '../game/context';
 	import {
-		ANTICIPATION,
-		BOARD_HEIGHT,
+		marcoFrameAt,
 		stateAnticipation,
 		resetAnticipation,
 	} from '../game/stateAnticipation.svelte';
+	import { labPreview } from '../game/stateTweak.svelte';
 	import Anticipation from './Anticipation.svelte';
+	import AnticipationColumnFrame from './AnticipationColumnFrame.svelte';
+	import BoardContainer from './BoardContainer.svelte';
 
 	const context = getContext();
 	const hasAnticipation = $derived(
 		context.stateGame.board.some((reel) => reel.reelState.anticipating),
 	);
+	// Preview del ANIM LAB: prende el marco de columna en TODAS las columnas y
+	// lo deja en bucle, sin sonido ni rampa, para encuadrarlo con los sliders
+	// del UI LAB sin tener que provocar una anticipación real.
+	const previewColumnFrame = $derived(!!labPreview.marcoColumna);
 </script>
 
 {#if hasAnticipation}
@@ -35,38 +41,22 @@
 				duration: SECOND,
 			});
 
-			// Reloj ÚNICO del efecto. A 16 ms porque el barrido se mueve: a los
-			// 30 ms del scrim viejo (que solo subía un alpha) el frente de luz
-			// se veía escalonado.
+			// Reloj ÚNICO del efecto: el frame del clip. Se publica ya el 0 antes
+			// del primer tick — si no, el primer frame de la anticipación saldría
+			// con el reloj todavía en −1 (grilla sin atenuar) y se vería un salto.
 			const t0 = performance.now();
-			// El frente entra por encima del board y sale por debajo, así que el
-			// recorrido incluye una banda de margen a cada lado: si no, la luz
-			// "aparecía" ya dentro del board en vez de bajar hacia él.
-			const span = BOARD_HEIGHT + ANTICIPATION.band * 2;
+			stateAnticipation.frame = marcoFrameAt(0);
+			// A 16 ms y no a los 66.7 del clip: el intervalo MUESTREA el reloj,
+			// no lo marca. Alineado al frame se acumularía el drift del timer y
+			// la barra iría perdiendo frames contra la iluminación, que es
+			// justamente lo que este rediseño viene a evitar.
 			const id = setInterval(() => {
-				const t = performance.now() - t0;
-				// Reloj crudo del marco (ver `elapsedMs`). Va aparte de `intensity`
-				// porque el marco necesita el TIEMPO, no una rampa normalizada.
-				stateAnticipation.elapsedMs = t;
-				// Dos tiempos, y por eso no es una sola rampa:
-				//  · rise  → entrada, 0→1 en 280 ms. Corta, para que el efecto se
-				//    LEA desde el arranque (con la rampa vieja de 900 ms recién
-				//    llegaba a full cuando ya se estaba apagando).
-				//  · swell → sigue engordando 0.75→1 hasta el reveal, que es el
-				//    crescendo que pide la anticipación.
-				const rise = Math.min(t / ANTICIPATION.riseMs, 1);
-				const swell = 0.75 + 0.25 * Math.min(t / ANTICIPATION.durationMs, 1);
-				stateAnticipation.intensity = rise * swell;
-				// Respiración MÁS CHICA que antes (0.93 ± 0.07 contra 0.9 ± 0.1):
-				// el latido no puede comerse el brillo que se acaba de subir.
-				stateAnticipation.breath = 0.93 + Math.sin(t / 200) * 0.07;
-				stateAnticipation.sweepY =
-					((t % ANTICIPATION.sweepMs) / ANTICIPATION.sweepMs) * span - ANTICIPATION.band;
+				stateAnticipation.frame = marcoFrameAt(performance.now() - t0);
 			}, 16);
 
 			return () => {
 				clearInterval(id);
-				// Deja el reloj en 0: sin esto quedarían símbolos brillando o
+				// Deja el reloj en reposo: sin esto quedarían símbolos brillando o
 				// atenuados después del reveal.
 				resetAnticipation();
 				context.eventEmitter.broadcast({ type: 'boardFrameGlowHide' });
@@ -76,9 +66,23 @@
 	/>
 {/if}
 
+<!-- MARCO DE COLUMNA (`Marco_2`, drop 10-09). UN clip por reel anticipado,
+     colgado del BOARD y no del reel: la columna gira debajo y este nodo ni se
+     entera, así que la animación corre entera en vez de rearrancar con cada
+     celda que entra. Ver AnticipationColumnFrame.svelte. -->
+{#if hasAnticipation || previewColumnFrame}
+	<BoardContainer>
+		{#each context.stateGame.board as reel, reelIndex (reelIndex)}
+			{#if reel.reelState.anticipating || previewColumnFrame}
+				<AnticipationColumnFrame {reelIndex} preview={previewColumnFrame} />
+			{/if}
+		{/each}
+	</BoardContainer>
+{/if}
+
 {#each context.stateGame.board as reel}
 	{#if reel.reelState.anticipating}
-		<!-- No renderiza nada: es el temporizador de 900 ms que apaga el flag. -->
+		<!-- No renderiza nada: es el temporizador que apaga el flag al terminar. -->
 		<Anticipation {reel} oncomplete={() => (reel.reelState.anticipating = false)} />
 	{/if}
 {/each}

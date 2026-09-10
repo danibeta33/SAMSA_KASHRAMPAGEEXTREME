@@ -1,0 +1,223 @@
+{"frames": {
+
+"Marco_Columna_00000.png":
+{
+	"frame": {"x":3274,"y":1,"w":526,"h":677},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":65,"y":66,"w":526,"h":677},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00001.png":
+{
+	"frame": {"x":344,"y":1,"w":526,"h":469},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":65,"y":27,"w":526,"h":469},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00002.png":
+{
+	"frame": {"x":2930,"y":1043,"w":614,"h":712},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":55,"w":614,"h":712},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00003.png":
+{
+	"frame": {"x":1212,"y":1537,"w":614,"h":926},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":81,"w":614,"h":926},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00004.png":
+{
+	"frame": {"x":886,"y":2153,"w":615,"h":1213},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":29,"y":33,"w":615,"h":1213},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00005.png":
+{
+	"frame": {"x":1,"y":3358,"w":615,"h":1222},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":29,"y":33,"w":615,"h":1222},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00006.png":
+{
+	"frame": {"x":1,"y":1520,"w":586,"h":1209},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":44,"y":60,"w":586,"h":1209},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00007.png":
+{
+	"frame": {"x":1312,"y":2835,"w":614,"h":1280},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":70,"w":614,"h":1280},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00008.png":
+{
+	"frame": {"x":2594,"y":2863,"w":614,"h":1293},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":57,"w":614,"h":1293},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00009.png":
+{
+	"frame": {"x":1225,"y":3451,"w":615,"h":1319},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":29,"y":72,"w":615,"h":1319},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00010.png":
+{
+	"frame": {"x":2546,"y":3479,"w":615,"h":1325},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":29,"y":66,"w":615,"h":1325},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00011.png":
+{
+	"frame": {"x":2718,"y":2275,"w":586,"h":1319},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":44,"y":60,"w":586,"h":1319},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00012.png":
+{
+	"frame": {"x":1,"y":2770,"w":586,"h":1309},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":44,"y":70,"w":586,"h":1309},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00013.png":
+{
+	"frame": {"x":1,"y":495,"w":504,"h":1246},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":63,"y":57,"w":504,"h":1246},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00014.png":
+{
+	"frame": {"x":2448,"y":529,"w":512,"h":1231},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":55,"y":72,"w":512,"h":1231},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00015.png":
+{
+	"frame": {"x":2063,"y":1,"w":494,"h":1209},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":64,"y":60,"w":494,"h":1209},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00016.png":
+{
+	"frame": {"x":1249,"y":497,"w":510,"h":1197},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":62,"y":70,"w":510,"h":1197},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00017.png":
+{
+	"frame": {"x":872,"y":1,"w":492,"h":1189},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":80,"y":66,"w":492,"h":1189},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00018.png":
+{
+	"frame": {"x":1,"y":1001,"w":517,"h":1218},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":37,"y":65,"w":517,"h":1218},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00019.png":
+{
+	"frame": {"x":1221,"y":1009,"w":526,"h":1119},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":65,"y":181,"w":526,"h":1119},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00020.png":
+{
+	"frame": {"x":2861,"y":1659,"w":614,"h":1023},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":241,"w":614,"h":1023},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00021.png":
+{
+	"frame": {"x":1,"y":2108,"w":614,"h":883},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":22,"y":385,"w":614,"h":883},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00022.png":
+{
+	"frame": {"x":2140,"y":1601,"w":615,"h":719},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":29,"y":553,"w":615,"h":719},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00023.png":
+{
+	"frame": {"x":2101,"y":2218,"w":615,"h":615},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":29,"y":656,"w":615,"h":615},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00024.png":
+{
+	"frame": {"x":2342,"y":1043,"w":586,"h":556},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":44,"y":699,"w":586,"h":556},
+	"sourceSize": {"w":644,"h":1426}
+},
+"Marco_Columna_00025.png":
+{
+	"frame": {"x":1,"y":1,"w":299,"h":341},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":126,"y":737,"w":299,"h":341},
+	"sourceSize": {"w":644,"h":1426}
+}},
+"animations": {
+	"Marco_Columna": ["Marco_Columna_00000.png","Marco_Columna_00001.png","Marco_Columna_00002.png","Marco_Columna_00003.png","Marco_Columna_00004.png","Marco_Columna_00005.png","Marco_Columna_00006.png","Marco_Columna_00007.png","Marco_Columna_00008.png","Marco_Columna_00009.png","Marco_Columna_00010.png","Marco_Columna_00011.png","Marco_Columna_00012.png","Marco_Columna_00013.png","Marco_Columna_00014.png","Marco_Columna_00015.png","Marco_Columna_00016.png","Marco_Columna_00017.png","Marco_Columna_00018.png","Marco_Columna_00019.png","Marco_Columna_00020.png","Marco_Columna_00021.png","Marco_Columna_00022.png","Marco_Columna_00023.png","Marco_Columna_00024.png","Marco_Columna_00025.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "Marco_2.webp",
+	"format": "RGBA8888",
+	"size": {"w":4095,"h":4095},
+	"scale": "0.99",
+	"smartupdate": "$TexturePacker:SmartUpdate:79c51a3bac34df9f8e410980cbab6b8a:0d91e38277e25e1cb13277d370acd1f6:120745e3b89ce50f7eaff22c3e2973d4$"
+}
+}

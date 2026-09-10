@@ -96,6 +96,12 @@ type TweakBase = {
 	fsScale: number;
 	fsAlpha: number;
 	fsZ: number;
+	// ── MARCO DE COLUMNA de la anticipación (drop 10-09, `Marco_2`) ─────────
+	// X/Y en fracciones de CELDA sobre el centro de la columna; `Scale`
+	// multiplica el tamaño base, que sale del ALTO del board.
+	antMarcoX: number;
+	antMarcoY: number;
+	antMarcoScale: number;
 };
 
 // ── GEOMETRÍA POR SÍMBOLO (drop 09-09 · Paso 8) ─────────────────────────────
@@ -262,6 +268,12 @@ const DEFAULTS: Tweak = {
 	fsAlpha: 1,
 	// −1 = por DETRÁS de la grilla (boardZ 0) y por delante de Kash (−4).
 	fsZ: -1,
+	// Marco de columna de la anticipación. Sin nudge y a escala 1 = el alto del
+	// board. Punto de partida: el encuadre bueno sale del UI LAB (categoría
+	// MARCO COLUMNA) con el preview del ANIM LAB prendido.
+	antMarcoX: 0,
+	antMarcoY: 0,
+	antMarcoScale: 1,
 	// Las 72 claves de geometría por símbolo (ver SYMBOL_GEOM_DEFAULTS).
 	...SYMBOL_GEOM_DEFAULTS,
 };
@@ -311,8 +323,19 @@ export const bucketFor = (w: number, h: number): ResBucketKey =>
 // ajuste a dedo hecho en Desktop se ve igual en laptop, popouts y los 3
 // mobile. No re-listar esas claves acá salvo que un tamaño necesite una
 // excepción real.
+//
+// Las EXCEPCIONES vigentes (10-09), todas aprobadas a dedo por el usuario:
+//   · desktop  → 7 diales de ícono/marco (celda más grande) + boardZ/kashZ
+//                intercambiados + `antMarco*`.
+//   · laptop   → `fsScale` 1.01 (el 1.16 común se pisaba con el HUD).
+//   · portrait → `titleAlpha` 0.05 (logo casi apagado) y `fsZ` 3.
+// El resto de `antMarco*` va por bucket en los 7: es lo único de este drop que
+// se encuadra contra el board Y contra la grilla a la vez.
 const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
-	// Aprobado por el usuario en /sizes (08-09, viewport 425×812 — Mobile L).
+	// Aprobado por el usuario en /sizes (10-09, viewport 425×812 — Mobile L).
+	// Este es el bucket MODELO de los 3 portrait: Mobile M y Mobile S copian de
+	// acá el bloque de título (transparentado), el del contador de free spins y
+	// el del marco de columna, y conservan su propio board/botonera/HUD.
 	portrait_l: {
 		// board + layout libre
 		freeScale: 1,
@@ -336,12 +359,27 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		hudY: 0.579,
 		hudScale: 0.82,
 		hudGap: 6,
-		// titulo
-		titleX: 0.57,
-		titleY: 0.07,
-		titleScale: 0.74,
+		// titulo — en portrait el logo queda CASI APAGADO (alpha 0.05): el board
+		// vertical le come el lugar y competía con el HUD en fila.
+		titleX: 0.471,
+		titleY: 0.314,
+		titleScale: 1.915,
+		titleAlpha: 0.05,
+		// contador de free spins — arriba al centro y por DELANTE de todo
+		// (fsZ 3): en portrait no hay margen derecho libre como en landscape.
+		fsX: 0.439,
+		fsY: 0.008,
+		fsScale: 0.66,
+		fsZ: 3,
+		// marco de columna de la anticipación
+		antMarcoX: 0.075,
+		antMarcoY: 0.145,
+		antMarcoScale: 1.355,
 	},
 	// Aprobado por el usuario en /sizes (08-09, viewport 375×667 — Mobile M).
+	// Título / free spins / marco de columna: mismos valores que Mobile L (los
+	// tres bloques son fracciones de canvas o de celda, así que dan el mismo
+	// encuadre relativo en los 3 portrait).
 	portrait_m: {
 		// board + layout libre
 		freeScale: 1,
@@ -365,12 +403,23 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		hudY: 0.632,
 		hudScale: 0.86,
 		hudGap: 6,
-		// titulo
-		titleX: 0.561,
-		titleY: 0.07,
-		titleScale: 0.74,
+		// titulo (= Mobile L)
+		titleX: 0.471,
+		titleY: 0.314,
+		titleScale: 1.915,
+		titleAlpha: 0.05,
+		// contador de free spins (= Mobile L)
+		fsX: 0.439,
+		fsY: 0.008,
+		fsScale: 0.66,
+		fsZ: 3,
+		// marco de columna (= Mobile L)
+		antMarcoX: 0.075,
+		antMarcoY: 0.145,
+		antMarcoScale: 1.355,
 	},
 	// Aprobado por el usuario en /sizes (08-09, viewport 320×568 — Mobile S).
+	// Título / free spins / marco de columna: mismos valores que Mobile L.
 	portrait_s: {
 		// board + layout libre
 		freeScale: 1,
@@ -394,20 +443,37 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		hudY: 0.64,
 		hudScale: 1,
 		hudGap: 6,
-		// titulo
-		titleX: 0.246,
-		titleY: 0.237,
-		titleScale: 0.865,
+		// titulo (= Mobile L)
+		titleX: 0.471,
+		titleY: 0.314,
+		titleScale: 1.915,
+		titleAlpha: 0.05,
+		// contador de free spins (= Mobile L)
+		fsX: 0.439,
+		fsY: 0.008,
+		fsScale: 0.66,
+		fsZ: 3,
+		// marco de columna (= Mobile L)
+		antMarcoX: 0.075,
+		antMarcoY: 0.145,
+		antMarcoScale: 1.355,
 	},
 	// Aprobado por el usuario en /sizes (viewport 1200×675 — Desktop). Board /
 	// Kash / botonera / título son del 08-09; el HUD superior se re-ajustó el
-	// 09-09 junto con el drop de íconos + marcos.
+	// 09-09 junto con el drop de íconos + marcos, y el 10-09 se sumaron el
+	// marco de columna, el intercambio de capas board/Kash y las 7 excepciones
+	// de marco por símbolo de abajo.
 	desktop: {
 		// board + layout libre
 		freeScale: 1,
 		boardH: 0.974,
 		boardX: 0.504,
 		boardY: 0.538,
+		// Capas INTERCAMBIADAS contra el default: en desktop el board va DETRÁS
+		// (−4) y Kash DELANTE (0), o sea el personaje pisa el marco de la
+		// grilla. Es el único bucket donde el usuario aprobó este orden.
+		boardZ: -4,
+		kashZ: 0,
 		// botonera + iconos
 		stackScale: 0.88,
 		stackRight: 37,
@@ -429,8 +495,24 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		titleX: 0.133,
 		titleY: 0.147,
 		titleScale: 1.55,
+		// marco de columna de la anticipación
+		antMarcoX: 0.08,
+		antMarcoY: 0.16,
+		antMarcoScale: 1.4,
+		// Excepciones de ÍCONO + MARCO solo para desktop: con la celda más
+		// grande el usuario cerró los marcos de W / S / H4 / L4 y bajó H1 / H2.
+		// El resto de los 72 diales sigue saliendo de SYMBOL_GEOM_APPROVED.
+		h4MarcoScale: 1.295,
+		h2Scale: 0.92,
+		h2MarcoScale: 1.2,
+		h1Scale: 0.9,
+		l4MarcoScale: 1.145,
+		wMarcoScale: 1.335,
+		sMarcoScale: 1.225,
 	},
 	// Aprobado por el usuario en /sizes (08-09, viewport 400×225 — Popout S).
+	// HUD vertical, free spins y marco de columna: copiados de Popout L (mismo
+	// aspect 16:9, la mitad de tamaño) — conserva su propio hudScale/hudGap.
 	popout_s: {
 		// board + layout libre
 		freeScale: 1,
@@ -448,18 +530,26 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		kashH: 0.73,
 		kashX: 0.1,
 		kashY: 0.568,
-		// HUD superior
+		// HUD superior (hudY centrado como en Popout L)
 		hudVertical: 1,
 		hudX: 0.906,
-		hudY: 0.155,
+		hudY: 0.329,
 		hudScale: 1.045,
 		hudGap: -8,
 		// titulo
 		titleX: 0.061,
 		titleY: 0.089,
 		titleScale: 1.515,
+		// contador de free spins (= Popout L)
+		fsX: 0.837,
+		fsY: 0.118,
+		// marco de columna (= Popout L)
+		antMarcoX: 0.075,
+		antMarcoY: 0.145,
+		antMarcoScale: 1.355,
 	},
-	// Aprobado por el usuario en /sizes (08-09, viewport 800×450 — Popout L).
+	// Aprobado por el usuario en /sizes (10-09, viewport 800×450 — Popout L).
+	// Bucket MODELO de Popout S.
 	popout_l: {
 		// board + layout libre
 		freeScale: 1,
@@ -480,15 +570,22 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		// HUD superior
 		hudVertical: 1,
 		hudX: 0.912,
-		hudY: 0.155,
+		hudY: 0.329,
 		hudScale: 1.09,
 		hudGap: 8,
 		// titulo
 		titleX: 0.088,
 		titleY: 0.123,
 		titleScale: 1.455,
+		// contador de free spins
+		fsX: 0.837,
+		fsY: 0.118,
+		// marco de columna de la anticipación
+		antMarcoX: 0.075,
+		antMarcoY: 0.145,
+		antMarcoScale: 1.355,
 	},
-	// Aprobado por el usuario en /sizes (08-09, viewport 1024×576 — Laptop).
+	// Aprobado por el usuario en /sizes (10-09, viewport 1024×576 — Laptop).
 	laptop: {
 		// board + layout libre
 		freeScale: 1,
@@ -509,13 +606,21 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		// HUD superior
 		hudVertical: 1,
 		hudX: 0.926,
-		hudY: 0.155,
+		hudY: 0.386,
 		hudScale: 1,
 		hudGap: 6,
 		// titulo
 		titleX: 0.115,
 		titleY: 0.134,
 		titleScale: 1.5,
+		// contador de free spins
+		fsX: 0.856,
+		fsY: 0.211,
+		fsScale: 1.01,
+		// marco de columna de la anticipación
+		antMarcoX: 0.055,
+		antMarcoY: 0.17,
+		antMarcoScale: 1.385,
 	},
 };
 
@@ -560,6 +665,13 @@ const TWEAKABLE_KEYS = [
 	'fsScale',
 	'fsAlpha',
 	'fsZ',
+	// Marco de columna de la anticipación: SÍ va por bucket. Es lo único de la
+	// anticipación que se mide contra el board (alto) y contra la celda (X/Y),
+	// y cada tamaño del ACP terminó necesitando su propio encuadre — sin estas
+	// tres claves acá el UI LAB movía el marco pero no lo guardaba.
+	'antMarcoX',
+	'antMarcoY',
+	'antMarcoScale',
 	// …más las 72 de geometría por símbolo, que se agregan abajo.
 ] as const;
 
@@ -683,7 +795,11 @@ if (typeof window !== 'undefined') {
 //   · luz   → fuerza el `_luz` de W / S / CASH STACK sin tener que ganar.
 // Sirven para revisar encuadre y jerarquía sin depender de que caiga un
 // cluster; no se persisten y solo existen en DEV.
-export const labPreview = $state({ marco: false, luz: false } as Record<string, boolean>);
+export const labPreview = $state({
+	marco: false,
+	luz: false,
+	marcoColumna: false,
+} as Record<string, boolean>);
 if (import.meta.env.DEV && typeof window !== 'undefined') {
 	(globalThis as Record<string, unknown>).__labPreview = labPreview;
 }
