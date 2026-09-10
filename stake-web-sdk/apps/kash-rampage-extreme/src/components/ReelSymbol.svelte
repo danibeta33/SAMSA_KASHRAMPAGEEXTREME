@@ -4,6 +4,7 @@
 	import { getSymbolInfo, getSymbolX } from '../game/utils';
 	import { stateRampage } from '../game/stateRampage.svelte';
 	import { getWinFlashCell } from '../game/winFlash.svelte';
+	import { getAnticipationGlow, getAnticipationAlpha } from '../game/stateAnticipation.svelte';
 	import type { ReelSymbol } from '../game/stateGame.svelte';
 
 	type Props = {
@@ -26,6 +27,16 @@
 	const winFlash = $derived(
 		getWinFlashCell({ reel: props.reelIndex, row: props.symbolIndex }),
 	);
+	// Anticipación (v5): el foco lo dan los símbolos, no un rectángulo.
+	//  · antGlow  → brillo 0→1 de ESTA celda. Sigue al frente de luz que baja
+	//    por la columna, así que sale de la Y EN VIVO del símbolo y no de su
+	//    índice: durante la anticipación la columna está girando y las celdas
+	//    se mueven bajo el barrido.
+	//  · antAlpha → atenuación de las columnas ya frenadas (spotlight).
+	const antGlow = $derived(
+		getAnticipationGlow({ reelIndex: props.reelIndex, y: props.reelSymbol.symbolY() }),
+	);
+	const antAlpha = $derived(getAnticipationAlpha({ reelIndex: props.reelIndex }));
 </script>
 
 {#if rampageHidden}
@@ -41,6 +52,8 @@
 		state={props.reelSymbol.symbolState}
 		rawSymbol={props.reelSymbol.rawSymbol}
 		{winFlash}
+		{antGlow}
+		{antAlpha}
 		oncomplete={() => {
 			if (props.reelSymbol.symbolState === 'win') props.reelSymbol.oncomplete();
 			if (props.reelSymbol.symbolState === 'land') props.reelSymbol.symbolState = 'static';

@@ -22,6 +22,11 @@
 		winPop?: WinPop;
 		// Brillo + boing del cluster ganador — lo trae el board principal.
 		winFlash?: WinFlashCell;
+		// Anticipación (v5): brillo 0→1 de la celda y alpha del spotlight. Los
+		// calcula ReelSymbol; acá solo pasan de largo hasta el sprite, que es
+		// quien enciende su carta/clip `_luz`.
+		antGlow?: number;
+		antAlpha?: number;
 	};
 
 	const props: Props = $props();
@@ -43,6 +48,8 @@
 		oncomplete={props.oncomplete}
 		winPop={props.winPop}
 		winFlash={props.winFlash}
+		antGlow={props.antGlow}
+		antAlpha={props.antAlpha}
 	/>
 {:else}
 	<SymbolSpine

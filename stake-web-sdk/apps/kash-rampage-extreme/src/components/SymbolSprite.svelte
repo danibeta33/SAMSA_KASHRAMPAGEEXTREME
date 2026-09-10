@@ -11,7 +11,8 @@
 	// marco por ENCIMA del ícono taparían la celda entera justo cuando el
 	// símbolo se está yendo. Pedido de dirección: terminar en el 18.
 	export const MARCO_LAST_FRAME = 18;
-	const MARCO_ANIM_SPEED = 24 / 60; // entrada y bucle: 24 fps
+	export const MARCO_FPS = 24; // entrada y bucle
+	const MARCO_ANIM_SPEED = MARCO_FPS / 60;
 	const MARCO_CELL_RATIO = 1.12; // lado del marco en celdas, antes del dial
 
 	// Frame ABSOLUTO en el que va el bucle. Vive en el módulo (compartido por
@@ -35,6 +36,7 @@
 	import type * as PIXI from 'pixi.js';
 	import {
 		AnimatedSprite,
+		BaseSprite,
 		Container,
 		Rectangle,
 		Sprite,
@@ -51,6 +53,7 @@
 	// Multiplicador extra SOLO para los especiales (slider `specialScale`).
 	import { stateTweak, labPreview } from '../game/stateTweak.svelte';
 	import { stateWinHighlight } from '../game/stateWinHighlight.svelte';
+	import { ANTICIPATION, stateAnticipation } from '../game/stateAnticipation.svelte';
 	import {
 		SELF_ANIMATED_ASSET_KEYS,
 		WIN_POP_TOTAL_MS,
@@ -72,6 +75,13 @@
 		// Tweens del feedback de victoria (winFlash.svelte.ts): alpha del
 		// brillo trasero + escala del ícono, en contenedores SEPARADOS.
 		winFlash?: WinFlashCell;
+		// ── ANTICIPACIÓN (v5, 09-09) ────────────────────────────────────────
+		// Los calcula ReelSymbol contra stateAnticipation. Opcionales: el tumble
+		// board y el AnimLab montan sprites sin anticipación y caen a 0 / 1.
+		//  · antGlow  → 0→1, cuánto está iluminado ESTE símbolo ahora mismo.
+		//  · antAlpha → alpha de la celda; < 1 solo en las columnas ya frenadas.
+		antGlow?: number;
+		antAlpha?: number;
 	};
 
 	const props: Props = $props();
@@ -307,6 +317,22 @@
 	const dimmed = $derived(
 		stateWinHighlight.active && !isWinning && props.symbolState === 'static',
 	);
+	// ── ANTICIPACIÓN: el símbolo ES el efecto ────────────────────────────────
+	// Sustituye a los 3 rectángulos lima de Anticipation.svelte. La columna que
+	// sigue girando se ilumina con su PROPIA carta/clip `_luz` —conserva su
+	// color y el SCATTER se sigue leyendo, que era el caso que el halo amarillo
+	// arruinaba— y el resto del board baja de alpha.
+	//
+	// El `_luz` es el mismo arte que usa la victoria, pero acá se lee distinto y
+	// a propósito: en anticipación la luz VIAJA de arriba abajo en bucle sobre
+	// símbolos GIRANDO, sin marco ni boing; el win la enciende en celdas
+	// quietas, una sola vez y con `Marco_Icono` detrás. Si dirección igual lo
+	// quiere separado, es cambiar la fuente de estas tres derivadas.
+	const antGlow = $derived(props.antGlow ?? 0);
+	const antAlpha = $derived(props.antAlpha ?? 1);
+	// El alpha del win manda cuando los dos están activos (nunca coinciden hoy:
+	// `dimmed` exige 'static' y en anticipación los símbolos están en 'spin').
+	const cellAlpha = $derived(dimmed ? 0.3 : antAlpha);
 	// Iconos ILUMINADOS (kit 26-08): carta full-bleed con marco oscuro + glow
 	// horneado que reemplaza al estático + halo lima durante win/postWinStatic.
 	// Los 9 regulares estáticos tienen versión luz; w/s/h4 son animados y usan
@@ -359,6 +385,17 @@
 	// cascada). Con secuencia, el ícono se dibuja ENCIMA del brillo para que
 	// el boing tenga algo que golpear.
 	const glowReplacesIcon = $derived(!props.winFlash && isWinning && luzReady);
+	// Alpha efectivo de la carta trasera: win o anticipación, el que mande.
+	const luzShowAlpha = $derived(Math.max(glowAlpha, antGlow));
+	// Copia aditiva del MISMO ícono, ENCIMA. Va SIEMPRE que haya anticipación,
+	// no solo cuando falta la carta `_luz`: la carta sola se queda corta porque
+	// vive DETRÁS del ícono (el ícono es opaco y la tapa casi entera), así que
+	// tope el alpha que tope, el símbolo no pasaba de su brillo normal. El
+	// aditivo SUMA luz sobre el arte en vez de asomarse por el borde — es lo
+	// que hace que la columna se vea encendida y no apenas contorneada.
+	// Sigue cubriendo el caso de respaldo: las cartas `_luz` van sin `preload`,
+	// y si todavía no bajó, esto es todo el efecto y alcanza.
+	const antAddAlpha = $derived(antGlow * ANTICIPATION.addMult);
 
 	// ── Ciclo de vida del brillo de los ESPECIALES (drop 09-09) ─────────────
 	// A diferencia de los 10 regulares —cuya carta `_luz` acompaña todo
@@ -384,6 +421,24 @@
 	// `labPreview.luz` lo fuerza desde el AnimLab sin tener que ganar.
 	const specialGlowOn = $derived(
 		labPreview.luz || props.symbolState === 'win' || props.symbolState === 'postWinStatic',
+	);
+	// El MISMO clip `_luz` sirve a los dos efectos, pero NO de la misma forma.
+	// Es la vía por la que se ilumina el SCATTER (`anim_sym_scatter_luz`), que
+	// es el caso de prueba del near-miss.
+	//
+	//  · VICTORIA → alpha pleno, DETRÁS del clip base (zIndex 0). El glow
+	//    sangra alrededor de la silueta y el ícono queda nítido. Sin cambios.
+	//  · ANTICIPACIÓN → el mismo clip va ENCIMA (zIndex 2) y en `blendMode`
+	//    aditivo. Detrás casi no se notaba: el clip base es opaco y solo dejaba
+	//    ver el borde. Aditivo y adelante SUMA luz sobre el arte entero, que es
+	//    lo que hace que la columna se lea encendida de verdad.
+	//    Es la misma arte registrada al mismo canvas 256², así que sumarlo
+	//    sobre sí mismo brilla sin desalinear ni ensuciar la silueta.
+	//    El alpha va por debajo de 1 (`specialAddMult`) para que el oro del
+	//    SCATTER se realce sin quemarse a blanco.
+	const antLuzOnTop = $derived(!specialGlowOn && antGlow > 0);
+	const specialLuzAlpha = $derived(
+		specialGlowOn ? 1 : antGlow * ANTICIPATION.specialAddMult,
 	);
 
 	type MarcoPhase = 'intro' | 'loop' | 'outro' | 'done';
@@ -414,8 +469,45 @@
 		(appContext.stateApp.loadedAssets?.marco as unknown as PIXI.Texture[] | undefined) ?? [],
 	);
 	const marcoReady = $derived(marcoTextures.length > MARCO_INTRO_END);
+	// ── El marco TAMBIÉN en la anticipación (pedido de dirección 09-09) ─────
+	// Las columnas que siguen girando encienden el mismo `Marco_Icono` que el
+	// cluster ganador: entra con su burst (frames 0..15) y se queda en el bucle
+	// de espera (4..15) mientras dure la anticipación.
+	//
+	// `marcoIsAnticipation` distingue los dos usos, y hace falta en dos lugares
+	// —el alpha y el frame compartido— porque el marco de win tiene contratos
+	// que el de anticipación NO debe tocar (ver abajo).
+	const marcoIsAnticipation = $derived(!isWinning && !labPreview.marco && antGlow > 0);
+	// El marco RESPIRA CON EL BARRIDO: su alpha es el mismo `antGlow` de la
+	// celda, así que la luz que baja de arriba hacia abajo enciende marco e
+	// ícono a la vez y se lee como UN solo pulso recorriendo la columna. En
+	// win queda en 1, como estaba.
+	const marcoAlpha = $derived(marcoIsAnticipation ? antGlow : 1);
+	// El marco de anticipación NO usa la máquina de fases de abajo: se dibuja
+	// como UN frame suelto, elegido por el reloj COMPARTIDO de la anticipación.
+	// El porqué está en `stateAnticipation.elapsedMs` — resumido: la columna
+	// gira, cada celda vive ~133 ms y una entrada de 666 ms por celda no
+	// llegaría a formarse nunca. Con el reloj compartido la celda que entra por
+	// arriba ya aparece con el marco armado y la animación se lee como una
+	// sola, corriendo en toda la columna.
+	//
+	// Recorre los MISMOS tramos que el marco de victoria: entrada 0..15 una vez
+	// y después el bucle de espera 4..15.
+	const antMarcoFrame = $derived.by(() => {
+		const f = Math.floor((stateAnticipation.elapsedMs / 1000) * MARCO_FPS);
+		if (f <= MARCO_INTRO_END) return f;
+		const loopLength = MARCO_INTRO_END - MARCO_LOOP_START + 1;
+		return MARCO_LOOP_START + ((f - MARCO_INTRO_END - 1) % loopLength);
+	});
+	// `marcoReady` ya garantiza que el array llega hasta MARCO_INTRO_END.
+	const antMarcoTexture = $derived(marcoTextures[antMarcoFrame]);
 	// `labPreview.marco` lo fuerza desde el AnimLab sin tener que ganar.
-	const marcoOn = $derived(marcoReady && (labPreview.marco || isWinning) && marcoPhase !== 'done');
+	// El de anticipación queda FUERA del guard de `marcoPhase`: esa máquina es
+	// del marco de victoria y acá no corre.
+	const marcoOn = $derived(
+		marcoReady &&
+			(marcoIsAnticipation || ((labPreview.marco || isWinning) && marcoPhase !== 'done')),
+	);
 	// Tamaño y posición salen de los 3 diales PROPIOS del símbolo
 	// (`<id>MarcoX/Y/Scale`): el encuadre del marco depende del ícono que
 	// enmarca, así que cada uno lleva el suyo. La base es la CELDA, no el ícono.
@@ -455,7 +547,7 @@
 	//
 	// Es lo que hacía que el marco nunca llegara al frame 18: `tumbleBoardExplode`
 	// espera el pop y enseguida `tumbleBoardRemoveExploded` DESMONTA el símbolo,
-	// así que el marco se destruye a los ~480 ms (WIN_POP_TOTAL_MS). A 24 fps,
+	// así que el marco se destruye a los ~980 ms (WIN_POP_TOTAL_MS). A 24 fps,
 	// arrancando en el frame 4, en ese tiempo apenas pasaban ~11 frames y la
 	// animación se cortaba a mitad de camino.
 	//
@@ -515,8 +607,11 @@
 	<!-- MARCO POR ENCIMA del símbolo (zIndex 1 · pedido de dirección). Hermano
 	     de las tres ramas de render, no hijo: pertenece a la CELDA, así que no
 	     hereda el nudge ni el tamaño del ícono — lleva sus propios tres diales.
-	     El `{#key}` remonta el AnimatedSprite en cada cambio de fase para que
-	     arranque en el frame 0 del slice nuevo (gotoAndPlay(0) al montar).
+
+	     Adentro hay DOS marcos distintos: el de VICTORIA (máquina de fases +
+	     `{#key}`, que remonta el AnimatedSprite en cada cambio para que arranque
+	     en el frame 0 del slice nuevo) y el de ANTICIPACIÓN (un frame suelto
+	     movido por el reloj compartido). Ver el `{#if}` de abajo.
 
 	     Lo que SÍ hereda son las DOS transformaciones del ícono, multiplicadas:
 	       · `flashScale` — el golpe de `winFlash` (0.85 → 1.15) que da el
@@ -533,33 +628,53 @@
 		zIndex={1}
 		scale={winScale * flashScale}
 		rotation={winRotation}
+		alpha={marcoAlpha}
 	>
-		{#key marcoPhase}
-			<AnimatedSprite
+		{#if marcoIsAnticipation}
+			<!-- ANTICIPACIÓN: un frame SUELTO, el que dicte el reloj compartido
+			     (`antMarcoFrame`). `BaseSprite` y no `AnimatedSprite` porque acá
+			     no hay reproducción propia que mantener — la animación la marca
+			     el reloj, y así la celda que entra girando por arriba aparece en
+			     EL MISMO frame que sus vecinas en vez de rearrancar su entrada.
+			     Tampoco toca `marcoLoopFrame`: ese contador es del marco de
+			     victoria (lo lee la salida del tumble board para retomar donde
+			     lo dejó la presentación del cluster) y un marco de anticipación
+			     —que nunca tiene salida, se desmonta con el reveal— no tiene por
+			     qué moverlo y desincronizar el boing del win siguiente. -->
+			<BaseSprite
 				anchor={0.5}
-				textures={marcoSlice}
+				texture={antMarcoTexture}
 				width={marcoSide}
 				height={marcoSide}
-				animationSpeed={marcoPhase === 'outro' ? marcoOutroSpeed : MARCO_ANIM_SPEED}
-				loop={marcoPhase === 'loop'}
-				play
-				onFrameChange={(frame: number) => {
-					// Solo el bucle publica el frame compartido: es el que hay que
-					// retomar cuando arranque la salida.
-					if (marcoPhase === 'loop') marcoLoopFrame = MARCO_LOOP_START + frame;
-				}}
-				onComplete={() => {
-					// intro → bucle de espera · salida → apagar (destruye el nodo)
-					if (marcoPhase === 'intro') marcoPhase = 'loop';
-					else if (marcoPhase === 'outro') marcoPhase = 'done';
-				}}
 			/>
-		{/key}
+		{:else}
+			{#key marcoPhase}
+				<AnimatedSprite
+					anchor={0.5}
+					textures={marcoSlice}
+					width={marcoSide}
+					height={marcoSide}
+					animationSpeed={marcoPhase === 'outro' ? marcoOutroSpeed : MARCO_ANIM_SPEED}
+					loop={marcoPhase === 'loop'}
+					play
+					onFrameChange={(frame: number) => {
+						// Solo el bucle publica el frame compartido: es el que hay
+						// que retomar cuando arranque la salida.
+						if (marcoPhase === 'loop') marcoLoopFrame = MARCO_LOOP_START + frame;
+					}}
+					onComplete={() => {
+						// intro → bucle de espera · salida → apagar (destruye el nodo)
+						if (marcoPhase === 'intro') marcoPhase = 'loop';
+						else if (marcoPhase === 'outro') marcoPhase = 'done';
+					}}
+				/>
+			{/key}
+		{/if}
 	</Container>
 {/if}
 
 {#if isWireframe}
-	<Container x={cx} y={cy} zIndex={0} scale={winScale} rotation={winRotation}>
+	<Container x={cx} y={cy} zIndex={0} scale={winScale} rotation={winRotation} alpha={cellAlpha}>
 		<!-- filled tile -->
 		<Rectangle
 			x={-w / 2}
@@ -611,10 +726,10 @@
 		y={cy}
 		zIndex={0}
 		scale={pop}
-		alpha={dimmed ? 0.3 : 1}
+		alpha={cellAlpha}
 		sortableChildren={true}
 	>
-		{#if specialLuzReady && specialGlowOn}
+		{#if specialLuzReady && specialLuzAlpha > 0}
 			<!-- ILUMINACIÓN DE VICTORIA del especial (drop 09-09). Misma
 			     jerarquía que la carta `_luz` de los 10 regulares: va PRIMERA =
 			     DETRÁS del clip base, que se dibuja encima y queda nítido
@@ -628,7 +743,9 @@
 			     en el mismo instante que la animación de victoria. -->
 			<SpriteSheet
 				anchor={0.5}
-				zIndex={0}
+				zIndex={antLuzOnTop ? 2 : 0}
+				alpha={specialLuzAlpha}
+				blendMode={antLuzOnTop ? 'add' : 'normal'}
 				x={specialOffsetX}
 				y={specialOffsetY}
 				key={special.luzKey}
@@ -665,10 +782,10 @@
 		zIndex={0}
 		scale={winScale}
 		rotation={winRotation}
-		alpha={dimmed ? 0.3 : 1}
+		alpha={cellAlpha}
 		sortableChildren={true}
 	>
-		{#if luzReady && glowAlpha > 0}
+		{#if luzReady && luzShowAlpha > 0}
 			<!-- BRILLO TRASERO: la carta iluminada del kit (marco + glow
 			     horneado) va DETRÁS del ícono (zIndex 0), con su propio alpha y
 			     SIN escala — el boing es del ícono, no del halo. -->
@@ -678,7 +795,7 @@
 				key={luzKey}
 				width={luzW}
 				height={luzH}
-				alpha={glowAlpha}
+				alpha={luzShowAlpha}
 			/>
 		{/if}
 		{#if !glowReplacesIcon && hasStatic}
@@ -687,6 +804,19 @@
 			     estático (ver STATIC_LESS): su clip preloaded ya cubre el hueco. -->
 			<Container zIndex={1} scale={flashScale}>
 				<Sprite anchor={0.5} key={props.symbolInfo.assetKey} width={w} height={h} />
+				{#if antAddAlpha > 0}
+					<!-- Respaldo de anticipación sin `_luz`: copia aditiva del ícono.
+					     Va DESPUÉS del sprite base (addChild apendea) para quedar
+					     encima, y comparte width/height/anchor para no desregistrar. -->
+					<Sprite
+						anchor={0.5}
+						key={props.symbolInfo.assetKey}
+						width={w}
+						height={h}
+						blendMode="add"
+						alpha={antAddAlpha}
+					/>
+				{/if}
 			</Container>
 		{/if}
 	</Container>

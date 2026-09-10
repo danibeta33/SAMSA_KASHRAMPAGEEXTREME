@@ -41,15 +41,15 @@ export const hasOwnClip = ({ symbolInfo }: { symbolInfo: SymbolStateInfo }) =>
 
 const DEG = Math.PI / 180;
 
-// Tiempos y curvas de cada paso. Total ≈ 480ms — el mismo orden de magnitud
-// que el rebote del slide-down (200ms) para que el ciclo win → tumble no se
-// sienta pesado. Subir `boing.duration` si dirección pide más "cuelgue".
+// Tiempos y curvas de cada paso. Total ≈ 980ms — el boing lleva +500ms de
+// "cuelgue" sobre los 220ms originales por pedido de dirección, así que el ciclo
+// win → tumble respira más que el rebote del slide-down (200ms).
 export const WIN_POP_STEPS = {
 	// Paso 1 — anticipación: contra-rotación + encoje.
 	anticipation: { duration: 110, easing: quadOut, scale: 0.75, rotation: -12 * DEG },
 	// Paso 2 — impacto: +50% con rebote. `elasticOut` (svelte/easing) es el
 	// swap directo si se quiere el gesto más cartoon.
-	boing: { duration: 220, easing: backOut, scale: 1.5, rotation: 0 },
+	boing: { duration: 720, easing: backOut, scale: 1.5, rotation: 0 },
 	// Paso 3 — desaparición: acelera hacia 0 y sale del board.
 	vanish: { duration: 150, easing: cubicIn, scale: 0 },
 } as const;

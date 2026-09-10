@@ -1,17 +1,24 @@
 <script lang="ts">
-	// Anticipación v4 (pedido de dirección 15-07): SOLO un glow — nada de marcos
-	// estroboscópicos ni rieles. Halo lima suave alrededor de la columna,
-	// respirando y subiendo de intensidad hacia el reveal. El spotlight que
-	// oscurece las demás columnas vive en Anticipations.svelte (queda igual).
-	// El halo se construye con capas concéntricas de alpha decreciente
-	// (Pixi sin filtros externos). `oncomplete` mantiene el timing del spin.
+	// Anticipación v5 (09-09): este componente YA NO DIBUJA NADA.
+	//
+	// Antes pintaba 3 rectángulos lima concéntricos alrededor de la columna.
+	// Se fueron: el padding de 30 px invadía el 37 % de la columna vecina (con
+	// 3 anticipadas contiguas los halos se fundían en un bloque amarillo) y el
+	// lavado compuesto llegaba a ~56 % de alpha sobre los símbolos, camuflando
+	// justo al SCATTER —barra de oro con letras amarillas— que el efecto
+	// existe para anunciar. Ahora el foco lo dan los SÍMBOLOS iluminándose
+	// (ver stateAnticipation.svelte.ts + SymbolSprite.svelte).
+	//
+	// Lo que queda —y hay que conservar— es el CONTRATO DE TIMING: a los 900 ms
+	// se llama `oncomplete`, que es lo que apaga `reel.reelState.anticipating`
+	// en Anticipations.svelte. Sin eso la secuencia del spin se cuelga.
+	// El reloj VISUAL (intensity / breath / barrido) no vive acá: es uno solo,
+	// compartido, y lo corre Anticipations.svelte — con un driver por columna
+	// cada uno arrancaría en su propio t0 y el barrido temblaría.
 	import { onMount, onDestroy } from 'svelte';
-	import { Container, Rectangle } from 'pixi-svelte';
 
 	import type { Reel } from '../game/stateGame.svelte';
-	import { getContext } from '../game/context';
-	import { SYMBOL_SIZE, BOARD_DIMENSIONS, REEL_PADDING } from '../game/constants';
-	import BoardContainer from './BoardContainer.svelte';
+	import { ANTICIPATION } from '../game/stateAnticipation.svelte';
 
 	type Props = {
 		reel: Reel;
@@ -19,62 +26,14 @@
 	};
 
 	const props: Props = $props();
-	const context = getContext();
 
-	const TOTAL_DURATION_MS = 900;
-	const LIME = 0xf6ef1b;
-
-	// intensity: 0→1 hacia el reveal. breath: respiración suave (no parpadeo).
-	let intensity = $state(0);
-	let breath = $state(1);
-
-	let tick: ReturnType<typeof setInterval> | undefined;
 	let doneTimer: ReturnType<typeof setTimeout> | undefined;
 
 	onMount(() => {
-		const t0 = performance.now();
-		tick = setInterval(() => {
-			const t = performance.now() - t0;
-			intensity = Math.min(t / TOTAL_DURATION_MS, 1);
-			breath = 0.85 + Math.sin(t / 180) * 0.15;
-		}, 30);
-		doneTimer = setTimeout(() => props.oncomplete?.(), TOTAL_DURATION_MS);
+		doneTimer = setTimeout(() => props.oncomplete?.(), ANTICIPATION.durationMs);
 	});
 
 	onDestroy(() => {
-		if (tick) clearInterval(tick);
 		if (doneTimer) clearTimeout(doneTimer);
 	});
-
-	const reelIndex = $derived(context.stateGame.board.indexOf(props.reel));
-	const reelHeight = SYMBOL_SIZE * BOARD_DIMENSIONS.y;
-	const reelWidth = SYMBOL_SIZE;
-	const reelX = $derived(SYMBOL_SIZE * (reelIndex + REEL_PADDING - 0.5));
-	const cx = $derived(reelX + reelWidth / 2);
-
-	// Halo: capas concéntricas, la interna más brillante. Alpha total sube
-	// con la carga y respira con `breath`.
-	const glow = $derived((0.16 + intensity * 0.22) * breath);
-	const LAYERS = [
-		{ pad: 6, mult: 1 },
-		{ pad: 16, mult: 0.55 },
-		{ pad: 30, mult: 0.28 },
-	];
 </script>
-
-{#if reelIndex >= 0}
-	<BoardContainer>
-		<Container x={cx} y={reelHeight / 2}>
-			{#each LAYERS as layer}
-				<Rectangle
-					x={-reelWidth / 2 - layer.pad}
-					y={-reelHeight / 2 - layer.pad}
-					width={reelWidth + layer.pad * 2}
-					height={reelHeight + layer.pad * 2}
-					backgroundColor={LIME}
-					alpha={glow * layer.mult}
-				/>
-			{/each}
-		</Container>
-	</BoardContainer>
-{/if}
