@@ -197,8 +197,8 @@
 	// libre de offsets. Con el default (0/0/1) no se escribe ningún override.
 	$effect(() => {
 		if (!import.meta.env.DEV) return;
-		const { dx, dy, dscale } = swingAlign;
-		if (dx === 0 && dy === 0 && dscale === 1) {
+		const { dx, dy, dscale, dwide } = swingAlign;
+		if (dx === 0 && dy === 0 && dscale === 1 && dwide === 1) {
 			clearSpritePlacement(SWING_CLIP);
 			return;
 		}
@@ -214,12 +214,17 @@
 		const bakedDy = (1 - base.anchorY) * baseH;
 		// El slider de escala del lab cambia el tamaño, así que el pivot se
 		// recalcula sobre el tamaño NUEVO: horneado + nudge, plegados de vuelta.
+		// `dwide` entra por el ASPECT y no por la escala: así estira SOLO de los
+		// lados —el alto y la línea de pies quedan intactos— que es justo lo que
+		// corrige que el swing se vea más angosto que el resto de los clips.
 		const scale = (base.scale ?? 1) * dscale;
+		const aspect = (base.aspect ?? 1) * dwide;
 		const height = kash.h * scale;
-		const width = height * (base.aspect ?? 1);
+		const width = height * aspect;
 		putSpritePlacement(SWING_CLIP, {
 			...base,
 			scale,
+			aspect,
 			anchorX: 0.5 - (bakedDx + dx) / width,
 			anchorY: 1 - (bakedDy + dy) / height,
 		});

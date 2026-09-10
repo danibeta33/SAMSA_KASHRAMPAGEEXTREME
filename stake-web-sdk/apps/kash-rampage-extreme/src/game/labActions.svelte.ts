@@ -139,6 +139,11 @@ const buildDiagnostics = (): InspectorDiagnostics => {
 		value: `${Math.round(swingAlign.dx)} · ${Math.round(swingAlign.dy)} · ${swingAlign.dscale.toFixed(3)}`,
 	});
 	rows.push({
+		label: 'swing ancho (×aspect)',
+		value: swingAlign.dwide.toFixed(3),
+		highlight: swingAlign.dwide !== 1,
+	});
+	rows.push({
 		label: 'GRID shake',
 		value: `x:${Math.round(boardShake.x)} y:${Math.round(boardShake.y)}`,
 		highlight: shaking,
@@ -229,7 +234,7 @@ export const registerGameLabActions = (context: GameContext) => {
 		category: 'swing',
 		order: 0,
 	});
-	const nudge = (k: 'dx' | 'dy' | 'dscale', d: number) => () => (swingAlign[k] += d);
+	const nudge = (k: 'dx' | 'dy' | 'dscale' | 'dwide', d: number) => () => (swingAlign[k] += d);
 	const NUDGES: { id: string; label: string; row: string; fn: () => void }[] = [
 		{ id: 'dx-5', label: '◀ x-5', row: 'dx', fn: nudge('dx', -5) },
 		{ id: 'dx-1', label: 'x-1', row: 'dx', fn: nudge('dx', -1) },
@@ -249,8 +254,22 @@ export const registerGameLabActions = (context: GameContext) => {
 				swingAlign.dx = 0;
 				swingAlign.dy = 0;
 				swingAlign.dscale = 1;
+				swingAlign.dwide = 1;
 			},
 		},
+		// ANCHO: estira solo de los lados (multiplica el aspect, no la escala),
+		// para corregir que el swing se vea más angosto que los idles sin mover
+		// el alto ni la línea de pies. Paso fino (1%) porque la deformación que
+		// se está compensando es sutil y se juzga contra el ghost.
+		//
+		// OJO con el orden de este array: `groupIntoRows` junta en una fila las
+		// acciones CONSECUTIVAS que comparten `row`, así que intercalar otra
+		// fila en medio de un bloque lo parte en dos filas con el MISMO id — y
+		// el `{#each ... (row.id)}` del panel muere con `each_key_duplicate`.
+		// Cada bloque de `row` va entero y de corrido.
+		{ id: 'dw-', label: 'ancho −', row: 'dw', fn: nudge('dwide', -0.01) },
+		{ id: 'dw+', label: 'ancho +', row: 'dw', fn: nudge('dwide', 0.01) },
+		{ id: 'dw-reset', label: 'ancho 1.00', row: 'dw', fn: () => (swingAlign.dwide = 1) },
 	];
 	for (const [i, n] of NUDGES.entries()) {
 		animInspector.registerAction(`swing:${n.id}`, {
