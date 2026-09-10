@@ -121,7 +121,7 @@
 		return typeof value === 'number' ? value : fallback;
 	};
 
-	// Los 3 animados (W / S / CASH STACK) conservan ADEMÁS el dial de GRUPO
+	// Los 3 animados (W / S / KASH) conservan ADEMÁS el dial de GRUPO
 	// `specialScale`, que es el que los hace resaltar juntos contra los 10
 	// regulares y está congelado por bucket en PER_BUCKET_SEED. El dial
 	// individual multiplica encima.
@@ -145,7 +145,7 @@
 		SYMBOL_SIZE * props.symbolInfo.sizeRatios.height * stateUiTweak.symScale * sizeMult,
 	);
 
-	// Iconos especiales ANIMADOS: W (bate WILD), S (barra SCATTER), H4 (grafiti
+	// Iconos especiales ANIMADOS: W (bate WILD), S (barra SCATTER), H4 (fajo
 	// KASH PREMIUM). El static key del math (sym_w/sym_s/sym_h4) se mapea al
 	// spritesheet del equipo (drop 04-09: llamas rojas, ya en paleta con los
 	// estáticos del kit 25-08). Loop a 10fps.
@@ -199,7 +199,7 @@
 			center: { x: 127.5 / 256, y: 127 / 256 },
 			box: 0.95, // = sizeRatios de sym_s
 		},
-		// CASH STACK (L4) — fajo de billetes (drop 08-09: el clip `Special_Billetes`
+		// KASH (H4, premium) — fajo de billetes (drop 08-09: el clip `Special_Billetes`
 		// reemplazó al `Special_Graffiti` bajo el mismo nombre de archivo). Arte
 		// 256×239 casi a sangre y centrado, contra el grafiti viejo que era
 		// 182×191 en (34,51) y colgaba abajo. Números medidos del .json con
@@ -215,13 +215,13 @@
 		// estaba mal era el CENTRADO: con center.y 0.5039 en vez de 0.5332 el
 		// offset compensaba 0.0039 de lienzo en lugar de 0.0332, así que el fajo
 		// se dibujaba ≈2.5 px de board (3 % de celda) por DEBAJO de su centro.
-		sym_l4: {
+		sym_h4: {
 			key: 'anim_sym_premium',
 			luzKey: 'anim_sym_premium_luz',
 			aspect: 1.07113,
 			fill: { w: 1.0, h: 0.933594 },
 			center: { x: 0.5, y: 0.533203 },
-			box: 0.8, // = sizeRatios de sym_l4 (default de mkSprite)
+			box: 0.8, // = sizeRatios de sym_h4 (default de mkSprite)
 		},
 	};
 	// Velocidad de reproducción de los clips especiales, en la unidad de PIXI
@@ -256,8 +256,8 @@
 			],
 	);
 	// Símbolos SIN sprite estático de respaldo: su .png se borró del registro
-	// porque el clip animado es ahora la única representación (H4 / fajo, drop
-	// 08-09 — `anim_sym_premium` va con `preload`, así que ya está en
+	// porque el clip animado es ahora la única representación (H4 = KASH / fajo,
+	// drop 08-09 — `anim_sym_premium` va con `preload`, así que ya está en
 	// `loadedAssets` antes del primer render del board).
 	//
 	// Esta guarda NO es defensa en profundidad opcional: sin ella la rama
@@ -269,8 +269,10 @@
 	// así que los tres símbolos animados quedaron SIN estático de respaldo. Sus
 	// clips van los tres con `preload`, que es lo que garantiza que la celda
 	// nunca quede vacía (el bug de las celdas en blanco salía justamente de
-	// pedir `sym_l4`, que ya no existía como textura).
-	const STATIC_LESS = new Set(['sym_l4', 'sym_w', 'sym_s']);
+	// pedir una textura que ya no existía).
+	// 10-09: el animado del trío vuelve a ser `sym_h4` (el fajo ES el premium
+	// KASH) y `sym_l4` recupera estático — el medallón `h4.png` + `h4_luz.png`.
+	const STATIC_LESS = new Set(['sym_h4', 'sym_w', 'sym_s']);
 	const hasStatic = $derived(!STATIC_LESS.has(props.symbolInfo.assetKey));
 	// Lado mayor del ARTE (no del canvas) en px de board; el menor sale del aspect.
 	const specialSide = $derived(
@@ -307,22 +309,22 @@
 	);
 	// Iconos ILUMINADOS (kit 26-08): carta full-bleed con marco oscuro + glow
 	// horneado que reemplaza al estático + halo lima durante win/postWinStatic.
-	// Los 10 regulares tienen versión luz (h1/h4 desde el swap a stand-ins del
-	// kit); w/s (y cualquier símbolo cuyo luz aún no cargó — van sin preload)
-	// caen al halo de siempre.
-	// (sym_l4 salió de este mapa el 09-09: el CASH STACK ilumina con su clip
-	// `anim_sym_premium_luz`, por la rama de los especiales, y su carta estática
-	// `l4_luz.png` desapareció en el drop de arte.)
+	// Los 9 regulares estáticos tienen versión luz; w/s/h4 son animados y usan
+	// su propio clip `_luz`, y cualquier símbolo cuyo luz aún no cargó — van sin
+	// preload — cae al halo de siempre.
+	// (sym_h4 NO está en este mapa: KASH es el fajo animado y su glow sale del
+	// clip `anim_sym_premium_luz`, por la rama de los especiales. `sym_l4` sí
+	// está — su carta es `h4_luz.png`, el medallón iluminado.)
 	const LUZ_KEY: Record<string, string> = {
 		sym_l1: 'sym_l1_luz',
 		sym_l2: 'sym_l2_luz',
 		sym_l3: 'sym_l3_luz',
+		sym_l4: 'sym_l4_luz',
 		sym_m1: 'sym_m1_luz',
 		sym_m2: 'sym_m2_luz',
 		sym_h1: 'sym_h1_luz',
 		sym_h2: 'sym_h2_luz',
 		sym_h3: 'sym_h3_luz',
-		sym_h4: 'sym_h4_luz',
 	};
 	const luzKey = $derived(LUZ_KEY[props.symbolInfo.assetKey]);
 	const luzReady = $derived(

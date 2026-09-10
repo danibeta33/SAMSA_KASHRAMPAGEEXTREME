@@ -38,8 +38,14 @@ import type {
  * default — los especiales saldrían de otro tamaño justo en los tamaños que
  * este drop viene a emparejar. El bump descarta esos overrides y deja mandar a
  * los valores de código.
+ *
+ * v17 (10-09): SÍ bumpea. H4 y L4 intercambiaron ARTE (el fajo animado pasó a
+ * ser KASH/H4 y el medallón bajó a L4), así que sus 12 diales de geometría
+ * intercambiaron también sus valores aprobados. Un override v16 traería el
+ * encuadre del medallón aplicado al fajo y viceversa — los marcos de victoria
+ * saldrían corridos justo en los dos símbolos que este cambio toca.
  */
-export const LAB_STORAGE_KEY = 'kash_tweak_v16';
+export const LAB_STORAGE_KEY = 'kash_tweak_v17';
 
 export const LAB_TITLE = 'UI LAB';
 
@@ -70,9 +76,13 @@ export const LAB_CATEGORIES: (InspectorCategoryConfig & { id: string })[] = [
  * L2=Keycard · L3=Smoke Grenade · L4=Cash Stack), porque el nombre del archivo
  * no alcanza para saber cuál es cuál — fue justamente la confusión que dejó a
  * L4 sin arte en el Paso 7.
+ *
+ * ⚠ El ARTE de H4 y L4 está cruzado respecto de los nombres de archivo: KASH
+ * (H4, el premium) es el FAJO animado `anim_sym_premium`, y el medallón que
+ * llegó rotulado `h4.png` es L4. Decisión de dirección del 10-09.
  */
 export const LAB_SYMBOLS = [
-	{ id: 'h4', label: 'H4 — KASH (medallón X)' },
+	{ id: 'h4', label: 'H4 — KASH (fajo) ✦' },
 	{ id: 'h3', label: 'H3 — Rookie (RAT)' },
 	{ id: 'h2', label: 'H2 — Syl (FT?)' },
 	{ id: 'h1', label: 'H1 — Bluff (12)' },
@@ -81,7 +91,7 @@ export const LAB_SYMBOLS = [
 	{ id: 'l1', label: 'L1 — Drill (palancas)' },
 	{ id: 'l2', label: 'L2 — Manopla' },
 	{ id: 'l3', label: 'L3 — Molotov' },
-	{ id: 'l4', label: 'L4 — Cash Stack ✦' },
+	{ id: 'l4', label: 'L4 — Medallón X' },
 	{ id: 'w', label: 'W — WILD ✦' },
 	{ id: 's', label: 'S — SCATTER ✦' },
 ] as const;

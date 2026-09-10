@@ -24,13 +24,13 @@ import type { SymbolStateInfo } from './constants';
 // las claves de ANIM_SPECIAL en SymbolSprite.svelte — ese mapa está tipado
 // contra `SelfAnimatedAssetKey`, así que agregar/quitar acá rompe la compilación
 // allá si se desincronizan.
-// ⚠ `sym_h4` → `sym_l4` el 09-09. El tercer especial NO es el premium de la
-// math: el clip `anim_sym_premium` es `Special_Billetes` (fajo de billetes) y
-// según `game_config.py` el fajo es **L4 = Cash Stack**; H4 es KASH, que en el
-// drop de ese día recibió arte propio (`h4.png`, medallón de cadena) y volvió a
-// ser un símbolo estático normal. El nombre del asset quedó mal rotulado en el
-// export y se conserva para no invalidar claves; la identidad la manda la math.
-export const SELF_ANIMATED_ASSET_KEYS = ['sym_w', 'sym_s', 'sym_l4'] as const;
+// ⚠ IDA Y VUELTA: `sym_h4` → `sym_l4` el 09-09 (se leyó el nombre del arte —
+// "fajo de billetes" = Cash Stack = L4) y de vuelta a `sym_h4` el 10-09 por
+// decisión de dirección: el FAJO **es** KASH, el símbolo premium. El tercer
+// especial es entonces el premium de la math, y el medallón `h4.png` —que no es
+// KASH— pasó a ser el arte estático de L4. La math no cambió: H4 paga
+// 13.5…4900×, L4 1.4…120×; lo que se movió es qué arte dibuja cada identidad.
+export const SELF_ANIMATED_ASSET_KEYS = ['sym_w', 'sym_s', 'sym_h4'] as const;
 export type SelfAnimatedAssetKey = (typeof SELF_ANIMATED_ASSET_KEYS)[number];
 
 const SELF_ANIMATED = new Set<string>(SELF_ANIMATED_ASSET_KEYS);

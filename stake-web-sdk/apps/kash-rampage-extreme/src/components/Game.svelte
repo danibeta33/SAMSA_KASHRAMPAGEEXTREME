@@ -15,6 +15,7 @@
 	import { stateMeta, stateUrlDerived } from 'state-shared';
 
 	import { getContext } from '../game/context';
+	import PaySprite from './PaySprite.svelte';
 
 	// TECHO del espacio de capas del canvas. Las celebraciones y la transición
 	// no se tweakean: son lo último que se lee en pantalla. Vive acá y no en
@@ -654,120 +655,122 @@
 					Multiplicadores sobre la apuesta base, por tamaño del cluster (símbolos conectados horizontal
 					o vertical, mínimo 5).
 				</p>
-				<table class="lb-pay-table">
-					<thead>
-						<tr>
-							<th>Símbolo</th>
-							<th>5</th>
-							<th>6-7</th>
-							<th>8-9</th>
-							<th>10-11</th>
-							<th>12-14</th>
-							<th>15+</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr class="tier-high">
-							<td class="lb-sym"><img src="assets/sprites/symbols/h4_still.png" alt="H4" /><span>KASH</span></td>
-							<td>13.5×</td>
-							<td>24.5×</td>
-							<td>95.0×</td>
-							<td>340.0×</td>
-							<td>1020.0×</td>
-							<td>4900.0×</td>
-						</tr>
-						<tr class="tier-high">
-							<td class="lb-sym"><img src="assets/sprites/symbols/h3.png" alt="H3" /><span>Bomb</span></td>
-							<td>8.2×</td>
-							<td>13.5×</td>
-							<td>43.5×</td>
-							<td>142.0×</td>
-							<td>405.0×</td>
-							<td>1880.0×</td>
-						</tr>
-						<tr class="tier-high">
-							<td class="lb-sym"><img src="assets/sprites/symbols/h2.png" alt="H2" /><span>UZI</span></td>
-							<td>6.8×</td>
-							<td>10.8×</td>
-							<td>38.0×</td>
-							<td>122.0×</td>
-							<td>340.0×</td>
-							<td>1620.0×</td>
-						</tr>
-						<tr class="tier-high">
-							<td class="lb-sym"><img src="assets/sprites/symbols/h1.png" alt="H1" /><span>Rampage Vial</span></td>
-							<td>4.8×</td>
-							<td>7.4×</td>
-							<td>23.5×</td>
-							<td>74.0×</td>
-							<td>200.0×</td>
-							<td>940.0×</td>
-						</tr>
-						<tr class="tier-mid">
-							<td class="lb-sym"><img src="assets/sprites/symbols/m2.png" alt="M2" /><span>Blueprint</span></td>
-							<td>3.3×</td>
-							<td>4.8×</td>
-							<td>13.5×</td>
-							<td>40.0×</td>
-							<td>102.0×</td>
-							<td>470.0×</td>
-						</tr>
-						<tr class="tier-mid">
-							<td class="lb-sym"><img src="assets/sprites/symbols/m1.png" alt="M1" /><span>Nitro</span></td>
-							<td>2.5×</td>
-							<td>3.6×</td>
-							<td>9.5×</td>
-							<td>27.0×</td>
-							<td>68.0×</td>
-							<td>295.0×</td>
-						</tr>
-						<tr class="tier-low">
-							<td class="lb-sym"><img src="assets/sprites/symbols/l4.png" alt="L4" /><span>Dye-Pack Cash</span></td>
-							<td>1.4×</td>
-							<td>1.9×</td>
-							<td>4.7×</td>
-							<td>12.0×</td>
-							<td>30.0×</td>
-							<td>120.0×</td>
-						</tr>
-						<tr class="tier-low">
-							<td class="lb-sym"><img src="assets/sprites/symbols/l3.png" alt="L3" /><span>Molotov</span></td>
-							<td>1.1×</td>
-							<td>1.5×</td>
-							<td>3.6×</td>
-							<td>9.5×</td>
-							<td>23.0×</td>
-							<td>95.0×</td>
-						</tr>
-						<tr class="tier-low">
-							<td class="lb-sym"><img src="assets/sprites/symbols/l2.png" alt="L2" /><span>Brass Knuckles</span></td>
-							<td>0.8×</td>
-							<td>1.1×</td>
-							<td>2.8×</td>
-							<td>6.9×</td>
-							<td>18.0×</td>
-							<td>68.0×</td>
-						</tr>
-						<tr class="tier-low">
-							<td class="lb-sym"><img src="assets/sprites/symbols/l1.png" alt="L1" /><span>Crowbar</span></td>
-							<td>0.6×</td>
-							<td>0.8×</td>
-							<td>2.2×</td>
-							<td>5.5×</td>
-							<td>14.0×</td>
-							<td>55.0×</td>
-						</tr>
-					</tbody>
-				</table>
+				<div class="lb-pay-scroll">
+					<table class="lb-pay-table">
+						<thead>
+							<tr>
+								<th>Símbolo</th>
+								<th>5</th>
+								<th>6-7</th>
+								<th>8-9</th>
+								<th>10-11</th>
+								<th>12-14</th>
+								<th>15+</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="tier-high">
+								<td class="lb-sym"><PaySprite name="premium" label="H4" /><span>KASH</span></td>
+								<td>13.5×</td>
+								<td>24.5×</td>
+								<td>95.0×</td>
+								<td>340.0×</td>
+								<td>1020.0×</td>
+								<td>4900.0×</td>
+							</tr>
+							<tr class="tier-high">
+								<td class="lb-sym"><img src="assets/sprites/symbols/h3.png" alt="H3" /><span>RAT</span></td>
+								<td>8.2×</td>
+								<td>13.5×</td>
+								<td>43.5×</td>
+								<td>142.0×</td>
+								<td>405.0×</td>
+								<td>1880.0×</td>
+							</tr>
+							<tr class="tier-high">
+								<td class="lb-sym"><img src="assets/sprites/symbols/h2.png" alt="H2" /><span>FTP</span></td>
+								<td>6.8×</td>
+								<td>10.8×</td>
+								<td>38.0×</td>
+								<td>122.0×</td>
+								<td>340.0×</td>
+								<td>1620.0×</td>
+							</tr>
+							<tr class="tier-high">
+								<td class="lb-sym"><img src="assets/sprites/symbols/h1.png" alt="H1" /><span>12!</span></td>
+								<td>4.8×</td>
+								<td>7.4×</td>
+								<td>23.5×</td>
+								<td>74.0×</td>
+								<td>200.0×</td>
+								<td>940.0×</td>
+							</tr>
+							<tr class="tier-mid">
+								<td class="lb-sym"><img src="assets/sprites/symbols/m2.png" alt="M2" /><span>CARD</span></td>
+								<td>3.3×</td>
+								<td>4.8×</td>
+								<td>13.5×</td>
+								<td>40.0×</td>
+								<td>102.0×</td>
+								<td>470.0×</td>
+							</tr>
+							<tr class="tier-mid">
+								<td class="lb-sym"><img src="assets/sprites/symbols/m1.png" alt="M1" /><span>Nitro</span></td>
+								<td>2.5×</td>
+								<td>3.6×</td>
+								<td>9.5×</td>
+								<td>27.0×</td>
+								<td>68.0×</td>
+								<td>295.0×</td>
+							</tr>
+							<tr class="tier-low">
+								<td class="lb-sym"><img src="assets/sprites/symbols/h4.png" alt="L4" /><span>MEDALLION</span></td>
+								<td>1.4×</td>
+								<td>1.9×</td>
+								<td>4.7×</td>
+								<td>12.0×</td>
+								<td>30.0×</td>
+								<td>120.0×</td>
+							</tr>
+							<tr class="tier-low">
+								<td class="lb-sym"><img src="assets/sprites/symbols/l3.png" alt="L3" /><span>Molotov</span></td>
+								<td>1.1×</td>
+								<td>1.5×</td>
+								<td>3.6×</td>
+								<td>9.5×</td>
+								<td>23.0×</td>
+								<td>95.0×</td>
+							</tr>
+							<tr class="tier-low">
+								<td class="lb-sym"><img src="assets/sprites/symbols/l2.png" alt="L2" /><span>Brass Knuckles</span></td>
+								<td>0.8×</td>
+								<td>1.1×</td>
+								<td>2.8×</td>
+								<td>6.9×</td>
+								<td>18.0×</td>
+								<td>68.0×</td>
+							</tr>
+							<tr class="tier-low">
+								<td class="lb-sym"><img src="assets/sprites/symbols/l1.png" alt="L1" /><span>Crowbar</span></td>
+								<td>0.6×</td>
+								<td>0.8×</td>
+								<td>2.2×</td>
+								<td>5.5×</td>
+								<td>14.0×</td>
+								<td>55.0×</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 
 				<h3>Símbolos especiales</h3>
 				<ul class="lb-pay-specials">
 					<li>
-						<strong class="lb-sym-inline"><img src="assets/sprites/symbols/w.png" alt="Wild" />Bat (Wild)</strong> — Kash's Bat. Sustituye cualquier símbolo regular dentro de
+						<strong class="lb-sym-inline"><PaySprite name="wild" size="1.6rem" label="Wild" />Bat (Wild)</strong> — Kash's Bat. Sustituye cualquier símbolo regular dentro de
 						los clusters. No sustituye al Gold Bar.
 					</li>
 					<li>
-						<strong class="lb-sym-inline"><img src="assets/sprites/symbols/s.png" alt="Scatter" />Gold Bar (Scatter)</strong> — solo cuenta para disparar Free Spins en el initial
+						<strong class="lb-sym-inline"><PaySprite name="scatterLuz" size="1.6rem" label="Scatter" />Gold Bar (Scatter)</strong> — solo cuenta para disparar Free Spins en el initial
 						drop. No participa en clusters. 4 = 10 FS, 5 = 15 FS, 6+ = 20 FS. 3+ durante FS = retrigger
 						+5 FS.
 					</li>
@@ -784,17 +787,18 @@
 				<h3>Tier de símbolos</h3>
 				<ul class="lb-pay-specials">
 					<li>
-						<strong>Premium (H4)</strong>: KASH — el botín del asalto, el fajo marcado.
+						<strong>Premium (H4)</strong>: KASH — el fajo marcado, el botín del asalto y el
+						símbolo que más paga.
 					</li>
 					<li>
-						<strong>High (H1-H3)</strong>: Rampage Vial, UZI, Bomb — la artillería pesada de la crew.
+						<strong>High (H1-H3)</strong>: 12!, FTP, RAT — los tags de la crew.
 					</li>
 					<li>
-						<strong>Medium (M1-M2)</strong>: Nitro (cilindro de nitroglicerina) y Blueprint (el
-						plano robado de la bóveda).
+						<strong>Medium (M1-M2)</strong>: Nitro (cilindro de nitroglicerina) y CARD (la
+						keycard de acceso a la bóveda).
 					</li>
 					<li>
-						<strong>Low (L1-L4)</strong>: Crowbar, Brass Knuckles, Molotov, Dye-Pack Cash — el
+						<strong>Low (L1-L4)</strong>: Crowbar, Brass Knuckles, Molotov, Medallion — el
 						toolkit del asalto.
 					</li>
 				</ul>
@@ -806,120 +810,122 @@
 					Multipliers on the base bet, by cluster size (symbols connected horizontally or vertically,
 					minimum 5).
 				</p>
-				<table class="lb-pay-table">
-					<thead>
-						<tr>
-							<th>Symbol</th>
-							<th>5</th>
-							<th>6-7</th>
-							<th>8-9</th>
-							<th>10-11</th>
-							<th>12-14</th>
-							<th>15+</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr class="tier-high">
-							<td class="lb-sym"><img src="assets/sprites/symbols/h4_still.png" alt="H4" /><span>KASH</span></td>
-							<td>13.5×</td>
-							<td>24.5×</td>
-							<td>95.0×</td>
-							<td>340.0×</td>
-							<td>1020.0×</td>
-							<td>4900.0×</td>
-						</tr>
-						<tr class="tier-high">
-							<td class="lb-sym"><img src="assets/sprites/symbols/h3.png" alt="H3" /><span>Bomb</span></td>
-							<td>8.2×</td>
-							<td>13.5×</td>
-							<td>43.5×</td>
-							<td>142.0×</td>
-							<td>405.0×</td>
-							<td>1880.0×</td>
-						</tr>
-						<tr class="tier-high">
-							<td class="lb-sym"><img src="assets/sprites/symbols/h2.png" alt="H2" /><span>UZI</span></td>
-							<td>6.8×</td>
-							<td>10.8×</td>
-							<td>38.0×</td>
-							<td>122.0×</td>
-							<td>340.0×</td>
-							<td>1620.0×</td>
-						</tr>
-						<tr class="tier-high">
-							<td class="lb-sym"><img src="assets/sprites/symbols/h1.png" alt="H1" /><span>Rampage Vial</span></td>
-							<td>4.8×</td>
-							<td>7.4×</td>
-							<td>23.5×</td>
-							<td>74.0×</td>
-							<td>200.0×</td>
-							<td>940.0×</td>
-						</tr>
-						<tr class="tier-mid">
-							<td class="lb-sym"><img src="assets/sprites/symbols/m2.png" alt="M2" /><span>Blueprint</span></td>
-							<td>3.3×</td>
-							<td>4.8×</td>
-							<td>13.5×</td>
-							<td>40.0×</td>
-							<td>102.0×</td>
-							<td>470.0×</td>
-						</tr>
-						<tr class="tier-mid">
-							<td class="lb-sym"><img src="assets/sprites/symbols/m1.png" alt="M1" /><span>Nitro</span></td>
-							<td>2.5×</td>
-							<td>3.6×</td>
-							<td>9.5×</td>
-							<td>27.0×</td>
-							<td>68.0×</td>
-							<td>295.0×</td>
-						</tr>
-						<tr class="tier-low">
-							<td class="lb-sym"><img src="assets/sprites/symbols/l4.png" alt="L4" /><span>Dye-Pack Cash</span></td>
-							<td>1.4×</td>
-							<td>1.9×</td>
-							<td>4.7×</td>
-							<td>12.0×</td>
-							<td>30.0×</td>
-							<td>120.0×</td>
-						</tr>
-						<tr class="tier-low">
-							<td class="lb-sym"><img src="assets/sprites/symbols/l3.png" alt="L3" /><span>Molotov</span></td>
-							<td>1.1×</td>
-							<td>1.5×</td>
-							<td>3.6×</td>
-							<td>9.5×</td>
-							<td>23.0×</td>
-							<td>95.0×</td>
-						</tr>
-						<tr class="tier-low">
-							<td class="lb-sym"><img src="assets/sprites/symbols/l2.png" alt="L2" /><span>Brass Knuckles</span></td>
-							<td>0.8×</td>
-							<td>1.1×</td>
-							<td>2.8×</td>
-							<td>6.9×</td>
-							<td>18.0×</td>
-							<td>68.0×</td>
-						</tr>
-						<tr class="tier-low">
-							<td class="lb-sym"><img src="assets/sprites/symbols/l1.png" alt="L1" /><span>Crowbar</span></td>
-							<td>0.6×</td>
-							<td>0.8×</td>
-							<td>2.2×</td>
-							<td>5.5×</td>
-							<td>14.0×</td>
-							<td>55.0×</td>
-						</tr>
-					</tbody>
-				</table>
+				<div class="lb-pay-scroll">
+					<table class="lb-pay-table">
+						<thead>
+							<tr>
+								<th>Symbol</th>
+								<th>5</th>
+								<th>6-7</th>
+								<th>8-9</th>
+								<th>10-11</th>
+								<th>12-14</th>
+								<th>15+</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="tier-high">
+								<td class="lb-sym"><PaySprite name="premium" label="H4" /><span>KASH</span></td>
+								<td>13.5×</td>
+								<td>24.5×</td>
+								<td>95.0×</td>
+								<td>340.0×</td>
+								<td>1020.0×</td>
+								<td>4900.0×</td>
+							</tr>
+							<tr class="tier-high">
+								<td class="lb-sym"><img src="assets/sprites/symbols/h3.png" alt="H3" /><span>RAT</span></td>
+								<td>8.2×</td>
+								<td>13.5×</td>
+								<td>43.5×</td>
+								<td>142.0×</td>
+								<td>405.0×</td>
+								<td>1880.0×</td>
+							</tr>
+							<tr class="tier-high">
+								<td class="lb-sym"><img src="assets/sprites/symbols/h2.png" alt="H2" /><span>FTP</span></td>
+								<td>6.8×</td>
+								<td>10.8×</td>
+								<td>38.0×</td>
+								<td>122.0×</td>
+								<td>340.0×</td>
+								<td>1620.0×</td>
+							</tr>
+							<tr class="tier-high">
+								<td class="lb-sym"><img src="assets/sprites/symbols/h1.png" alt="H1" /><span>12!</span></td>
+								<td>4.8×</td>
+								<td>7.4×</td>
+								<td>23.5×</td>
+								<td>74.0×</td>
+								<td>200.0×</td>
+								<td>940.0×</td>
+							</tr>
+							<tr class="tier-mid">
+								<td class="lb-sym"><img src="assets/sprites/symbols/m2.png" alt="M2" /><span>CARD</span></td>
+								<td>3.3×</td>
+								<td>4.8×</td>
+								<td>13.5×</td>
+								<td>40.0×</td>
+								<td>102.0×</td>
+								<td>470.0×</td>
+							</tr>
+							<tr class="tier-mid">
+								<td class="lb-sym"><img src="assets/sprites/symbols/m1.png" alt="M1" /><span>Nitro</span></td>
+								<td>2.5×</td>
+								<td>3.6×</td>
+								<td>9.5×</td>
+								<td>27.0×</td>
+								<td>68.0×</td>
+								<td>295.0×</td>
+							</tr>
+							<tr class="tier-low">
+								<td class="lb-sym"><img src="assets/sprites/symbols/h4.png" alt="L4" /><span>MEDALLION</span></td>
+								<td>1.4×</td>
+								<td>1.9×</td>
+								<td>4.7×</td>
+								<td>12.0×</td>
+								<td>30.0×</td>
+								<td>120.0×</td>
+							</tr>
+							<tr class="tier-low">
+								<td class="lb-sym"><img src="assets/sprites/symbols/l3.png" alt="L3" /><span>Molotov</span></td>
+								<td>1.1×</td>
+								<td>1.5×</td>
+								<td>3.6×</td>
+								<td>9.5×</td>
+								<td>23.0×</td>
+								<td>95.0×</td>
+							</tr>
+							<tr class="tier-low">
+								<td class="lb-sym"><img src="assets/sprites/symbols/l2.png" alt="L2" /><span>Brass Knuckles</span></td>
+								<td>0.8×</td>
+								<td>1.1×</td>
+								<td>2.8×</td>
+								<td>6.9×</td>
+								<td>18.0×</td>
+								<td>68.0×</td>
+							</tr>
+							<tr class="tier-low">
+								<td class="lb-sym"><img src="assets/sprites/symbols/l1.png" alt="L1" /><span>Crowbar</span></td>
+								<td>0.6×</td>
+								<td>0.8×</td>
+								<td>2.2×</td>
+								<td>5.5×</td>
+								<td>14.0×</td>
+								<td>55.0×</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 
 				<h3>Special Symbols</h3>
 				<ul class="lb-pay-specials">
 					<li>
-						<strong class="lb-sym-inline"><img src="assets/sprites/symbols/w.png" alt="Wild" />Bat (Wild)</strong> — Kash's Bat. Substitutes for any regular symbol within
+						<strong class="lb-sym-inline"><PaySprite name="wild" size="1.6rem" label="Wild" />Bat (Wild)</strong> — Kash's Bat. Substitutes for any regular symbol within
 						clusters. Does not substitute for the Gold Bar.
 					</li>
 					<li>
-						<strong class="lb-sym-inline"><img src="assets/sprites/symbols/s.png" alt="Scatter" />Gold Bar (Scatter)</strong> — only counts toward triggering Free Spins on the
+						<strong class="lb-sym-inline"><PaySprite name="scatterLuz" size="1.6rem" label="Scatter" />Gold Bar (Scatter)</strong> — only counts toward triggering Free Spins on the
 						initial drop. Does not participate in clusters. 4 = 10 FS, 5 = 15 FS, 6+ = 20 FS. 3+
 						during FS = retrigger +5 FS.
 					</li>
@@ -937,17 +943,18 @@
 				<h3>Symbol Tiers</h3>
 				<ul class="lb-pay-specials">
 					<li>
-						<strong>Premium (H4)</strong>: KASH — the heist loot, the marked cash bundle.
+						<strong>Premium (H4)</strong>: KASH — the marked cash bundle, the heist loot and the
+						top-paying symbol.
 					</li>
 					<li>
-						<strong>High (H1-H3)</strong>: Rampage Vial, UZI, Bomb — the crew's heavy artillery.
+						<strong>High (H1-H3)</strong>: 12!, FTP, RAT — the crew's tags.
 					</li>
 					<li>
-						<strong>Medium (M1-M2)</strong>: Nitro (nitroglycerin canister) and Blueprint (the
-						stolen vault blueprint).
+						<strong>Medium (M1-M2)</strong>: Nitro (nitroglycerin canister) and CARD (the vault
+						access keycard).
 					</li>
 					<li>
-						<strong>Low (L1-L4)</strong>: Crowbar, Brass Knuckles, Molotov, Dye-Pack Cash — the
+						<strong>Low (L1-L4)</strong>: Crowbar, Brass Knuckles, Molotov, Medallion — the
 						heist toolkit.
 					</li>
 				</ul>
@@ -1033,7 +1040,9 @@
 		font-family: 'Europa', system-ui, sans-serif;
 		color: #f5f5f5;
 		text-align: left;
+		width: 100%;
 		max-width: 760px;
+		box-sizing: border-box;
 		padding: 1rem 1.5rem;
 		line-height: 1.4;
 	}
@@ -1127,5 +1136,71 @@
 		object-fit: contain;
 		vertical-align: middle;
 		margin-right: 0.35rem;
+	}
+
+	/* Los sprites recortados de atlas (PaySprite) comparten la separación de
+	   los <img> estáticos: el tamaño ya lo fija el propio componente. */
+	:global(.lb-pay-table td.lb-sym .pay-sprite) {
+		margin-right: 0.5rem;
+	}
+	:global(.lb-sym-inline .pay-sprite) {
+		margin-right: 0.35rem;
+	}
+
+	/* ── Slider horizontal de la tabla de pagos ───────────────────────────
+	   El shell del modal es `width: min(86vw, 640px)` y `BaseScrollable` corta
+	   con `overflow-x: hidden`, así que en celular las 7 columnas se recortaban
+	   sin forma de llegar a los tramos altos. La tabla conserva un ancho mínimo
+	   legible y se desplaza DENTRO de este contenedor. */
+	:global(.lb-pay-scroll) {
+		max-width: 100%;
+		overflow-x: auto;
+		overflow-y: hidden;
+		-webkit-overflow-scrolling: touch;
+		overscroll-behavior-x: contain;
+		scrollbar-width: thin;
+		scrollbar-color: #e02330 transparent;
+		/* Pista de que hay más tabla a la derecha aunque la barra esté oculta
+		   (iOS la esconde hasta que se arrastra). */
+		background:
+			linear-gradient(to right, #0d0c0a 30%, rgba(13, 12, 10, 0)) left / 24px 100% no-repeat,
+			linear-gradient(to left, #0d0c0a 30%, rgba(13, 12, 10, 0)) right / 24px 100% no-repeat,
+			radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.6), transparent) left / 12px 100% no-repeat,
+			radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.6), transparent) right / 12px 100% no-repeat;
+		background-attachment: local, local, scroll, scroll;
+	}
+	:global(.lb-pay-scroll)::-webkit-scrollbar {
+		height: 6px;
+	}
+	:global(.lb-pay-scroll)::-webkit-scrollbar-track {
+		background: rgba(255, 255, 255, 0.06);
+		border-radius: 3px;
+	}
+	:global(.lb-pay-scroll)::-webkit-scrollbar-thumb {
+		background: #e02330;
+		border-radius: 3px;
+	}
+	:global(.lb-pay-scroll .lb-pay-table) {
+		/* 1ª columna (icono + nombre) + 6 tramos. Por debajo de esto los
+		   multiplicadores empiezan a partirse en dos líneas. */
+		min-width: 30rem;
+	}
+
+	@media (max-width: 640px) {
+		:global(.lb-pay) {
+			padding: 0.75rem 0.75rem;
+		}
+		:global(.lb-pay-table) {
+			font-size: 0.8rem;
+		}
+		:global(.lb-pay-table th),
+		:global(.lb-pay-table td) {
+			padding: 0.3rem 0.4rem;
+		}
+		:global(.lb-pay-table td.lb-sym img),
+		:global(.lb-pay-table td.lb-sym .pay-sprite) {
+			width: 1.8rem;
+			height: 1.8rem;
+		}
 	}
 </style>

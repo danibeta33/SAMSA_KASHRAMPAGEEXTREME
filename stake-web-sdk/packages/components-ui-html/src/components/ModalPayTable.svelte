@@ -87,6 +87,30 @@
 
 	.kash-doc__body {
 		overflow-x: auto;
+		// `BaseScrollable type="column"` centra sus hijos, así que sin esto el
+		// body toma el ancho INTRÍNSECO de la tabla y se lo come el
+		// `overflow-x: hidden` del scroller. Con un ancho acotado, el slider
+		// horizontal del paytable (.lb-pay-scroll) tiene contra qué recortar.
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
+	}
+
+	/* Celular: el shell se queda con casi todo el viewport y afloja el padding
+	   — cada píxel que no gasta el marco es tabla visible antes de scrollear. */
+	@media (max-width: 640px) {
+		.kash-doc {
+			width: 96vw;
+			padding: 16px 12px 14px;
+		}
+		.kash-doc__title {
+			font-size: 17px;
+			letter-spacing: 3px;
+		}
+		.kash-doc__body {
+			padding-right: 0;
+		}
 	}
 
 	/* Compacto mini-player (popout ≤300px de alto) */

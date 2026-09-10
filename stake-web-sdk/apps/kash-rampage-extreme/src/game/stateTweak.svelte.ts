@@ -135,13 +135,17 @@ export const SYMBOL_GEOM_KEYS = LAB_SYMBOLS.flatMap((symbol) =>
 //
 // Nota sobre `wScale` 0.82 / `sScale` 0.935: son el sucesor del viejo
 // `SPECIAL_TRIM` — el bate WILD y el scatter entran en su box con más sangrado
-// que el resto, así que a igual `specialScale` se veían más grandes que L4.
+// que el resto, así que a igual `specialScale` se veían más grandes que el fajo.
 //
 // Orden de la tupla = SYMBOL_GEOM_PROPS → [X, Y, Scale, MarcoX, MarcoY, MarcoScale].
 type SymbolGeomTuple = readonly [number, number, number, number, number, number];
 
 const SYMBOL_GEOM_APPROVED: Record<SymbolLabId, SymbolGeomTuple> = {
-	h4: [0, 0, 1, -0.105, 0, 1.13],
+	// ⚠ h4 y l4 INTERCAMBIARON tupla el 10-09 junto con su arte: estos números
+	// son del ARTE, no de la identidad de la math. El fajo animado pasó a H4
+	// (marco 1.225, la caja grande que necesita un especial) y el medallón a L4
+	// (marco 1.13).
+	h4: [0, 0, 1, -0.095, 0, 1.225],
 	h3: [0, 0, 1, -0.105, 0, 1],
 	h2: [0, 0, 1, -0.105, 0, 0.99],
 	h1: [0, 0, 1, -0.115, -0.035, 1],
@@ -150,7 +154,7 @@ const SYMBOL_GEOM_APPROVED: Record<SymbolLabId, SymbolGeomTuple> = {
 	l1: [0, 0, 1, -0.095, -0.035, 1],
 	l2: [0, 0, 1, -0.105, 0, 1],
 	l3: [0, 0, 1, -0.13, 0, 1],
-	l4: [0, 0, 1, -0.095, 0, 1.225],
+	l4: [0, 0, 1, -0.105, 0, 1.13],
 	w: [0, 0, 0.82, -0.095, 0.01, 1.175],
 	s: [0, 0, 0.935, -0.095, 0.115, 1.105],
 };
