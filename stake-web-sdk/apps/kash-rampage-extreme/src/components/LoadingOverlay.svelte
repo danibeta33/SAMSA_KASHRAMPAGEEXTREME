@@ -9,6 +9,7 @@
 
 	import { getContext } from '../game/context';
 	import { htmlAssets } from '../game/htmlAssets.svelte';
+	import LoadingSpinner from './LoadingSpinner.svelte';
 
 	const context = getContext();
 	const appContext = getContextApp();
@@ -60,7 +61,7 @@
 				     Stake Engine). Acá solo se muestra si los assets del juego
 				     siguen cargando; con todo listo, CLICK/TAP TO CONTINUE pelado. -->
 				{#if !ready}
-					<span class="load__spinner" aria-hidden="true"></span>
+					<LoadingSpinner />
 					<span class="load__tap load__tap--load">LOADING</span>
 				{:else}
 					<span class="load__tap" style="opacity: {pulse ? 1 : 0.35}">{continueLabel}</span>
@@ -143,29 +144,10 @@
 			opacity: 0.35;
 		}
 	}
-	/* Wild girando (asset del equipo, Loading zip 14-07): tira de 6 frames
-	   (630x120 = 6 × 105x120, mitad de res — se muestra a ≤104px y así no
-	   compite con los assets críticos en la carga). steps(6) avanza frame a
-	   frame; el bg-size fija los 6 frames a lo ancho. */
-	.load__spinner {
-		width: clamp(56px, 12vmin, 104px);
-		aspect-ratio: 105 / 120;
-		background-image: url('assets/loading/spinner.webp');
-		background-repeat: no-repeat;
-		background-size: 600% 100%;
-		/* steps(6, jump-none): 6 paradas exactas en 0/20/40/60/80/100% → los 6
-		   frames del strip (con bg-size 600% cada frame cae en esas posiciones). */
-		animation: load-spin 0.66s steps(6, jump-none) infinite;
-		filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6));
-	}
-	@keyframes load-spin {
-		from {
-			background-position: 0% 0;
-		}
-		to {
-			background-position: 100% 0;
-		}
-	}
+	/* El bate girando (Cargador_Bate) vive en LoadingSpinner.svelte: el sheet
+	   nuevo trae los 6 frames RECORTADOS en una columna y con altos distintos,
+	   así que ya no se puede animar con un steps() sobre background-position.
+	   Acá solo queda el encuadre. */
 
 	/* Portrait — panel a lo alto */
 	@media (max-aspect-ratio: 1/1) {

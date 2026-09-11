@@ -2,7 +2,7 @@
     "workingName": "Kash Rampage Extreme",
     "frontendConfig": {
         "file": "fe_config.json",
-        "sha256": "2e61f90a8d87839d0cec3d175493d24bd79c5c82ce4b5d21b93dcf0b46b2b308"
+        "sha256": "b802c860c88a9692fc7c010434ff19ada9d7c87fdafc173549d37650331d78db"
     },
     "gameID": "kash_rampage_extreme",
     "rtp": 96.5,
@@ -98,7 +98,7 @@
                 }
             ],
             "cost": 500.0,
-            "rtp": 0.965,
+            "rtp": 0.962,
             "std": 1.17,
             "bookLength": 250000,
             "feature": true,

@@ -27,6 +27,17 @@ type TweakBase = {
 	kashH: number; // Kash lateral height as ratio of canvas height
 	kashX: number; // Kash center X as ratio of canvas width
 	kashY: number; // Kash center Y as ratio of canvas height
+	// ── COLOR DE KASH (drop 10-09) ──────────────────────────────────────────
+	// Corrección de color del personaje, ajustable en vivo desde el UI LAB
+	// (categoría KASH). Los 4 primeros alimentan un ColorMatrixFilter y los 2
+	// últimos un `tint` multiplicativo; con TODOS en su default el sprite se
+	// dibuja sin filtro ni tint, exactamente como antes (ver Background.svelte).
+	kashSaturation: number; // 1 = neutro · 0 = escala de grises · 2 = saturadísimo
+	kashBrightness: number; // 1 = neutro
+	kashContrast: number; // 1 = neutro
+	kashHue: number; // grados de rotación de matiz · 0 = neutro
+	kashTintHue: number; // matiz del tinte, 0..360 (solo actúa con kashTintAmount > 0)
+	kashTintAmount: number; // 0 = sin teñir · 1 = tinte pleno
 	stackScale: number; // Escala del stack BET/SPIN derecho (se sincroniza a stateUiTweak)
 	stackRight: number; // Separación de la botonera al borde derecho (px, → stateUiTweak)
 	stackBottom: number; // Separación de la botonera al borde inferior (px, → stateUiTweak)
@@ -208,6 +219,14 @@ const DEFAULTS: Tweak = {
 	kashH: 0.68,
 	kashX: 0.106,
 	kashY: 0.587,
+	// Color de Kash: NEUTRO por default — el personaje sale con el color del
+	// arte tal cual lo exportó el equipo y no se instancia ningún filtro.
+	kashSaturation: 1,
+	kashBrightness: 1,
+	kashContrast: 1,
+	kashHue: 0,
+	kashTintHue: 0,
+	kashTintAmount: 0,
 	// Smash Meter (caja KASH STRIKES!) — ancla SOBRE Kash, sin superponerse a
 	// la grilla (PersistentMultiplier calcula el ancla); meterX/meterY son un
 	// nudge fino en celdas desde esa ancla.
@@ -632,6 +651,16 @@ const TWEAKABLE_KEYS = [
 	'kashH',
 	'kashX',
 	'kashY',
+	// Color de Kash. Va por bucket como todo lo demás del laboratorio: no es
+	// que el grado dependa de la resolución, pero el panel guarda por bucket y
+	// dejarlas afuera hacía que el slider moviera el color en vivo y lo
+	// perdiera al recargar.
+	'kashSaturation',
+	'kashBrightness',
+	'kashContrast',
+	'kashHue',
+	'kashTintHue',
+	'kashTintAmount',
 	'stackScale',
 	'stackRight',
 	'stackBottom',

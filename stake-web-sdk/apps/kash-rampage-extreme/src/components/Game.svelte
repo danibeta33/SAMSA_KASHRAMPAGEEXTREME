@@ -65,7 +65,7 @@
 			text: {
 				title: 'VAULT CRACK',
 				dialog:
-					'10 Free Spins. KASH RAMPAGE strikes about 1 in 8 spins.',
+					'10 Free Spins. KASH RAMPAGE strikes about 1 in 6.6 spins.',
 				description: 'The measured way in.',
 				button: 'BUY',
 				betAmountLabel: '',
@@ -84,7 +84,7 @@
 			text: {
 				title: 'SMASH MODE',
 				dialog:
-					'10 Free Spins. KASH RAMPAGE strikes about 1 in 5 spins.',
+					'10 Free Spins. KASH RAMPAGE strikes about 1 in 4.1 spins.',
 				description: 'More rampages, more chaos.',
 				button: 'BUY',
 				betAmountLabel: '',
@@ -103,8 +103,8 @@
 			text: {
 				title: 'RAGE MODE',
 				dialog:
-					'10 Free Spins. KASH RAMPAGE strikes about 1 in 2.5 spins.',
-				description: 'Max volatility. Total demolition.',
+					'10 Free Spins. KASH RAMPAGE strikes about 1 in 2.2 spins.',
+				description: 'Most rampages per spin. Total demolition.',
 				button: 'BUY',
 				betAmountLabel: '',
 				tickerIdle: 'GETTING READY',
@@ -319,7 +319,8 @@
 						caen por gravedad, generando posibles tumbles en cascada sin límite.
 					</p>
 					<p>
-						Volatilidad <strong>Extreme</strong>. RTP target <strong>96.50%</strong>. Max win cap
+						Volatilidad <strong>Extreme</strong>. RTP del modo base <strong>96.50%</strong> (el RTP de
+						cada modo figura en la tabla). Max win cap
 						<strong>5,000×</strong> la apuesta.
 					</p>
 				</section>
@@ -349,21 +350,21 @@
 								<td>100×</td>
 								<td>96.5%</td>
 								<td>5,000×</td>
-								<td>≈ 1 / 8 spins</td>
+								<td>≈ 1 / 6.6 spins</td>
 							</tr>
 							<tr>
 								<td>SMASH MODE</td>
 								<td>250×</td>
 								<td>96.5%</td>
 								<td>5,000×</td>
-								<td>≈ 1 / 5 spins</td>
+								<td>≈ 1 / 4.1 spins</td>
 							</tr>
 							<tr>
 								<td>RAGE MODE</td>
 								<td>500×</td>
-								<td>96.5%</td>
+								<td>96.2%</td>
 								<td>5,000×</td>
-								<td>≈ 1 / 2.5 spins</td>
+								<td>≈ 1 / 2.2 spins</td>
 							</tr>
 						</tbody>
 					</table>
@@ -447,9 +448,9 @@
 						<li>KASH RAMPAGE golpea como máximo una vez por spin y nunca durante los tumbles.</li>
 						<li>
 							La chance de un KASH RAMPAGE crece con el modo:
-							<strong>VAULT CRACK</strong> ≈ 1 de cada 8 Free Spins ·
-							<strong>SMASH MODE</strong> ≈ 1 de cada 5 ·
-							<strong>RAGE MODE</strong> ≈ 1 de cada 2.3.
+							<strong>VAULT CRACK</strong> ≈ 1 de cada 6.6 Free Spins ·
+							<strong>SMASH MODE</strong> ≈ 1 de cada 4.1 ·
+							<strong>RAGE MODE</strong> ≈ 1 de cada 2.2.
 						</li>
 					</ul>
 				</section>
@@ -496,7 +497,8 @@
 						triggering cascading tumbles with no cap on chain length.
 					</p>
 					<p>
-						Volatility <strong>Extreme</strong>. Target RTP <strong>96.50%</strong>. Max win cap
+						Volatility <strong>Extreme</strong>. Base mode RTP <strong>96.50%</strong> (per-mode RTP is
+						listed in the table). Max win cap
 						<strong>5,000×</strong> the bet.
 					</p>
 				</section>
@@ -526,21 +528,21 @@
 								<td>100×</td>
 								<td>96.5%</td>
 								<td>5,000×</td>
-								<td>≈ 1 / 8 spins</td>
+								<td>≈ 1 / 6.6 spins</td>
 							</tr>
 							<tr>
 								<td>SMASH MODE</td>
 								<td>250×</td>
 								<td>96.5%</td>
 								<td>5,000×</td>
-								<td>≈ 1 / 5 spins</td>
+								<td>≈ 1 / 4.1 spins</td>
 							</tr>
 							<tr>
 								<td>RAGE MODE</td>
 								<td>500×</td>
-								<td>96.5%</td>
+								<td>96.2%</td>
 								<td>5,000×</td>
-								<td>≈ 1 / 2.5 spins</td>
+								<td>≈ 1 / 2.2 spins</td>
 							</tr>
 						</tbody>
 					</table>
@@ -623,9 +625,9 @@
 						<li>KASH RAMPAGE strikes at most once per spin and never during tumbles.</li>
 						<li>
 							The chance of a KASH RAMPAGE grows with the mode:
-							<strong>VAULT CRACK</strong> ≈ 1 in 8 Free Spins ·
-							<strong>SMASH MODE</strong> ≈ 1 in 5 ·
-							<strong>RAGE MODE</strong> ≈ 1 in 2.3.
+							<strong>VAULT CRACK</strong> ≈ 1 in 6.6 Free Spins ·
+							<strong>SMASH MODE</strong> ≈ 1 in 4.1 ·
+							<strong>RAGE MODE</strong> ≈ 1 in 2.2.
 						</li>
 					</ul>
 				</section>

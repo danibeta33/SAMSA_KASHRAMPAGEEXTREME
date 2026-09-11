@@ -14,21 +14,31 @@ export default {
 			cost: 1.0,
 			feature: true,
 			buyBonus: false,
-			rtp: 0.97,
+			rtp: 0.965,
 			max_win: 5000.0,
 		},
-		bonus: {
-			cost: 80,
+		vault_crack: {
+			cost: 100.0,
 			feature: true,
 			buyBonus: true,
-			rtp: 0.97,
+			rtp: 0.965,
 			max_win: 5000.0,
 		},
-		super_bonus: {
-			cost: 200,
+		smash_mode: {
+			cost: 250.0,
 			feature: true,
 			buyBonus: true,
-			rtp: 0.97,
+			rtp: 0.965,
+			max_win: 5000.0,
+		},
+		rage_mode: {
+			cost: 500.0,
+			feature: true,
+			buyBonus: true,
+			// rage entrega 96.1993% medido sobre la lookup table publicada
+			// (fences sobre-suscritas en 0.3126%); dentro del +-0.5% del base
+			// que exige Stake. Declarado igual en library/configs/config.json.
+			rtp: 0.962,
 			max_win: 5000.0,
 		},
 	},

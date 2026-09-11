@@ -53,7 +53,12 @@
 			context.stateApp.pixiApplication = await initWithPreference(preferred);
 		} catch (error) {
 			if (preferred === 'webgl') throw error;
-			console.warn('WebGPU init failed — retrying with WebGL.', error);
+			// Consola de prod en CERO es requisito de approval (rechazo N2.2 de
+			// KS1). En el iframe del ACP la creación del contexto WebGPU FALLA
+			// siempre, así que este warn se disparaba justo en el entorno del
+			// reviewer. El fallback a WebGL sigue igual; solo se silencia el log.
+			if (import.meta.env.DEV)
+				console.warn('WebGPU init failed — retrying with WebGL.', error);
 			context.stateApp.pixiApplication = await initWithPreference('webgl');
 		}
 

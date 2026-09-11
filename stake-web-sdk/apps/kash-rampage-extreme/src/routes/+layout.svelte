@@ -45,8 +45,8 @@
 
 	// Guideline nuevo del ACP (jul-2026): "Game should not contain the Stake
 	// Engine Loader" — el splash LoaderStakeEngine del SDK se eliminó; el
-	// juego arranca directo con el loader brandeado (GameLoader).
-	const loaderUrl = new URL('../../loader.gif', import.meta.url).href;
+	// juego arranca directo con el loader brandeado (GameLoader), que ya no
+	// recibe ruta: el sheet del bate lo resuelve LoadingSpinner.
 
 	// QoL de DEV: entrar a localhost:3001 "pelado" (sin rgs_url) moría con
 	// SOMETHING WENT WRONG al intentar autenticar contra el RGS real. En dev,
@@ -129,8 +129,8 @@
 	</Authenticate>
 </GlobalStyle>
 
-<!-- Loader brandeado: wild girando (static/loader.gif) + LOADING lima. -->
-<GameLoader src={loaderUrl} />
+<!-- Loader brandeado: el bate girando (assets/loading/spinner.webp) + LOADING lima. -->
+<GameLoader />
 
 {@render props.children()}
 

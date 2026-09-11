@@ -173,6 +173,29 @@ export const LAB_SLIDERS: (InspectorSliderConfig & { id: string })[] = [
 	{ id: 'kashY', label: 'Kash Y', min: 0.2, max: 0.9, step: 0.001, category: 'kash', order: 33 },
 	{ id: 'kashAlpha', label: 'Kash opacidad', min: 0, max: 1, step: 0.01, category: 'kash', order: 34 },
 	{ id: 'kashZ', label: 'Kash capa', ...LAYER, category: 'kash', order: 35 },
+	// ── COLOR DE KASH (drop 10-09) ──────────────────────────────────────────
+	// Corrección de color del personaje, EN VIVO sobre el clip que esté
+	// sonando. Los cuatro primeros arman un `PIXI.ColorMatrixFilter`
+	// (Background.svelte) y los dos últimos un `tint` multiplicativo:
+	//
+	//   · Saturación / Brillo / Contraste → 1 = neutro (el valor de hoy).
+	//   · Tono                            → grados de rotación de matiz; 0 = neutro.
+	//   · Tinte color + Tinte fuerza      → mezcla del blanco con un matiz. Con
+	//                                       fuerza 0 el tint queda en blanco puro
+	//                                       (= sin teñir) y NO se paga el filtro.
+	//
+	// Con los 6 en su default no se instancia ningún filtro: el camino de
+	// dibujo queda EXACTAMENTE como antes de este drop (ver `kashFilters`).
+	//
+	// El `order` arranca en 70 y no en 36 para dejar aire entre el bloque de
+	// geometría/capa y el de color; los números solo ordenan DENTRO de la
+	// categoría, así que no compiten con los de HUD SUPERIOR.
+	{ id: 'kashSaturation', label: 'Kash saturación', min: 0, max: 2, step: 0.01, category: 'kash', order: 70 },
+	{ id: 'kashBrightness', label: 'Kash brillo', min: 0.2, max: 2, step: 0.01, category: 'kash', order: 71 },
+	{ id: 'kashContrast', label: 'Kash contraste', min: 0, max: 2, step: 0.01, category: 'kash', order: 72 },
+	{ id: 'kashHue', label: 'Kash tono (°)', min: -180, max: 180, step: 1, decimals: 0, category: 'kash', order: 73 },
+	{ id: 'kashTintHue', label: 'Kash tinte — color (°)', min: 0, max: 360, step: 1, decimals: 0, category: 'kash', order: 74 },
+	{ id: 'kashTintAmount', label: 'Kash tinte — fuerza', min: 0, max: 1, step: 0.01, category: 'kash', order: 75 },
 	{ id: 'hudX', label: 'HUD X', min: 0, max: 1, step: 0.001, category: 'tophud', order: 40 },
 	{ id: 'hudY', label: 'HUD Y', min: 0, max: 1, step: 0.001, category: 'tophud', order: 41 },
 	{ id: 'hudScale', label: 'HUD size', min: 0.3, max: 2.5, step: 0.005, category: 'tophud', order: 42 },
