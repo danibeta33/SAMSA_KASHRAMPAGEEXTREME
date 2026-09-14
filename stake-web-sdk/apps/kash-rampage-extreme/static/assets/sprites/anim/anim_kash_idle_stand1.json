@@ -2,131 +2,131 @@
 
 "Kash_Standby_00000.png":
 {
-	"frame": {"x":740,"y":1911,"w":369,"h":764},
-	"rotated": false,
+	"frame": {"x":1,"y":2298,"w":444,"h":920},
+	"rotated": true,
 	"trimmed": true,
-	"spriteSourceSize": {"x":226,"y":106,"w":369,"h":764},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":273,"y":128,"w":444,"h":920},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00001.png":
 {
-	"frame": {"x":1518,"y":1489,"w":370,"h":764},
-	"rotated": false,
+	"frame": {"x":923,"y":2294,"w":445,"h":920},
+	"rotated": true,
 	"trimmed": true,
-	"spriteSourceSize": {"x":225,"y":106,"w":370,"h":764},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":271,"y":128,"w":445,"h":920},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00002.png":
 {
-	"frame": {"x":0,"y":1911,"w":370,"h":764},
-	"rotated": false,
+	"frame": {"x":923,"y":1846,"w":446,"h":920},
+	"rotated": true,
 	"trimmed": true,
-	"spriteSourceSize": {"x":224,"y":106,"w":370,"h":764},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":270,"y":128,"w":446,"h":920},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00003.png":
 {
-	"frame": {"x":1145,"y":747,"w":371,"h":764},
-	"rotated": true,
+	"frame": {"x":1814,"y":923,"w":448,"h":920},
+	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":223,"y":106,"w":371,"h":764},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":268,"y":128,"w":448,"h":920},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00004.png":
 {
-	"frame": {"x":753,"y":1524,"w":374,"h":765},
-	"rotated": true,
+	"frame": {"x":2288,"y":1,"w":449,"h":921},
+	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":221,"y":105,"w":374,"h":765},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":267,"y":127,"w":449,"h":921},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00005.png":
 {
-	"frame": {"x":0,"y":1146,"w":377,"h":765},
+	"frame": {"x":1377,"y":1,"w":454,"h":920},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":219,"y":105,"w":377,"h":765},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":264,"y":127,"w":454,"h":920},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00006.png":
 {
-	"frame": {"x":380,"y":380,"w":379,"h":765},
-	"rotated": true,
+	"frame": {"x":460,"y":924,"w":455,"h":921},
+	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":218,"y":105,"w":379,"h":765},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":263,"y":126,"w":455,"h":921},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00007.png":
 {
-	"frame": {"x":0,"y":0,"w":380,"h":766},
+	"frame": {"x":1,"y":924,"w":457,"h":921},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":218,"y":104,"w":380,"h":766},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":263,"y":126,"w":457,"h":921},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00008.png":
 {
-	"frame": {"x":0,"y":766,"w":380,"h":766},
-	"rotated": true,
+	"frame": {"x":1,"y":1,"w":458,"h":921},
+	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":218,"y":104,"w":380,"h":766},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":263,"y":126,"w":458,"h":921},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00009.png":
 {
-	"frame": {"x":380,"y":0,"w":380,"h":765},
-	"rotated": true,
+	"frame": {"x":461,"y":1,"w":457,"h":921},
+	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":220,"y":105,"w":380,"h":765},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":265,"y":126,"w":457,"h":921},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00010.png":
 {
-	"frame": {"x":766,"y":759,"w":379,"h":765},
+	"frame": {"x":920,"y":1,"w":455,"h":920},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":221,"y":105,"w":379,"h":765},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":267,"y":127,"w":455,"h":920},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00011.png":
 {
-	"frame": {"x":377,"y":1146,"w":376,"h":765},
+	"frame": {"x":1833,"y":1,"w":453,"h":920},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":223,"y":105,"w":376,"h":765},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":269,"y":127,"w":453,"h":920},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00012.png":
 {
-	"frame": {"x":1145,"y":0,"w":374,"h":765},
+	"frame": {"x":1,"y":1847,"w":449,"h":920},
 	"rotated": true,
 	"trimmed": true,
-	"spriteSourceSize": {"x":224,"y":105,"w":374,"h":765},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":271,"y":127,"w":449,"h":920},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00013.png":
 {
-	"frame": {"x":1145,"y":374,"w":373,"h":764},
-	"rotated": true,
+	"frame": {"x":1363,"y":923,"w":449,"h":920},
+	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":225,"y":106,"w":373,"h":764},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":271,"y":127,"w":449,"h":920},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00014.png":
 {
-	"frame": {"x":1145,"y":1118,"w":371,"h":764},
-	"rotated": true,
+	"frame": {"x":2264,"y":924,"w":447,"h":920},
+	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":226,"y":106,"w":371,"h":764},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":272,"y":128,"w":447,"h":920},
+	"sourceSize": {"w":930,"h":1112}
 },
 "Kash_Standby_00015.png":
 {
-	"frame": {"x":370,"y":1911,"w":370,"h":764},
+	"frame": {"x":917,"y":924,"w":444,"h":920},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":226,"y":106,"w":370,"h":764},
-	"sourceSize": {"w":772,"h":923}
+	"spriteSourceSize": {"x":273,"y":128,"w":444,"h":920},
+	"sourceSize": {"w":930,"h":1112}
 }},
 "animations": {
 	"Kash_Standby": ["Kash_Standby_00000.png","Kash_Standby_00001.png","Kash_Standby_00002.png","Kash_Standby_00003.png","Kash_Standby_00004.png","Kash_Standby_00005.png","Kash_Standby_00006.png","Kash_Standby_00007.png","Kash_Standby_00008.png","Kash_Standby_00009.png","Kash_Standby_00010.png","Kash_Standby_00011.png","Kash_Standby_00012.png","Kash_Standby_00013.png","Kash_Standby_00014.png","Kash_Standby_00015.png"]
@@ -136,8 +136,8 @@
 	"version": "1.1",
 	"image": "anim_kash_idle_stand1.webp",
 	"format": "RGBA8888",
-	"size": {"w":4096,"h":4096},
-	"scale": "0.83",
-	"smartupdate": "$TexturePacker:SmartUpdate:f7463ce40c5c2513e9ebaf90a26831d0:227d1fd113f71a97b6e615ca6598efb6:63c753e4cdfee1b0698fc66a066d6ca2$"
+	"size": {"w":2743,"h":2743},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:53b87c1fb2317f71f8f74d0f041633b3:227d1fd113f71a97b6e615ca6598efb6:63c753e4cdfee1b0698fc66a066d6ca2$"
 }
 }

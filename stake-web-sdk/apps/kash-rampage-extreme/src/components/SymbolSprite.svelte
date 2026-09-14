@@ -139,6 +139,13 @@
 	// estático). Si solo escalara uno, el swap estático → animado daría un salto
 	// de tamaño. Mismo motivo para el desplazamiento.
 	const sizeMult = $derived((isSpecial ? stateTweak.specialScale : 1) * geomOf('Scale', 1));
+	// Diales POR EJE (drop 11-09), encima del conjunto. `Scale` decide cuánto
+	// ocupa el ícono; estos dos, qué FORMA tiene — sirven para corregir un arte
+	// que llegó con otra proporción sin re-exportarlo ni desbalancear el tamaño
+	// del resto. Neutros en 1 = la proporción nativa de la hoja de sprite
+	// (SYMBOL_SHEET_ASPECT), que es la que `sizeRatios` ya trae.
+	const sizeMultX = $derived(sizeMult * geomOf('ScaleX', 1));
+	const sizeMultY = $derived(sizeMult * geomOf('ScaleY', 1));
 
 	// X/Y del laboratorio vienen en FRACCIONES DE CELDA — el símbolo ya está
 	// posicionado por la grilla y esto es un nudge fino sobre esa posición, así
@@ -146,11 +153,14 @@
 	const cx = $derived((props.x ?? 0) + geomOf('X', 0) * SYMBOL_SIZE);
 	const cy = $derived((props.y ?? 0) + geomOf('Y', 0) * SYMBOL_SIZE);
 
+	// `sizeRatios.width` ya viene con la proporción del arte (1080×970) aplicada
+	// sobre el `box`, así que acá NO hay que compensar nada: cada eje solo suma
+	// su propio dial del laboratorio.
 	const w = $derived(
-		SYMBOL_SIZE * props.symbolInfo.sizeRatios.width * stateUiTweak.symScale * sizeMult,
+		SYMBOL_SIZE * props.symbolInfo.sizeRatios.width * stateUiTweak.symScale * sizeMultX,
 	);
 	const h = $derived(
-		SYMBOL_SIZE * props.symbolInfo.sizeRatios.height * stateUiTweak.symScale * sizeMult,
+		SYMBOL_SIZE * props.symbolInfo.sizeRatios.height * stateUiTweak.symScale * sizeMultY,
 	);
 
 	// Iconos especiales ANIMADOS: W (bate WILD), S (barra SCATTER), H4 (fajo
@@ -286,11 +296,18 @@
 	const specialSide = $derived(
 		special ? SYMBOL_SIZE * special.box * stateUiTweak.symScale * sizeMult : 0,
 	);
+	// Los diales por eje se aplican sobre el ARTE (no sobre `specialSide`), para
+	// que `specialW`/`specialH` —y con ellos el offset de centrado— sigan
+	// derivando del mismo par de números y el clip no se descentre al estirarlo.
 	const artW = $derived(
-		special ? (special.aspect >= 1 ? specialSide : specialSide * special.aspect) : 0,
+		special
+			? (special.aspect >= 1 ? specialSide : specialSide * special.aspect) * geomOf('ScaleX', 1)
+			: 0,
 	);
 	const artH = $derived(
-		special ? (special.aspect >= 1 ? specialSide / special.aspect : specialSide) : 0,
+		special
+			? (special.aspect >= 1 ? specialSide / special.aspect : specialSide) * geomOf('ScaleY', 1)
+			: 0,
 	);
 	// El SpriteSheet se dimensiona por el CANVAS 256² (ver nota arriba): se
 	// infla desde el arte dividiendo por el fill…

@@ -79,7 +79,6 @@ target/
 
 # ------------------------------------------------------------------------------
 # 4. CASINO MATH RUNS, LOGS & INTERMEDIATE SIMULATIONS
-# (Solo los artefactos finales certificados en publish_files/ se trackean con LFS)
 # ------------------------------------------------------------------------------
 # Math simulation logs & run outputs
 *.log
@@ -88,6 +87,7 @@ run_*.log
 **/library/**/*.log
 
 # Math optimizer intermediate iterations & scratch trials
+**/library/publish_files/
 **/library/optimization_files/
 **/library/trial_results/
 **/library/forces/scratch/
@@ -184,3 +184,5 @@ $RECYCLE.BIN/
 # System crash dumps
 core
 sysinfo.txt
+
+build_kash/

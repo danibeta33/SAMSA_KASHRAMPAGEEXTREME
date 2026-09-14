@@ -28,7 +28,7 @@
 
 	import { getContext } from '../game/context';
 	import { getSymbolX } from '../game/utils';
-	import { SYMBOL_SIZE } from '../game/constants';
+	import { SYMBOL_SIZE, SYMBOL_SHEET_ASPECT } from '../game/constants';
 	import {
 		rampageUnhide,
 		RAMPAGE_FALL_DELAY_MS,
@@ -43,9 +43,12 @@
 	// Caída del símbolo nuevo: beat de celda vacía + caída con ease-in.
 	const FALL_DELAY_MS = RAMPAGE_FALL_DELAY_MS;
 	const FALL_DUR_MS = RAMPAGE_FALL_DUR_MS;
-	// El sprite del símbolo se dibuja a 0.8 de la celda (mkSprite) → los
-	// fragmentos arrancan cubriendo exactamente esa caja.
-	const SYM_BOX = SYMBOL_SIZE * 0.8;
+	// El sprite del símbolo se dibuja a 0.8 de celda de ALTO (mkSprite) y con el
+	// ancho derivado del aspect de su hoja (1080×970) → los fragmentos arrancan
+	// cubriendo exactamente esa caja. Eran cuadrados hasta el fix del 11-09, así
+	// que las esquirlas salían un 10 % más angostas que el símbolo que rompían.
+	const SYM_BOX_H = SYMBOL_SIZE * 0.8;
+	const SYM_BOX_W = SYM_BOX_H * SYMBOL_SHEET_ASPECT;
 
 	type Fragment = {
 		texture: PIXI.Texture;
@@ -115,12 +118,13 @@
 			if (fromTexture?.source) {
 				const pieceW = fromTexture.width / GRID;
 				const pieceH = fromTexture.height / GRID;
-				const disp = SYM_BOX / GRID;
+				const dispX = SYM_BOX_W / GRID;
+				const dispY = SYM_BOX_H / GRID;
 				const fragments: Fragment[] = [];
 				for (let i = 0; i < GRID; i += 1) {
 					for (let j = 0; j < GRID; j += 1) {
-						const ox = (j - (GRID - 1) / 2) * disp;
-						const oy = (i - (GRID - 1) / 2) * disp;
+						const ox = (j - (GRID - 1) / 2) * dispX;
+						const oy = (i - (GRID - 1) / 2) * dispY;
 						fragments.push({
 							texture: new PIXI.Texture({
 								source: fromTexture.source,
@@ -154,7 +158,7 @@
 						texture: toTexture,
 						// Arranca justo por encima del borde superior del marco (y=0
 						// en coords board), venga de la fila que venga.
-						fromOffset: -(y + SYM_BOX),
+						fromOffset: -(y + SYM_BOX_H),
 						reelSymbol,
 					},
 				];
@@ -189,8 +193,8 @@
 				x={f.ox + f.vx * t}
 				y={f.oy + f.vy * t + 0.5 * GRAVITY * t * t}
 				rotation={f.vrot * t}
-				width={SYM_BOX / GRID}
-				height={SYM_BOX / GRID}
+				width={SYM_BOX_W / GRID}
+				height={SYM_BOX_H / GRID}
 				alpha={alphaAt(t)}
 			/>
 		{/each}
@@ -204,8 +208,8 @@
 			anchor={0.5}
 			x={0}
 			y={fallOffset(f)}
-			width={SYM_BOX}
-			height={SYM_BOX}
+			width={SYM_BOX_W}
+			height={SYM_BOX_H}
 		/>
 	</SymbolWrap>
 {/each}

@@ -228,7 +228,26 @@ const spriteState = (key: string, sizeRatios: { width: number; height: number })
 	assetKey: key,
 	sizeRatios,
 });
-const mkSprite = (key: string, sizeRatios = { width: 0.8, height: 0.8 }) => {
+
+// ── PROPORCIÓN NATIVA DE LA HOJA DE SPRITE (fix 11-09) ─────────────────────
+// Los PNG del kit de símbolos NO son cuadrados: los 9 estáticos miden
+// 1080×970 (aspect ≈1.1134), igual que las cartas `_luz` que los acompañan.
+//
+// Hasta este fix `mkSprite` los declaraba con `width === height`, así que el
+// board los pintaba en una caja cuadrada y el arte salía comprimido al
+// 970/1080 = 89.8 % de su ancho real — el "achatado en X" que se veía en
+// molotov, nitro, la manopla, la palanca, la keycard… casi todos. Que la carta
+// `_luz` SÍ respetara el aspect (`luzH = luzW * 970/1080` en SymbolSprite) es
+// lo que dejaba el ícono visiblemente más angosto que su propio resalte.
+//
+// El `box` que recibe `mkSprite` sigue siendo el ALTO en fracciones de celda
+// (los valores aprobados no se tocan); el ancho ahora se DERIVA de él con la
+// proporción del arte, que es lo que hace que el ícono mida lo mismo que su
+// hoja de sprite.
+export const SYMBOL_SHEET_ASPECT = 1080 / 970;
+
+const mkSprite = (key: string, box = 0.8) => {
+	const sizeRatios = { width: box * SYMBOL_SHEET_ASPECT, height: box };
 	// Fresh objects per state so SymbolSprite's $effect (which tracks the
 	// symbolInfo reference) re-runs on state transitions.
 	const s = () => spriteState(key, sizeRatios);
@@ -276,8 +295,11 @@ export const SYMBOL_INFO_MAP: Record<
 	L2: mkSprite('sym_l2'),
 	L3: mkSprite('sym_l3'),
 	L4: mkSprite('sym_l4'),
-	W: mkSprite('sym_w', { width: 0.9, height: 0.9 }),
-	S: mkSprite('sym_s', { width: 0.95, height: 0.95 }),
+	// W y S no tienen PNG estático (ver STATIC_LESS en SymbolSprite): su `box`
+	// llega hasta acá solo para quedar documentado junto al del resto — el
+	// tamaño real de los 3 animados sale de `ANIM_SPECIAL[…].box`.
+	W: mkSprite('sym_w', 0.9),
+	S: mkSprite('sym_s', 0.95),
 };
 
 export const SCATTER_LAND_SOUND_MAP = {

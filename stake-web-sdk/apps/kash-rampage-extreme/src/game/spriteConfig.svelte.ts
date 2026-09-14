@@ -135,16 +135,26 @@ const KASH_IDLE_IDS = [
 //
 // (H se cancela en ambas: por eso la alineación aguanta en cualquier resolución
 // sin necesidad de fracciones ni de recalcular nada por bucket.)
-const SWING_ASPECT = 423 / 460;
+// `dwide` del AnimLab: estira el clip SOLO de los lados — el alto y la línea de
+// pies no se tocan— para que el bateo no se vea más angosto que los idles. Va
+// dentro del aspect (y no de la escala) por eso mismo, y el anchorX lo usa YA
+// multiplicado: la alineación en píxeles se pliega contra el ancho FINAL.
+const SWING_CROP_ASPECT = 423 / 460;
+const SWING_WIDE = 1.1; // horneado del AnimLab (11-09) — "swing ancho (×aspect)"
+const SWING_ASPECT = SWING_CROP_ASPECT * SWING_WIDE; // ≈1.0115
 const SWING_SCALE = 1.09 * 0.99 * 1.02; // ≈1.1007 — cuerpo del swing = cuerpo del standby
-const SWING_DX_FRAC = 37 / 563 - 26 / 650 + 39 / 650; // ≈ 0.0857 — alineación horneada en el AnimLab
-const SWING_DY_FRAC = -4 / 563 - 18 / 650 + 7 / 650; // ≈ −0.0240
+// Cada sumando es un nudge del AnimLab en px de canvas sobre el alto de Kash de
+// esa sesión (por eso la fracción): así la alineación aguanta en cualquier
+// resolución. El último par (/474) es el ajuste del 11-09, hecho en Desktop
+// contra el ghost del idle junto con el ensanche de arriba.
+const SWING_DX_FRAC = 37 / 563 - 26 / 650 + 39 / 650 + 7 / 474; // ≈ 0.1005
+const SWING_DY_FRAC = -4 / 563 - 18 / 650 + 7 / 650 + 2 / 474; // ≈ −0.0198
 
 export const SPRITE_PLACEMENTS: Record<string, SpritePlacement> = {
 	...Object.fromEntries(KASH_IDLE_IDS.map((id) => [id, IDLE])),
 	anim_kash_swing: {
-		anchorX: 0.5 - SWING_DX_FRAC / (SWING_SCALE * SWING_ASPECT), // ≈0.4153
-		anchorY: 1 - SWING_DY_FRAC / SWING_SCALE, // ≈1.0218 (>1 es válido en PixiJS)
+		anchorX: 0.5 - SWING_DX_FRAC / (SWING_SCALE * SWING_ASPECT), // ≈0.4097
+		anchorY: 1 - SWING_DY_FRAC / SWING_SCALE, // ≈1.0180 (>1 es válido en PixiJS)
 		aspect: SWING_ASPECT,
 		scale: SWING_SCALE,
 		fps: 24,

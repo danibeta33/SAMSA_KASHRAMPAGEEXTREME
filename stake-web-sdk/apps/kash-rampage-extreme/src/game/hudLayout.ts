@@ -11,15 +11,53 @@
 // los tamaños del stack/TopBar, cambiarlos SOLO acá y en stateUiTweak.
 
 import { stateUiTweak } from './stateUiTweak.svelte';
+import {
+	isPortraitViewport,
+	PORTRAIT_REF_H,
+	PORTRAIT_REF_W,
+	viewportRatio,
+	WIDE_RATIO,
+} from './layoutRefs';
 
-export const isPortraitViewport = (w: number, h: number) => h > w;
+export { isPortraitViewport, viewportRatio, WIDE_RATIO };
 
-// Misma fórmula congelada que usaba BottomBar (diseño: desktop 1200×675,
-// portrait de referencia 425 de ancho).
-export const uiScaleFor = (w: number, h: number) =>
-	isPortraitViewport(w, h)
-		? Math.min(1, Math.max(0.7, w / 425))
-		: Math.min(1, Math.max(0.32, Math.min(w / 1200, h / 675)));
+// ── Escala responsive del HUD — DOS ANCLAJES ───────────────────────
+// El bug que esto arregla (reporte del usuario, 11-09): `uiScaleFor` estaba
+// topeada en 1, o sea que por encima del viewport de diseño (1200×675, el
+// preset Desktop del ACP) el HUD se CONGELABA en px mientras el board seguía
+// creciendo con `mainLayout().scale` (min(w/1422, h/800), sin tope). En una
+// ventana de 1912×956 el board sale ×1.416 más grande y la botonera/íconos/
+// recipientes/título quedaban del mismo tamaño → el usuario terminó con DOS
+// configuraciones distintas del MISMO bucket `desktop` (una tuneada en /sizes
+// y otra a mano en su ventana), que es justo lo que se pidió corregir.
+//
+// Tres tramos (anclajes A/B en `layoutRefs.ts`):
+//   r < 1       → escala LINEAL (idéntico al comportamiento histórico: los
+//                 buckets laptop/popout/portrait no se tocan).
+//   1 ≤ r ≤ rB  → escala 1; quien cambia el tamaño es el LERP por anclaje de
+//                 `stateTweak` (stackScale, iconScale, hudScale, …), que
+//                 reproduce EXACTO el encuadre A en 1200×675 y el B en
+//                 1912×956, e interpola en el medio.
+//   r > rB      → proporcional (r/rB): más allá del anclaje ancho se congela
+//                 el LOOK aprobado en B y todo crece junto con el board, así
+//                 que 2560×1440 o 4K se ven como 1912×956, sin HUD enano.
+
+export const uiScaleFor = (w: number, h: number) => {
+	if (isPortraitViewport(w, h)) {
+		// Por debajo de Mobile L (425 de ancho) se conserva la fórmula histórica
+		// TAL CUAL: los 3 buckets portrait se aprobaron con estos números y
+		// cambiar el eje que manda los movería a todos.
+		const below = w / PORTRAIT_REF_W;
+		if (below < 1) return Math.max(0.7, below);
+		// Portrait más grande que la referencia (tablets): crece con el lado que
+		// manda, igual que el board, en vez de quedarse clavado en 1.
+		return Math.min(below, h / PORTRAIT_REF_H);
+	}
+	const r = viewportRatio(w, h);
+	if (r < 1) return Math.max(0.32, r);
+	if (r <= WIDE_RATIO) return 1;
+	return r / WIDE_RATIO;
+};
 
 // Alto de la franja superior reservada al HUD. Desde el 08-09 vale SIEMPRE 0:
 // TopBar.svelte —la barra HTML `position: fixed` que ocupaba 24/40/56 px según

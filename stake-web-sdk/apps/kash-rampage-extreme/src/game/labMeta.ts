@@ -29,7 +29,7 @@ import type {
  * 09-09: se agregan los 12 diales de opacidad + capa (uno por elemento de la
  * UI) y los 9 de geometría de los especiales. Eso NO bumpeó: las claves nuevas
  * son ADITIVAS y `loadOverrides` copia solo las que encuentra, así que un
- * override viejo no las trae y caen al DEFAULT vía el merge de `applyBucket`.
+ * override viejo no las trae y caen al DEFAULT vía el merge de `applyLayout`.
  *
  * v16 (09-09): SÍ bumpea. Se congelaron los 72 diales de íconos + marcos
  * aprobados en Desktop y `specialScale` pasó a ser un valor ÚNICO (1.235) en
@@ -44,8 +44,26 @@ import type {
  * intercambiaron también sus valores aprobados. Un override v16 traería el
  * encuadre del medallón aplicado al fajo y viceversa — los marcos de victoria
  * saldrían corridos justo en los dos símbolos que este cambio toca.
+ *
+ * v18 (11-09): SÍ bumpea. Dos cambios encadenados:
+ *
+ *   1. Los íconos dejaron de comprimirse en X (`SYMBOL_SHEET_ASPECT` en
+ *      `constants.ts` — los PNG son 1080×970 y se pintaban cuadrados), y el
+ *      usuario reencuadró contra el arte ya sin deformar. La tabla nueva vive
+ *      en SYMBOL_GEOM_APPROVED y vale para los 7 buckets.
+ *   2. Las 7 excepciones de ícono/marco que tenía desktop en PER_BUCKET_SEED
+ *      se absorbieron en esa tabla.
+ *
+ * Sin el bump el cambio NO llega a "todas las resoluciones", que es el pedido:
+ * `saveTweak` persiste TODAS las claves del bucket activo —las 96 de símbolo
+ * incluidas—, así que cualquier bucket guardado con v17 trae congelado el
+ * encuadre viejo y `applyLayout` lo deja ganar sobre el default nuevo.
+ *
+ * ⚠ El bump descarta también los overrides de LAYOUT guardados (board, HUD,
+ * título, contador FS…). Es el costo aceptado: cada bucket vuelve a su
+ * PER_BUCKET_SEED de código, que es el último estado aprobado y versionado.
  */
-export const LAB_STORAGE_KEY = 'kash_tweak_v17';
+export const LAB_STORAGE_KEY = 'kash_tweak_v18';
 
 export const LAB_TITLE = 'UI LAB';
 
@@ -99,8 +117,25 @@ export const LAB_SYMBOLS = [
 
 export type SymbolLabId = (typeof LAB_SYMBOLS)[number]['id'];
 
-/** Sufijos de las 6 claves que tiene cada símbolo. */
-export const SYMBOL_GEOM_PROPS = ['X', 'Y', 'Scale', 'MarcoX', 'MarcoY', 'MarcoScale'] as const;
+/**
+ * Sufijos de las 8 claves que tiene cada símbolo.
+ *
+ * `Scale` es el dial CONJUNTO (escala los dos ejes a la vez, es el histórico);
+ * `ScaleX` / `ScaleY` multiplican ENCIMA de él, uno por eje, para corregir
+ * proporción sin tocar el tamaño general. Los tres se multiplican entre sí, así
+ * que con ScaleX = ScaleY = 1 el símbolo queda exactamente como antes de que
+ * existieran estos dos diales.
+ */
+export const SYMBOL_GEOM_PROPS = [
+	'X',
+	'Y',
+	'Scale',
+	'ScaleX',
+	'ScaleY',
+	'MarcoX',
+	'MarcoY',
+	'MarcoScale',
+] as const;
 
 export type SymbolGeomKey = `${SymbolLabId}${(typeof SYMBOL_GEOM_PROPS)[number]}`;
 
@@ -173,29 +208,6 @@ export const LAB_SLIDERS: (InspectorSliderConfig & { id: string })[] = [
 	{ id: 'kashY', label: 'Kash Y', min: 0.2, max: 0.9, step: 0.001, category: 'kash', order: 33 },
 	{ id: 'kashAlpha', label: 'Kash opacidad', min: 0, max: 1, step: 0.01, category: 'kash', order: 34 },
 	{ id: 'kashZ', label: 'Kash capa', ...LAYER, category: 'kash', order: 35 },
-	// ── COLOR DE KASH (drop 10-09) ──────────────────────────────────────────
-	// Corrección de color del personaje, EN VIVO sobre el clip que esté
-	// sonando. Los cuatro primeros arman un `PIXI.ColorMatrixFilter`
-	// (Background.svelte) y los dos últimos un `tint` multiplicativo:
-	//
-	//   · Saturación / Brillo / Contraste → 1 = neutro (el valor de hoy).
-	//   · Tono                            → grados de rotación de matiz; 0 = neutro.
-	//   · Tinte color + Tinte fuerza      → mezcla del blanco con un matiz. Con
-	//                                       fuerza 0 el tint queda en blanco puro
-	//                                       (= sin teñir) y NO se paga el filtro.
-	//
-	// Con los 6 en su default no se instancia ningún filtro: el camino de
-	// dibujo queda EXACTAMENTE como antes de este drop (ver `kashFilters`).
-	//
-	// El `order` arranca en 70 y no en 36 para dejar aire entre el bloque de
-	// geometría/capa y el de color; los números solo ordenan DENTRO de la
-	// categoría, así que no compiten con los de HUD SUPERIOR.
-	{ id: 'kashSaturation', label: 'Kash saturación', min: 0, max: 2, step: 0.01, category: 'kash', order: 70 },
-	{ id: 'kashBrightness', label: 'Kash brillo', min: 0.2, max: 2, step: 0.01, category: 'kash', order: 71 },
-	{ id: 'kashContrast', label: 'Kash contraste', min: 0, max: 2, step: 0.01, category: 'kash', order: 72 },
-	{ id: 'kashHue', label: 'Kash tono (°)', min: -180, max: 180, step: 1, decimals: 0, category: 'kash', order: 73 },
-	{ id: 'kashTintHue', label: 'Kash tinte — color (°)', min: 0, max: 360, step: 1, decimals: 0, category: 'kash', order: 74 },
-	{ id: 'kashTintAmount', label: 'Kash tinte — fuerza', min: 0, max: 1, step: 0.01, category: 'kash', order: 75 },
 	{ id: 'hudX', label: 'HUD X', min: 0, max: 1, step: 0.001, category: 'tophud', order: 40 },
 	{ id: 'hudY', label: 'HUD Y', min: 0, max: 1, step: 0.001, category: 'tophud', order: 41 },
 	{ id: 'hudScale', label: 'HUD size', min: 0.3, max: 2.5, step: 0.005, category: 'tophud', order: 42 },
@@ -232,7 +244,7 @@ export const LAB_SLIDERS: (InspectorSliderConfig & { id: string })[] = [
 	{ id: 'antMarcoScale', label: 'Marco col. tamaño', min: 0.3, max: 2.5, step: 0.005, category: 'antmarco', order: 62 },
 ];
 
-// ── GEOMETRÍA POR SÍMBOLO: 6 sliders × 12 símbolos (drop 09-09 · Paso 8) ────
+// ── GEOMETRÍA POR SÍMBOLO: 8 sliders × 12 símbolos (drop 09-09 · Paso 8) ────
 // Antes solo los 3 animados (W / S / Cash Stack) tenían diales propios; ahora
 // los 12 se ajustan individualmente, y cada uno lleva ADEMÁS los 3 del marco
 // de victoria que se dibuja sobre él.
@@ -244,6 +256,11 @@ export const LAB_SLIDERS: (InspectorSliderConfig & { id: string })[] = [
 //   · Scale      → multiplica al tamaño que le da su `box`. Para los 3
 //                  animados se multiplica además por el dial de grupo
 //                  `specialScale` (categoría BOTONERA + ÍCONOS).
+//   · ScaleX/Y   → estiran UN eje encima de `Scale`, sin tocar el otro. Son el
+//                  dial de PROPORCIÓN: `Scale` cambia cuánto ocupa el ícono,
+//                  estos dos cambian su forma. El tamaño nativo (el de la hoja
+//                  de sprite, 1080×970) es 1/1 — no hay que compensar nada acá
+//                  para que el ícono salga sin deformar.
 //   · Marco*     → lo mismo, pero para el clip `Marco_Icono` que estalla
 //                  SOBRE el símbolo al anotar. Van acá y no en una categoría
 //                  aparte porque el encuadre del marco depende del ícono que
@@ -252,6 +269,8 @@ const SYMBOL_SLIDER_SPECS = [
 	{ prop: 'X', label: 'X', min: -0.5, max: 0.5, step: 0.005 },
 	{ prop: 'Y', label: 'Y', min: -0.5, max: 0.5, step: 0.005 },
 	{ prop: 'Scale', label: 'Tamaño', min: 0.3, max: 2.5, step: 0.005 },
+	{ prop: 'ScaleX', label: 'Tamaño X (ancho)', min: 0.5, max: 2, step: 0.005 },
+	{ prop: 'ScaleY', label: 'Tamaño Y (alto)', min: 0.5, max: 2, step: 0.005 },
 	{ prop: 'MarcoX', label: 'Marco X', min: -0.5, max: 0.5, step: 0.005 },
 	{ prop: 'MarcoY', label: 'Marco Y', min: -0.5, max: 0.5, step: 0.005 },
 	{ prop: 'MarcoScale', label: 'Marco tamaño', min: 0.3, max: 3, step: 0.005 },

@@ -49,22 +49,8 @@
 # ------------------------------------------------------------------------------
 # 3. MATH SDK: ARCHIVOS PESADOS DE SIMULACIÓN MATEMÁTICA Y REGULACIÓN
 # ------------------------------------------------------------------------------
-# Libros de eventos comprimidos en ZStandard (hasta 400-600+ MB por modo de juego)
-*.jsonl.zst             lfs
-*.zst                   lfs
-*.zstandard             lfs
-
 # Lookup Tables (LUTs) de producción en CSV (millones de líneas por simulación)
 *.csv                   lfs
-
-# Formatos columnares / binarios de cálculo científico y machine learning
-*.parquet               lfs
-*.arrow                 lfs
-*.feather               lfs
-*.h5                    lfs
-*.hdf5                  lfs
-*.npy                   lfs
-*.npz                   lfs
 
 # Reportes matemáticos y auditorías de volatilidad/RTP
 *.xlsx                  lfs

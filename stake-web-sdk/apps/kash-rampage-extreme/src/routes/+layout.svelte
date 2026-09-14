@@ -164,6 +164,13 @@
 		--kash-glow: 0 0 12px rgba(246, 239, 27, 0.35), 0 0 24px rgba(224, 35, 48, 0.18);
 		--kash-pink-glow: 0 4px 18px rgba(224, 35, 48, 0.35);
 	}
+	/* El canvas de Pixi es `display: inline` por defecto: el gap de baseline
+	   del inline-flow le sumaba ~4px al alto del documento y la página
+	   scrolleaba en vertical (scrollbar visible en el iframe del ACP en
+	   1200×675, 1024×576 y 800×450). `display: block` lo elimina. */
+	:global(canvas) {
+		display: block;
+	}
 	/* Hardcodeados rosa del shell de modals del package (PAYTABLE/RULES) */
 	:global(.kash-doc__title) {
 		color: #e02330 !important;

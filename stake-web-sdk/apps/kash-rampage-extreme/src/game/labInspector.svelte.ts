@@ -21,6 +21,18 @@ const tweak = stateTweak as unknown as Record<string, number>;
 
 const bucketLabel = () => RES_BUCKETS.find((b) => b.key === labState.bucket)?.label ?? labState.bucket;
 
+// El bucket `desktop` tiene DOS anclajes (1200×675 y 1912×956) y el layout
+// interpola entre ellos, así que el panel tiene que decir sobre CUÁL de los dos
+// van a caer SAVE/RESET — si no, ajustar en una ventana intermedia es a ciegas.
+// En un viewport que cae justo en un anclaje se muestra solo su nombre; en el
+// medio se agrega el peso de la mezcla.
+const anchorLabel = () => {
+	const t = labState.blend;
+	const name = labState.anchor === 'wide' ? 'ancho' : 'base';
+	const exact = t <= 0.001 || t >= 0.999;
+	return exact ? `anclaje ${name}` : `anclaje ${name} · mezcla ${Math.round(t * 100)}%`;
+};
+
 let registered = false;
 
 export const registerGameInspector = () => {
@@ -41,11 +53,15 @@ export const registerGameInspector = () => {
 		},
 		commit: saveTweak,
 		reset: resetTweak,
-		status: () => ({ label: bucketLabel(), detail: `${labState.vw}×${labState.vh}` }),
+		status: () => ({
+			label: bucketLabel(),
+			detail: `${labState.vw}×${labState.vh} · ${anchorLabel()}`,
+		}),
 		// Mismo formato que el COPY VALUES histórico (bucket + viewport + valores),
 		// plano y serializable para que `/sizes` pueda leerlo desde el padre.
 		snapshot: () => ({
 			bucket: labState.bucket,
+			anchor: labState.anchor,
 			viewport: `${labState.vw}x${labState.vh}`,
 			...Object.fromEntries(
 				[...LAB_TOGGLES, ...LAB_SLIDERS].map((c) => [c.id, tweak[c.id]]),

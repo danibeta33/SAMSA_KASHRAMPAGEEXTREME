@@ -189,69 +189,6 @@
 		kashPlaced.foreground && celebration.n === 0 ? SWING_FRONT_LAYER : stateTweak.kashZ,
 	);
 
-	// ── COLOR DE KASH (UI LAB → categoría KASH, drop 10-09) ─────────────────
-	// Corrección de color EN VIVO del personaje, sobre el clip que esté sonando.
-	// Se resuelve en dos canales distintos a propósito:
-	//
-	//   · saturación / brillo / contraste / tono → un ColorMatrixFilter. Es una
-	//     PASADA DE RENDER extra (Pixi dibuja el sprite a una render texture y
-	//     recién ahí aplica la matriz), así que solo se engancha cuando hace
-	//     falta: con los 4 diales en neutro `kashFilters` es `[]` y el camino de
-	//     dibujo queda idéntico al de antes de este drop.
-	//   · tinte (color + fuerza) → el `tint` nativo del sprite, que se resuelve
-	//     en el mismo draw call y no cuesta nada. Blanco = sin teñir.
-	//
-	// El filtro es UNA sola instancia reusada: crear uno por cambio de slider
-	// dejaría un filtro (y su render texture) huérfano en cada tick del drag.
-	const colorFilter = new PIXI.ColorMatrixFilter();
-	const KASH_FILTERS = [colorFilter];
-
-	const colorNeutral = $derived(
-		stateTweak.kashSaturation === 1 &&
-			stateTweak.kashBrightness === 1 &&
-			stateTweak.kashContrast === 1 &&
-			stateTweak.kashHue === 0,
-	);
-
-	$effect(() => {
-		if (colorNeutral) return;
-		// `reset()` deja la identidad y de ahí en más cada llamada MULTIPLICA
-		// (segundo argumento `true`), así que el orden importa: es el pipeline
-		// clásico de grading — exposición → contraste → saturación → matiz.
-		// Los tres primeros diales van 1 = neutro y Pixi los quiere con 0 =
-		// neutro en contrast/saturate, de ahí el `- 1`.
-		colorFilter.reset();
-		colorFilter.brightness(stateTweak.kashBrightness, true);
-		colorFilter.contrast(stateTweak.kashContrast - 1, true);
-		colorFilter.saturate(stateTweak.kashSaturation - 1, true);
-		colorFilter.hue(stateTweak.kashHue, true);
-	});
-
-	const kashFilters = $derived(colorNeutral ? [] : KASH_FILTERS);
-
-	/** Matiz puro del círculo cromático (HSL con s=1, l=0.5), en canales 0..1. */
-	const hueToRgb = (hue: number): [number, number, number] => {
-		const h = ((((hue % 360) + 360) % 360) / 60) % 6;
-		const x = 1 - Math.abs((h % 2) - 1);
-		if (h < 1) return [1, x, 0];
-		if (h < 2) return [x, 1, 0];
-		if (h < 3) return [0, 1, x];
-		if (h < 4) return [0, x, 1];
-		if (h < 5) return [x, 0, 1];
-		return [1, 0, x];
-	};
-
-	// El tinte es una interpolación entre BLANCO (0xffffff = el sprite sin
-	// tocar, porque `tint` multiplica) y el matiz elegido. Con fuerza 0 da
-	// blanco exacto → no tiñe.
-	const kashTint = $derived.by(() => {
-		const amount = stateTweak.kashTintAmount;
-		if (amount <= 0) return 0xffffff;
-		const [r, g, b] = hueToRgb(stateTweak.kashTintHue);
-		const ch = (v: number) => Math.round(255 * (1 + (v - 1) * amount));
-		return (ch(r) << 16) | (ch(g) << 8) | ch(b);
-	});
-
 	// DEV — el AnimLab sigue alineando el swing con dx/dy/dscale en píxeles de
 	// canvas. Eso ya NO toca el render: se traduce a un override del registro.
 	// Un offset es un ancla disfrazada (desplazar d px equivale a mover el pivot
@@ -525,8 +462,6 @@
 				onComplete={onClipComplete}
 				onFrameChange={onFrame}
 				alpha={stateTweak.kashAlpha}
-				tint={kashTint}
-				filters={kashFilters}
 				zIndex={kashLayer}
 			/>
 		{/key}
@@ -548,8 +483,6 @@
 				onComplete={onClipComplete}
 				onFrameChange={onFrame}
 				alpha={stateTweak.kashAlpha}
-				tint={kashTint}
-				filters={kashFilters}
 				zIndex={kashLayer}
 			/>
 		{/key}
@@ -563,8 +496,6 @@
 			width={still.width}
 			height={still.height}
 			alpha={stateTweak.kashAlpha}
-			tint={kashTint}
-			filters={kashFilters}
 			zIndex={kashLayer}
 		/>
 	{/if}

@@ -14,6 +14,7 @@
 	// bucket: los 3 Mobile comparten reglas pero cada tamaño se aprueba mirándolo.
 	const APPROVED_PRESETS = [
 		'Desktop',
+		'Desktop XL',
 		'Laptop',
 		'Popout S',
 		'Popout L',
@@ -25,6 +26,11 @@
 	// Los MISMOS tamaños del selector del ACP de Stake (screenshot del usuario, 15-07).
 	const PRESETS = [
 		{ label: 'Desktop', w: 1200, h: 675 },
+		// No es un tamaño del ACP: es el ANCLAJE ANCHO del layout (la ventana real
+		// del usuario, 1912×956). El bucket `desktop` va de 1100 px para arriba y
+		// interpola entre este preset y el de 1200×675, así que hay que poder ver
+		// y ajustar los dos extremos desde acá. Los tamaños del medio salen solos.
+		{ label: 'Desktop XL', w: 1912, h: 956 },
 		{ label: 'Laptop', w: 1024, h: 576 },
 		{ label: 'Popout S', w: 400, h: 225 },
 		{ label: 'Popout L', w: 800, h: 450 },

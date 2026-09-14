@@ -37,7 +37,7 @@ type UiTweak = {
 };
 
 // $state: stackScale ahora se ajusta EN VIVO por resolución desde el UI LAB
-// (stateTweak.applyBucket lo sincroniza) — sin reactividad el BottomBar no se
+// (stateTweak.applyLayout lo sincroniza) — sin reactividad el BottomBar no se
 // enteraría del cambio hasta el próximo resize.
 export const stateUiTweak: UiTweak = $state({
 	stackW: 218,
