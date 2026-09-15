@@ -61,7 +61,12 @@ export const winLevelMap = {
 		type: 'big',
 		text: 'SUPER WIN',
 		presentDuration: 18 * SECOND,
-		sound: { sfx: 'sfx_winlevel_mega', bgm: 'bgm_winlevel_superwin' },
+		// SFX intercambiado con `epic` (14-09, pedido de dirección): SUPER WIN
+		// toca el AU-26 que tocaba EPIC, y EPIC el AU-25 que tocaba este. Los
+		// dos siguen compartiendo archivo con otro tier —antes superwin con
+		// mega y epic con max, ahora al revés—, que es la consecuencia directa
+		// del cambio.
+		sound: { sfx: 'sfx_winlevel_max', bgm: 'bgm_winlevel_superwin' },
 		animation: { intro: 'super_win_intro', idle: 'super_win_idle', outro: 'super_win_exit' },
 	},
 	8: {
@@ -79,7 +84,8 @@ export const winLevelMap = {
 		type: 'big',
 		text: 'EPIC WIN!',
 		presentDuration: 26 * SECOND,
-		sound: { sfx: 'sfx_winlevel_max', bgm: 'bgm_winlevel_epic' },
+		// SFX intercambiado con `superwin` — ver la nota del nivel 7.
+		sound: { sfx: 'sfx_winlevel_mega', bgm: 'bgm_winlevel_epic' },
 		animation: { intro: 'epic_win_intro', idle: 'epic_win_idle', outro: 'epic_win_exit' },
 	},
 	10: {

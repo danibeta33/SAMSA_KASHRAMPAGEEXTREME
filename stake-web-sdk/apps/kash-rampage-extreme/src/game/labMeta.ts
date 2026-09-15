@@ -79,9 +79,45 @@ export const LAB_CATEGORIES: (InspectorCategoryConfig & { id: string })[] = [
 	{ id: 'title', label: 'TÍTULO', order: 5 },
 	{ id: 'freespin', label: 'CONTADOR FREE SPINS', order: 6 },
 	{ id: 'antmarco', label: 'MARCO COLUMNA (anticipación)', order: 7 },
+	{ id: 'intro', label: 'PANTALLA DE CARGA (INTRO)', order: 8 },
 	// Una categoría POR SÍMBOLO (drop 09-09 · Paso 8) — se generan más abajo a
 	// partir de `LAB_SYMBOLS`, a continuación de estas.
 ];
+
+/**
+ * Los 4 elementos de la PANTALLA DE CARGA (drop 14-09), en el orden en que se
+ * listan en el panel. Cada uno lleva el mismo juego de 5 diales, con las
+ * mismas convenciones que el resto del laboratorio:
+ *
+ *   · X / Y   → fracciones del VIEWPORT (0..1), como `hudX`/`titleX` lo son del
+ *               canvas. La pantalla de carga es un overlay HTML a pantalla
+ *               completa, así que su sistema de coordenadas es la ventana.
+ *   · Scale   → multiplica el tamaño base del elemento. El tamaño base va en
+ *               `min(Nvw, Mvh)` (ver `LoadingOverlay.svelte`) para que el arte
+ *               no se salga ni en landscape ancho ni en portrait.
+ *   · Alpha   → opacidad CSS 0..1.
+ *   · Z       → capa dentro del overlay. Solo ordena estos 4 elementos entre
+ *               ellos: el overlay entero va con `z-index: 200` sobre el canvas.
+ *
+ * Son por bucket, como todo lo demás: la misma pantalla se encuadra distinto
+ * en Desktop que en Mobile portrait.
+ *
+ * Para ajustarlos hace falta que la pantalla esté en pantalla — y se cierra al
+ * primer click. ANIM LAB (tecla A) → PANTALLA DE CARGA trae "MOSTRAR de nuevo"
+ * y el toggle "no cerrar al click", que es el modo en que se tunea esto.
+ */
+export const LAB_INTRO_ELEMENTS = [
+	{ id: 'introTitle', label: 'INTRO — TÍTULO' },
+	{ id: 'introAnim', label: 'INTRO — UI (ventana animada)' },
+	{ id: 'introSpin', label: 'INTRO — ÍCONO DE CARGA' },
+	{ id: 'introText', label: 'INTRO — TEXTO' },
+] as const;
+
+export type IntroLabId = (typeof LAB_INTRO_ELEMENTS)[number]['id'];
+
+export const INTRO_GEOM_PROPS = ['X', 'Y', 'Scale', 'Alpha', 'Z'] as const;
+
+export type IntroGeomKey = `${IntroLabId}${(typeof INTRO_GEOM_PROPS)[number]}`;
 
 /**
  * Los 12 símbolos del board, en el orden en que se listan en el panel. El `id`
@@ -243,6 +279,36 @@ export const LAB_SLIDERS: (InspectorSliderConfig & { id: string })[] = [
 	{ id: 'antMarcoY', label: 'Marco col. Y', min: -1.5, max: 1.5, step: 0.005, category: 'antmarco', order: 61 },
 	{ id: 'antMarcoScale', label: 'Marco col. tamaño', min: 0.3, max: 2.5, step: 0.005, category: 'antmarco', order: 62 },
 ];
+
+// ── PANTALLA DE CARGA: 5 sliders × 4 elementos (drop 14-09) ─────────────────
+// Los 4 van a la MISMA categoría (son una sola pantalla, se encuadran uno
+// contra otro) y el label lleva el nombre del elemento adelante para poder
+// distinguirlos dentro de la lista.
+const INTRO_SLIDER_SPECS: { prop: string; label: string; min: number; max: number; step: number; decimals?: number }[] = [
+	{ prop: 'X', label: 'X', min: 0, max: 1, step: 0.002 },
+	{ prop: 'Y', label: 'Y', min: 0, max: 1, step: 0.002 },
+	{ prop: 'Scale', label: 'Tamaño', min: 0.2, max: 2.5, step: 0.005 },
+	{ prop: 'Alpha', label: 'Opacidad', min: 0, max: 1, step: 0.01 },
+	{ prop: 'Z', label: 'Capa', ...LAYER },
+];
+
+for (const [i, element] of LAB_INTRO_ELEMENTS.entries()) {
+	// El prefijo del label se recorta del label de la categoría del elemento
+	// ("INTRO — TÍTULO" → "TÍTULO") para que el slider diga "TÍTULO · X".
+	const name = element.label.replace('INTRO — ', '');
+	for (const [j, spec] of INTRO_SLIDER_SPECS.entries()) {
+		LAB_SLIDERS.push({
+			id: `${element.id}${spec.prop}`,
+			label: `${name} · ${spec.label}`,
+			min: spec.min,
+			max: spec.max,
+			step: spec.step,
+			decimals: spec.decimals,
+			category: 'intro',
+			order: 70 + i * 10 + j,
+		});
+	}
+}
 
 // ── GEOMETRÍA POR SÍMBOLO: 8 sliders × 12 símbolos (drop 09-09 · Paso 8) ────
 // Antes solo los 3 animados (W / S / Cash Stack) tenían diales propios; ahora

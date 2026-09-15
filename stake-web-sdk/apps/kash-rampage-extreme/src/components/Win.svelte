@@ -137,6 +137,29 @@
 
 	const COUNT_UP_STEPS = 24;
 
+	// ── Contador del count-up ────────────────────────────────────────────
+	// El clip "Contador" suena EN LOOP mientras las cifras suben debajo del
+	// cartel y se apaga cuando llegan al total. Vive acá y no en
+	// `bookEventHandlerMap` (donde están los stings de celebración) porque el
+	// count-up es de este componente: así el sonido dura EXACTAMENTE lo que
+	// dura el conteo de cada tier —600ms en small, ~2.4s en max— sin duplicar
+	// la tabla de duraciones ni volver a derivarla desde afuera.
+	const COUNTER_SFX = 'sfx_winlevel_end' as const;
+	const startCounterSfx = () =>
+		context.eventEmitter.broadcast({ type: 'soundLoop', name: COUNTER_SFX });
+	// Fade corto en vez de corte seco: el clip dura 2.35s y ningún tier salvo
+	// max lo deja terminar, así que cortarlo de golpe se oía como un tijeretazo.
+	// Entra holgado en el `holdMs` del tier (≥1000ms), que es lo que corre
+	// después del conteo — el fade termina mucho antes del `winHide`.
+	const stopCounterSfx = () =>
+		context.eventEmitter.broadcast({
+			type: 'soundFade',
+			name: COUNTER_SFX,
+			from: 1,
+			to: 0,
+			duration: 180,
+		});
+
 	const runCountUp = async (target: number, duration: number) => {
 		displayAmount = 0;
 		const stepMs = duration / COUNT_UP_STEPS;
@@ -178,6 +201,10 @@
 			// count-up.
 			show = false;
 			clearAllTimers();
+			// Red de seguridad del loop del contador: si un winHide llega con el
+			// conteo a medias (unmount, celebración cortada), el loop no puede
+			// quedar sonando solo.
+			context.eventEmitter.broadcast({ type: 'soundStop', name: COUNTER_SFX });
 			exitCelebration();
 		},
 		winUpdate: async (emitterEvent) => {
@@ -195,7 +222,9 @@
 			if (cfg.shakeOnHit) triggerBoardShake(cfg.shakeOnHit, 500);
 			startFlash(cfg.flashPeak);
 
+			startCounterSfx();
 			await runCountUp(emitterEvent.amount, cfg.countUpDuration);
+			stopCounterSfx();
 
 			// Hold the final frame so the player reads the number before the
 			// fade-out kicks in — escalado por tier via cfg.holdMs.

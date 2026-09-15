@@ -27,14 +27,15 @@
 
 	import { getContext } from '../game/context';
 	// SoundName ya viene importado en el module script de arriba.
-	import { SFX_MAP, SFX_GAIN, SFX_BASE_VOLUME } from '../game/sound';
+	import { SFX_MAP, SFX_GAIN, SFX_BASE_VOLUME, BGM_BASE_VOLUME } from '../game/sound';
 
 	const context = getContext();
 
-	// Base BGM volume — multiplied by master*music ratio from stateSound (0..1).
-	// Feedback del usuario (15-07): la música iba muy arriba en la mezcla —
-	// bajada 0.45 → 0.3 para que los SFX (base 0.7 × gain) manden.
-	const BGM_BASE_VOLUME = 0.3;
+	// `BGM_BASE_VOLUME` (el volumen base de la música, ×master*music del
+	// mezclador) se mudó a `game/sound.ts`: la cama `BackgroundLoop` que
+	// arranca en la intro cuelga del MISMO número (va al 50% de él) y no puede
+	// leerlo desde acá — corre por fuera de este componente, ver
+	// `game/ambientAudio.svelte.ts`.
 
 	// Pipeline de audio 26-08 (estilo dead-heat): clips trimeados + loudnorm a
 	// -14 LUFS (música -14.5) / TP -1, servidos como m4a cuando el browser lo
@@ -46,6 +47,9 @@
 		supportsM4A && !path.includes('-loop') ? path.replace(/\.mp3$/, '.m4a') : path;
 	// Gains que llevan los loops (sin re-encode) al target -14.5 LUFS de la
 	// música: AU-03-loop -9.3 LUFS medido → ×0.55 · AU-04-loop -9.9 → ×0.59.
+	// `bgm_main` (MusicaBase-loop) NO lleva entrada aunque también sea `-loop`:
+	// ese sí se normalizó ANTES del crossfade y quedó en -14.9 LUFS, a 0.4dB del
+	// target, así que su gain natural es 1.
 	const MUSIC_GAIN: Record<string, number> = {
 		bgm_freespin: 0.55,
 		bgm_freespin_rage: 0.59,
@@ -151,6 +155,13 @@
 			// Autoplay may be blocked by the browser; user gesture starts BGM via stateSound.
 			void bgm.play().catch(() => {});
 		}
+		// PRECARGA de la cadena del marco: el resto de los SFX se crean en su
+		// primer play (no tiene sentido pedir 40 clips que la ronda no toca),
+		// pero este pesa 600 KB —es el único wav sin pasar por el pipeline— y
+		// tiene que caer EN EL FRAME en que arranca el marco. Sin esto, el
+		// primer cluster ganador de la sesión se enmarca mudo mientras baja.
+		getOrCreateAudio('sfx_marco_chain', { loop: false });
+
 		// Expose for headless tests / debugging
 		(globalThis as unknown as { __bgm?: HTMLAudioElement }).__bgm = bgm;
 		(globalThis as unknown as { __stateSound?: typeof stateSound }).__stateSound = stateSound;

@@ -3,7 +3,6 @@
 	import { GlobalStyle } from 'components-ui-html';
 	import { Authenticate, LoadI18n } from 'components-shared';
 	import Game from '../components/Game.svelte';
-	import GameLoader from '../components/GameLoader.svelte';
 	import BottomBar from '../components/BottomBar.svelte';
 	import LoadingOverlay from '../components/LoadingOverlay.svelte';
 	import BuyBonusOverlay from '../components/BuyBonusOverlay.svelte';
@@ -26,6 +25,7 @@
 	import { enableSocialText } from '../game/social';
 	import { preloadHtmlAssets } from '../game/htmlAssets.svelte';
 	import { compileMessagePlain } from '../game/i18nCompiler';
+	import { startAmbientMusic } from '../game/ambientAudio.svelte';
 
 	// Lingui no instala compilador de mensajes en prod → "Uncompiled message
 	// detected!" al traducir (visible al disparar las notifs de límite del
@@ -45,8 +45,17 @@
 
 	// Guideline nuevo del ACP (jul-2026): "Game should not contain the Stake
 	// Engine Loader" — el splash LoaderStakeEngine del SDK se eliminó; el
-	// juego arranca directo con el loader brandeado (GameLoader), que ya no
-	// recibe ruta: el sheet del bate lo resuelve LoadingSpinner.
+	// juego arranca directo con la pantalla brandeada, que es `LoadingOverlay`
+	// (fondo + título + intro animado + bate girando + LOADING/CLICK TO SKIP).
+	//
+	// 14-09: se eliminó también `GameLoader.svelte`, el rectángulo negro con
+	// solo el bate que tapaba esta pantalla durante sus primeros 2 s. Era
+	// redundante: `ssr = false` (SPA), así que el primer paint de todos modos
+	// es el `background: black` del body, y `LoadingOverlay` se monta en el
+	// MISMO render que `<Game />` con `stateApp.loaded` todavía en false — o
+	// sea que ya mostraba el mismo bate y el mismo LOADING, pero con el fondo,
+	// el título y el intro. Lo único que hacía el loader viejo era esconder
+	// todo eso durante los primeros segundos.
 
 	// QoL de DEV: entrar a localhost:3001 "pelado" (sin rgs_url) moría con
 	// SOMETHING WENT WRONG al intentar autenticar contra el RGS real. En dev,
@@ -92,6 +101,13 @@
 		// Imágenes HTML del HUD/overlays al cache durante el loading — sin esto
 		// las cards del buy menu "aparecían" tarde en la primera apertura.
 		void preloadHtmlAssets();
+		// Cama de música (`BackgroundLoop`) desde el PRIMER frame: corre por
+		// debajo de la música de fondo del juego y, a diferencia de ella, no
+		// espera al click de la pantalla de carga. Se arranca acá y no en
+		// `LoadingOverlay` para que no dependa del ciclo de vida de ese
+		// overlay, que el ANIM LAB puede volver a abrir. Ver
+		// `game/ambientAudio.svelte.ts`.
+		startAmbientMusic();
 	});
 
 	// (Se removió la telemetría DEV que posteaba a http://127.0.0.1:9911/err:
@@ -128,9 +144,6 @@
 		</LoadI18n>
 	</Authenticate>
 </GlobalStyle>
-
-<!-- Loader brandeado: el bate girando (assets/loading/spinner.webp) + LOADING lima. -->
-<GameLoader />
 
 {@render props.children()}
 

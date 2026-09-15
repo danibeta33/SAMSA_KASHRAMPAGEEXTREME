@@ -3,7 +3,7 @@
 	import SymbolWrap from './SymbolWrap.svelte';
 	import { getSymbolInfo, getSymbolX, isTopLayerSymbol } from '../game/utils';
 	import { stateRampage } from '../game/stateRampage.svelte';
-	import { getWinFlashCell } from '../game/winFlash.svelte';
+	import { getWinFlashCell, isWinCellLit } from '../game/winFlash.svelte';
 	import { getAnticipationGlow, getAnticipationAlpha } from '../game/stateAnticipation.svelte';
 	import type { ReelSymbol } from '../game/stateGame.svelte';
 
@@ -24,9 +24,12 @@
 	const rampageHidden = $derived(stateRampage.hiddenSymbols.includes(props.reelSymbol));
 	// Feedback de cluster ganador en cascada (undefined = esta celda no está
 	// en el cluster o la secuencia ya terminó).
-	const winFlash = $derived(
-		getWinFlashCell({ reel: props.reelIndex, row: props.symbolIndex }),
-	);
+	const winFlash = $derived(getWinFlashCell({ reel: props.reelIndex, row: props.symbolIndex }));
+	// ¿Ya le llegó el turno a esta celda? La cascada enciende el MARCO de
+	// victoria (y la carta `_luz` de los especiales, que no tienen winFlash)
+	// símbolo por símbolo en vez de todos de una. Sin cascada corriendo es
+	// `true` y el marco se comporta como siempre.
+	const winLit = $derived(isWinCellLit({ reel: props.reelIndex, row: props.symbolIndex }));
 	// Anticipación (v5): el foco lo dan los símbolos, no un rectángulo.
 	//  · antGlow  → brillo 0→1 de ESTA celda. Sigue al frente de luz que baja
 	//    por la columna, así que sale de la Y EN VIVO del símbolo y no de su
@@ -48,22 +51,23 @@
 	<!-- nada: la celda queda vacía hasta que aterrice el símbolo nuevo -->
 {:else}
 	<SymbolWrap
-	x={getSymbolX(props.reelIndex)}
-	y={props.reelSymbol.symbolY()}
-	zIndex={onTopLayer ? 1 : 0}
-	animating={symbolInfo.type === 'spine' &&
-		(props.reelSymbol.symbolState === 'land' || props.reelSymbol.symbolState === 'win')}
->
-	<Symbol
-		state={props.reelSymbol.symbolState}
-		rawSymbol={props.reelSymbol.rawSymbol}
-		{winFlash}
-		{antGlow}
-		{antAlpha}
-		oncomplete={() => {
-			if (props.reelSymbol.symbolState === 'win') props.reelSymbol.oncomplete();
-			if (props.reelSymbol.symbolState === 'land') props.reelSymbol.symbolState = 'static';
-		}}
-	/>
+		x={getSymbolX(props.reelIndex)}
+		y={props.reelSymbol.symbolY()}
+		zIndex={onTopLayer ? 1 : 0}
+		animating={symbolInfo.type === 'spine' &&
+			(props.reelSymbol.symbolState === 'land' || props.reelSymbol.symbolState === 'win')}
+	>
+		<Symbol
+			state={props.reelSymbol.symbolState}
+			rawSymbol={props.reelSymbol.rawSymbol}
+			{winFlash}
+			{winLit}
+			{antGlow}
+			{antAlpha}
+			oncomplete={() => {
+				if (props.reelSymbol.symbolState === 'win') props.reelSymbol.oncomplete();
+				if (props.reelSymbol.symbolState === 'land') props.reelSymbol.symbolState = 'static';
+			}}
+		/>
 	</SymbolWrap>
 {/if}

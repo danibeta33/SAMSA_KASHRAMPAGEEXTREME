@@ -22,6 +22,10 @@
 		winPop?: WinPop;
 		// Brillo + boing del cluster ganador — lo trae el board principal.
 		winFlash?: WinFlashCell;
+		// Turno de esta celda en la cascada de victoria: mientras sea `false` el
+		// símbolo ya ganó pero todavía no le toca enmarcarse. `undefined` (tumble
+		// board, anticipación) = sin cascada → se dibuja como siempre.
+		winLit?: boolean;
 		// Anticipación (v5): brillo 0→1 de la celda y alpha del spotlight. Los
 		// calcula ReelSymbol; acá solo pasan de largo hasta el sprite, que es
 		// quien enciende su carta/clip `_luz`.
@@ -48,6 +52,7 @@
 		oncomplete={props.oncomplete}
 		winPop={props.winPop}
 		winFlash={props.winFlash}
+		winLit={props.winLit}
 		antGlow={props.antGlow}
 		antAlpha={props.antAlpha}
 	/>

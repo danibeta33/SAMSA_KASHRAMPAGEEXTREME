@@ -55,7 +55,7 @@
 	});
 
 	const bgTexture = $derived(
-		((appContext.stateApp.loadedAssets?.bg_vault as PIXI.Texture) || PIXI.Texture.EMPTY),
+		(appContext.stateApp.loadedAssets?.bg_vault as PIXI.Texture) || PIXI.Texture.EMPTY,
 	);
 
 	// ── Fondo ANIMADO (drop 07-09) ─────────────────────────────────────
@@ -138,11 +138,19 @@
 	// El swing (anim_kash_swing) NO está acá: es el SMASH del win (Feedback
 	// N1 #7), se dispara vía el evento 'kashSwing' — la rotación random son
 	// solo gestos.
-	const ACTIONS = [
-		'anim_kash_idle_glasses1',
-		'anim_kash_idle_scratch1',
-		'anim_kash_idle_nose1',
-		'anim_kash_idle_bat1', 'anim_kash_idle_bat2',
+	// Cada gesto trae su PESO en la rotación: glasses es el guiño raro (5%) y
+	// los otros cuatro se reparten el resto en partes iguales (23.75% c/u).
+	// Los pesos son la probabilidad nominal de cada gesto en una tirada libre;
+	// la regla de "no repetir el anterior" (ver pickAction) reparte el peso del
+	// excluido entre los que quedan, así que la frecuencia observada de glasses
+	// sube apenas por encima del 5% nominal — sigue siendo, de lejos, el gesto
+	// menos común, que es lo que se pidió.
+	const ACTIONS: { clip: string; weight: number }[] = [
+		{ clip: 'anim_kash_idle_glasses1', weight: 5 },
+		{ clip: 'anim_kash_idle_scratch1', weight: 23.75 },
+		{ clip: 'anim_kash_idle_nose1', weight: 23.75 },
+		{ clip: 'anim_kash_idle_bat1', weight: 23.75 },
+		{ clip: 'anim_kash_idle_bat2', weight: 23.75 },
 	];
 	// La GEOMETRÍA de cada clip (ancla, aspect, escala, fps, capa) ya no vive
 	// acá: son datos del registro `spriteConfig.svelte.ts`, resueltos por
@@ -160,6 +168,24 @@
 
 	const SWING_CLIP = 'anim_kash_swing';
 	const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+	// Última acción reproducida: se excluye de la siguiente tirada para que
+	// nunca salga el mismo gesto dos veces seguidas.
+	let lastAction: string | null = null;
+	/**
+	 * Sortea un gesto por peso, salteando el que se acaba de ver. El peso del
+	 * excluido no se pierde: al normalizar sobre el total de los candidatos
+	 * restantes, se reparte entre ellos en proporción a sus propios pesos.
+	 */
+	const pickAction = () => {
+		const pool = ACTIONS.filter((a) => a.clip !== lastAction);
+		const total = pool.reduce((sum, a) => sum + a.weight, 0);
+		let roll = Math.random() * total;
+		// El último del pool es el fallback: cubre el borde donde la resta de
+		// floats deja `roll` justo en el total.
+		const chosen = pool.find((a) => (roll -= a.weight) < 0) ?? pool[pool.length - 1];
+		lastAction = chosen.clip;
+		return chosen.clip;
+	};
 
 	let currentClip = $state('anim_kash_idle_stand1');
 	let currentLoop = $state(true);
@@ -259,25 +285,59 @@
 	const KASH_IDLES_ENABLED = true;
 	// PROTOTIPO 26-08 (mecánica pedida por dirección): el batazo del KASH RAMPAGE
 	// sí reproduce el swing KS1 (outfit viejo, provisorio) para probar cómo se
-	// siente que Kash cause la conversión: swing → golpe en frame 30 (shake +
-	// AU-09) → wave de conversión de símbolos. Solo aplica a kashSwing con
+	// siente que Kash cause la conversión: swing → golpe en el frame de contacto
+	// (shake + bateo) → wave de conversión de símbolos. Solo aplica a kashSwing con
 	// source 'rampage'; al reactivar KASH_IDLES_ENABLED vuelve el swing en wins.
 	const KASH_SWING_RAMPAGE_ENABLED = true;
 	// La stand-by por defecto no está preloaded — hasta que cargue, se muestra
 	// el sprite estático (kash_side, preloaded) para no dejar el hueco vacío.
 	const idleReady = $derived(
 		KASH_IDLES_ENABLED &&
-			!!appContext.stateApp.loadedAssets?.[currentClip as keyof typeof appContext.stateApp.loadedAssets],
+			!!appContext.stateApp.loadedAssets?.[
+				currentClip as keyof typeof appContext.stateApp.loadedAssets
+			],
 	);
 
 	let actionTimer: ReturnType<typeof setTimeout>;
 	// El golpe del swing se dispara por FRAME REAL (onFrameChange), no por ms:
-	// el frame es determinista aunque el playback varíe. Frame ~43 del clip
-	// kash_batea = el bate extendido hacia el board. swingHit evita repetir.
-	// Swing ÚNICO (48f a 24fps). Verificado IN-GAME: el bate CONTACTA el grid en
-	// el frame 31 (entra en la 1ra columna); frame 33+ ya es follow-through. El
-	// jolt en 30 hace que la sacudida caiga justo en el golpe.
-	const SWING_STRIKE_FRAME = 30;
+	// el frame es determinista aunque el playback varíe. `swingHit` evita
+	// repetirlo.
+	//
+	// EL FRAME DE CONTACTO, LEÍDO DEL SHEET (no del comentario viejo)
+	// ---------------------------------------------------------------
+	// Este número decía 30 y venía de un export de 48 frames que ya no existe:
+	// `anim_kash_swing.json` trae 41 (0..40) y el golpe se corrió con él.
+	// Revisando el sheet frame por frame:
+	//     0..9    standby, el bate al hombro
+	//     10..23  wind-up: levanta el bate y lo deja cargado arriba
+	//     24      empieza a girar
+	//     25      el bate CRUZA, borroneado, apuntando abajo
+	//     26      el ARCO BLANCO del impacto — es el frame del golpe
+	//     27..34  follow-through y retroceso
+	//     35..40  vuelta a standby
+	// O sea que en el 30 el bate ya pasó hace rato: el shake y el sonido caían
+	// ~170 ms tarde, en pleno follow-through. De ahí el feedback de que "el
+	// bateo suena después de lo que debería".
+	const SWING_STRIKE_FRAME = 26;
+	// ── El SFX arranca ANTES que el golpe ───────────────────────────────────
+	// Y encima el clip `Bateo` NO empieza en el impacto: dura 674 ms y su
+	// transitorio —el crack del bate— cae a los 250 ms; lo de antes es el
+	// silbido del bate cruzando el aire. Disparándolo EN el frame de contacto,
+	// el crack caía otros 6 frames más tarde. Sumado al frame equivocado, el
+	// golpe se escuchaba casi medio segundo después de verse.
+	//
+	// Se adelanta entonces lo que el clip tarda en llegar a su golpe: 250 ms a
+	// 24 fps = 6 frames. Con el contacto en el 26, el sonido arranca en el 20:
+	// el silbido se vuelve audible sobre los frames 24-25 (justo cuando el bate
+	// gira y cruza) y el crack cae en el 26, con el arco blanco y el shake.
+	//
+	// El 0.19s de silencio de cabeza que menciona `sound.ts` ya está recortado
+	// del archivo — esto es el cuerpo del sonido, no silencio, y por eso se
+	// compensa acá y no con otro trim.
+	const SWING_SFX_LEAD_FRAMES = 6;
+	const SWING_SFX_FRAME = SWING_STRIKE_FRAME - SWING_SFX_LEAD_FRAMES;
+	// Dos banderas y no una: el sonido y el golpe ya no caen en el mismo frame.
+	let swingSfxFired = false;
 	let swingHit = false;
 	// Resolver pendiente del broadcastAsync('kashSwing'): se resuelve en el
 	// frame de golpe → setWin sincroniza la celebración con el impacto.
@@ -287,10 +347,18 @@
 	// SFX del bate AU-09 — Feedback N1 #7: el SMASH suena con su golpe).
 	const onFrame = (frame: number) => {
 		currentFrame = frame;
-		if (currentClip === SWING_CLIP && !swingHit && frame >= SWING_STRIKE_FRAME) {
+		if (currentClip !== SWING_CLIP) return;
+		// Silbido del bate: arranca a mitad del swing para que el crack del clip
+		// (250 ms adentro) caiga justo en el frame de contacto.
+		if (!swingSfxFired && frame >= SWING_SFX_FRAME) {
+			swingSfxFired = true;
+			context.eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_wild_explode' });
+		}
+		// Contacto: shake del board + resolve de la promesa (la celebración entra
+		// con el impacto). El sonido acá ya viene sonando.
+		if (!swingHit && frame >= SWING_STRIKE_FRAME) {
 			swingHit = true;
 			triggerBoardShake(24, 600);
-			context.eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_wild_explode' });
 			strikeResolve?.();
 			strikeResolve = null;
 		}
@@ -299,7 +367,8 @@
 		if (!KASH_IDLES_ENABLED) return; // sin idles no hay rotación que agendar
 		actionTimer = setTimeout(
 			() => {
-				const clip = pick(ACTIONS);
+				const clip = pickAction();
+				swingSfxFired = false;
 				swingHit = false; // reset del golpe para el nuevo clip
 				currentClip = clip;
 				currentLoop = false;
@@ -355,10 +424,11 @@
 				return;
 			}
 			clearTimeout(actionTimer);
+			swingSfxFired = false;
 			swingHit = false;
 			currentClip = SWING_CLIP;
 			currentLoop = false;
-			// Golpe en frame 30 @24fps ≈ 1.25s — el fallback apenas por encima:
+			// Golpe en el frame 26 @24fps ≈ 1.08s — el fallback queda con holgura:
 			// si el clip no corre (race rara vista 1 vez en QA), la celebración
 			// entra a lo sumo ~1.6s tarde en vez de 2.6s.
 			await waitForResolve((resolve) => (strikeResolve = resolve), {
@@ -376,6 +446,7 @@
 				c: string,
 			) => {
 				clearTimeout(actionTimer);
+				swingSfxFired = false;
 				swingHit = false;
 				currentClip = c;
 				currentLoop = STANDBYS.includes(c);

@@ -112,12 +112,37 @@ const IDLE: SpritePlacement = {
 
 const KASH_IDLE_IDS = [
 	'anim_kash_idle_stand1',
-	'anim_kash_idle_glasses1',
 	'anim_kash_idle_scratch1',
 	'anim_kash_idle_nose1',
 	'anim_kash_idle_bat1',
 	'anim_kash_idle_bat2',
 ] as const;
+
+// ── Glasses: mismo id, OTRO canvas ──────────────────────────────────────────
+// El re-drop 14-09 de `anim_kash_idle_glasses1` conserva el nombre pero NO el
+// recorte del resto de los idles: viene del canvas del swing (1250×1230) en vez
+// del común (930×1112). El personaje está dibujado al mismo tamaño en píxeles
+// (447×918 contra los 444×920 del standby) — lo que cambió es el PADDING. Con
+// la entrada IDLE puesta, ese padding extra se comía la escala (Kash aparecía
+// ~10% más chico) y corría la línea de pies hacia arriba, así que el clip
+// necesita su propia geometría igual que el swing.
+//
+// Los números salen del `spriteSourceSize` de los .json, no del ojo:
+//   · standby (930×1112): pies en y≈1047.5 · cabeza en y≈127 → cuerpo 920.5px
+//   · glasses (1250×1230): pies en y=1107   · cabeza en y=189 → cuerpo 918px
+// Todo se expresa como FRACCIÓN del canvas para que no dependa del alto de
+// Kash en pantalla (que cambia con la resolución).
+const IDLE_FEET_FRAC = 1047.5 / 1112; // ≈0.9420 — dónde pisa el standby en su canvas
+const IDLE_BODY_FRAC = 920.5 / 1112; // ≈0.8278 — cuánto del canvas ocupa el cuerpo
+const GLASSES_CANVAS = { w: 1250, h: 1230 };
+const GLASSES_FEET_FRAC = 1107 / GLASSES_CANVAS.h; // 0.9000
+const GLASSES_BODY_FRAC = 918 / GLASSES_CANVAS.h; // ≈0.7463
+// Escala: el cuerpo tiene que MEDIR lo mismo en pantalla que el del standby.
+const GLASSES_SCALE = IDLE_BODY_FRAC / GLASSES_BODY_FRAC; // ≈1.1091
+// Ancla vertical: con anchorY 1 el standby deja los pies (1 − IDLE_FEET_FRAC)
+// del alto por ENCIMA del punto anclado. El ancla de glasses es la que pone sus
+// pies en ese mismo lugar — resolviendo scale·(feetFrac − anchorY) = −(1 − IDLE_FEET_FRAC).
+const GLASSES_ANCHOR_Y = GLASSES_FEET_FRAC + (1 - IDLE_FEET_FRAC) / GLASSES_SCALE; // ≈0.9523
 
 // ── Geometría del swing, y de dónde sale su ancla ───────────────────────────
 // El swing está PLANTADO (cada frame recortado centrado en los pies, ver
@@ -152,6 +177,19 @@ const SWING_DY_FRAC = -4 / 563 - 18 / 650 + 7 / 650 + 2 / 474; // ≈ −0.0198
 
 export const SPRITE_PLACEMENTS: Record<string, SpritePlacement> = {
 	...Object.fromEntries(KASH_IDLE_IDS.map((id) => [id, IDLE])),
+	// Ver el bloque "Glasses: mismo id, OTRO canvas" arriba. `aspect` es el del
+	// canvas EXACTO (1250/1230) para no deformar el arte; el ancla horizontal
+	// se queda en 0.5 porque el cuerpo cae casi al centro de su canvas
+	// (654.5/1250 = 0.5236) y, con este aspect y esta escala, ese 0.5 deja el
+	// torso en la misma columna que el standby (el valor exacto sería 0.4997).
+	anim_kash_idle_glasses1: {
+		anchorX: 0.5,
+		anchorY: GLASSES_ANCHOR_Y,
+		aspect: GLASSES_CANVAS.w / GLASSES_CANVAS.h,
+		scale: GLASSES_SCALE,
+		fps: 10, // mismo reloj que el resto de los idles: 23 frames = 2.3s
+		foreground: false,
+	},
 	anim_kash_swing: {
 		anchorX: 0.5 - SWING_DX_FRAC / (SWING_SCALE * SWING_ASPECT), // ≈0.4097
 		anchorY: 1 - SWING_DY_FRAC / SWING_SCALE, // ≈1.0180 (>1 es válido en PixiJS)

@@ -18,6 +18,8 @@ export type SoundEffectName =
 	| 'sfx_btn_general'
 	| 'sfx_btn_spin'
 	| 'sfx_fs_respins'
+	| 'sfx_intro_swipe'
+	| 'sfx_marco_chain'
 	| 'sfx_multiplier_combine_a'
 	| 'sfx_multiplier_combine_b'
 	| 'sfx_multiplier_explosion_a'
@@ -82,10 +84,58 @@ export { sound };
 // Missing (rows highlighted in PDF v1.0):
 //   AU-02 Vault Crack bonus loop, AU-05 BIG win sting, AU-06 MEGA win sting,
 //   AU-07 MAX win sting, AU-08 big/mega win explosion.
+// Reemplazos del drop 14-09 (ya no por número de planilla sino por nombre):
+//   MusicaBase reemplaza a AU-01 (música base), Bateo a AU-09 (golpe del bate)
+//   y Contador a AU-20 (tick del count-up). Los AU-XX viejos siguen en
+//   `static/assets/audio/` pero ya no los referencia nadie.
 
 const AU = (id: string) => `assets/audio/AU-${id}.mp3`;
 
+// Clips entregados por nombre propio (drop 14-09), fuera de la numeración AU-XX
+// de la planilla original. Pasaron por el MISMO pipeline que el resto
+// (trim de silencios + loudnorm 2-pass a -14 LUFS / -14.5 la música, TP -1).
+// Los SFX traen su par .m4a y `srcFor()` en Sound.svelte los sirve igual que
+// los AU-XX; el `-loop` de la música va solo en mp3, como los AU-03/04-loop.
+// Los archivos crudos que entregó el equipo quedaron en `src/game/sounds/`
+// (la carpeta de fuentes sin compilar del SDK, gitignoreada) y NO en `static/`:
+// ahí adentro el .wav de 23MB se copiaría tal cual al build.
+const CLIP = (name: string) => `assets/audio/${name}.mp3`;
+
+// Clips del drop 15-09 que llegaron en .wav y TODAVÍA NO pasaron por el
+// pipeline (trim + loudnorm + mp3/m4a): esta máquina no tiene ffmpeg. Se
+// sirven tal cual — el browser reproduce wav sin problema y `srcFor()` en
+// Sound.svelte los deja pasar (solo reescribe `.mp3` → `.m4a`). Cuando se
+// corra el pipeline, cambiar la extensión acá y listo; el resto no se toca.
+const RAW = (name: string) => `assets/audio/${name}.wav`;
+
 export const SFX_BASE_VOLUME = 0.7;
+
+// ─── Bus de MÚSICA ────────────────────────────────────────────────────────
+// Volumen base de la pista de música (lo multiplica el ratio master*music del
+// mezclador). Vivía dentro de Sound.svelte; se subió acá porque ahora hay DOS
+// emisores de música y los dos tienen que colgar del mismo número:
+//   · `bgm_main` y compañía — Sound.svelte, arranca al entrar al juego.
+//   · la cama `BackgroundLoop` — ambientAudio.svelte.ts, arranca en la intro.
+// Feedback del usuario (15-07): la música iba muy arriba en la mezcla —
+// bajada 0.45 → 0.3 para que los SFX (base 0.7 × gain) manden.
+export const BGM_BASE_VOLUME = 0.3;
+
+// ─── Cama de fondo (`BackgroundLoop`, drop 15-09) ─────────────────────────
+// Segunda capa de música que corre DEBAJO de la música de fondo del juego, en
+// bucle y SIN CORTES desde la intro: a diferencia de `bgm_main` —que Sound.svelte
+// recién monta después del click de la pantalla de carga— esta arranca con la
+// app (ver `ambientAudio.svelte.ts`, llamado desde `routes/+layout.svelte`) y
+// no se detiene en los swaps de pista (base ↔ free spins ↔ rage).
+//
+// Va por fuera de SFX_MAP a propósito: no es un `MusicName` ruteable por
+// `soundMusic`, que SUSTITUYE la pista del elemento `bgm`. Si estuviera en el
+// mapa, un `soundMusic({ name: 'bgm_ambient' })` mataría la música de fondo.
+//
+// Pedido del usuario: "50% menos de volumen que la música de fondo" — de ahí
+// el ×0.5 exacto sobre BGM_BASE_VOLUME. Igual que la otra, la afecta el
+// mezclador del juego por el bus **Music**.
+export const AMBIENT_MUSIC_SRC = 'assets/audio/BackgroundLoop.mp3';
+export const AMBIENT_BASE_VOLUME = BGM_BASE_VOLUME * 0.5;
 
 export const SFX_MAP: Record<SoundName, string | null> = {
 	// Mapeo deliberado contra la spec del equipo (PDF "Audio — Detalle" v1.0).
@@ -94,7 +144,15 @@ export const SFX_MAP: Record<SoundName, string | null> = {
 	// momento clave; reemplazar cuando lleguen los definitivos.
 
 	// ── BGM (music bus) ──────────────────────────────────────────────
-	bgm_main: AU('01'), // AU-01 base game loop (trap 90-100 BPM)
+	// Música base — reemplaza al AU-01 por "MusicaBase" (drop 14-09), 2:10.3.
+	// El .wav entregado NO era un loop: cerraba con 1.39s de silencio y una cola
+	// en fade (−38 dBFS RMS contra −19 del arranque), el mismo defecto que
+	// dirección rechazó en los AU-03/04 el 15-07 ("se corta y vuelve a
+	// arrancar"). Lleva entonces el MISMO tratamiento que aquellos: silencio de
+	// cola recortado + crossfade de 1.5s del final contra el arranque. Por eso
+	// el sufijo `-loop`, que además hace que `srcFor()` en Sound.svelte lo sirva
+	// como mp3 y no busque un .m4a (re-encodear rompería el seam).
+	bgm_main: CLIP('MusicaBase-loop'),
 	// Los AU-03/04 originales NO eran loops (intro fuerte + cola con fade →
 	// "se corta y vuelve a arrancar", feedback de dirección 15-07). Los
 	// *-loop.mp3 son los mismos temas procesados a loop seamless: cola de
@@ -116,7 +174,16 @@ export const SFX_MAP: Record<SoundName, string | null> = {
 	sfx_scatter_win: AU('19'), // AU-19 4+ scatters → fanfare
 
 	// ── SFX signature ────────────────────────────────────────────────
-	sfx_wild_explode: AU('09'), // AU-09 bat smash — el SFX más reconocible
+	// El BATEO. Reemplaza al AU-09 por "Bateo" (drop 14-09): suena en el swing de
+	// Kash (Background.svelte) y en el acento premium de la wave del RAMPAGE.
+	// Se le recortaron 0.19s de silencio de cabeza al entregarlo.
+	//
+	// OJO al usarlo en otro lado: el clip dura 674 ms y NO empieza en el golpe —
+	// los primeros 250 ms son el silbido del bate y el crack cae recién ahí. Lo
+	// que queda de cabeza es SONIDO, no silencio, así que no se recorta: el
+	// caller que necesite el crack en un frame exacto lo dispara 250 ms antes
+	// (ver `SWING_SFX_LEAD_FRAMES` en Background.svelte).
+	sfx_wild_explode: CLIP('Bateo'),
 	// Feedback N1 #8: el landing de wild usa la caída pesada del gold bar
 	// (AU-21) con gain bajo — el AU-18 que sonaba acá era demasiado
 	// preponderante y pasó a los wins (sfx_winlevel_small).
@@ -125,7 +192,7 @@ export const SFX_MAP: Record<SoundName, string | null> = {
 	// ── Win celebrations (AU-05/06/07/08 faltan → sustituto fanfare/smash) ─
 	sfx_youwon_panel: AU('19'), // FS total win reveal → fanfare (falta AU-08 explosion)
 	sfx_bigwin_coinloop: null, // loop de coins big/mega — falta AU-05/06
-	sfx_multiplier_explosion_b: AU('09'), // explosión de mult → bat smash (falta AU-08)
+	sfx_multiplier_explosion_b: CLIP('Bateo'), // explosión de mult → bateo (falta AU-08)
 	// Feedback N1 #8: "wild scatter queda para win" — el AU-18 (aparición de
 	// wild/scatter, antes en los landings) ahora abre la celebración chica.
 	// Small/big usan el sonido de wild/scatter (pedido de dirección 15-07);
@@ -186,7 +253,22 @@ export const SFX_MAP: Record<SoundName, string | null> = {
 	sfx_anticipation: AU('22'), // sin sonido dedicado → corriente del meter (tensión)
 	sfx_anticipation_start: AU('24'), // arranque de anticipación → mark
 	sfx_fs_respins: AU('24'), // retrigger +5 → FS mark corto [CORREGIDO: era AU-21 gold bar]
-	sfx_winlevel_end: AU('20'), // AU-20 win counter tick
+	// Contador del count-up: suena EN LOOP mientras las cifras suben debajo del
+	// cartel de win y se apaga cuando llegan al total (Win.svelte). Reemplaza al
+	// AU-20, que estaba mapeado acá pero no lo disparaba nadie en KRE.
+	sfx_winlevel_end: CLIP('Contador'),
+	// ── Transición de la intro al juego (drop 15-09) ─────────────────
+	// Suena EXACTAMENTE cuando el telón de la pantalla de carga se va hacia
+	// abajo y aparece el board (`dismiss()` en LoadingOverlay.svelte). En ese
+	// instante `<Sound />` todavía no está montado —se monta recién con el
+	// juego, un tick después—, así que este clip NO se dispara por el
+	// eventEmitter sino directo desde `ambientAudio.svelte.ts`.
+	sfx_intro_swipe: RAW('Swipe'),
+	// ── Marco de victoria (drop 15-09) ───────────────────────────────
+	// Un disparo por SÍMBOLO, en el mismo turno en que se enciende su marco
+	// dentro de la cascada de victoria (winFlash.svelte.ts → Board.svelte).
+	// Hasta acá el enmarcado era mudo.
+	sfx_marco_chain: RAW('Chain'),
 	sfx_winlevel_nice: null, // cubierto por cluster win
 	sfx_winlevel_standard: null,
 	sfx_winlevel_substantial: null,
@@ -230,4 +312,11 @@ export const SFX_GAIN: Partial<Record<SoundName, number>> = {
 	sfx_winlevel_end: 0.8,
 	// Botón de spin — feedback de UI, por debajo del juego
 	sfx_btn_spin: 0.8,
+	// Cadena del marco — se dispara una vez POR SÍMBOLO del cluster (hasta 25
+	// en cascada, y en clusters grandes cada ~110 ms), así que va bajo: a 1.0
+	// una victoria larga se vuelve una ametralladora. Además el .wav todavía
+	// no pasó por el loudnorm, así que viene más caliente que el resto.
+	sfx_marco_chain: 0.45,
+	// Swipe del telón de la intro — transición, no celebración
+	sfx_intro_swipe: 0.7,
 };

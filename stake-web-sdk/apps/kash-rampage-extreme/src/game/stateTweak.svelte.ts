@@ -16,9 +16,13 @@
 // el panel no tenga ninguna constante propia del juego.
 import { aspectBlend, sizeBlend } from './layoutRefs';
 import {
+	INTRO_GEOM_PROPS,
+	LAB_INTRO_ELEMENTS,
 	LAB_STORAGE_KEY,
 	LAB_SYMBOLS,
 	SYMBOL_GEOM_PROPS,
+	type IntroGeomKey,
+	type IntroLabId,
 	type SymbolGeomKey,
 	type SymbolLabId,
 } from './labMeta';
@@ -124,12 +128,50 @@ type TweakBase = {
 //
 // X/Y son FRACCIONES DE CELDA (× SYMBOL_SIZE) sobre la posición que ya le dio
 // la grilla — no fracciones de canvas como boardX/hudX.
-type Tweak = TweakBase & Record<SymbolGeomKey, number>;
+type Tweak = TweakBase & Record<SymbolGeomKey, number> & Record<IntroGeomKey, number>;
 
 /** Las 96 claves por símbolo, en el mismo orden que las genera el panel. */
 export const SYMBOL_GEOM_KEYS = LAB_SYMBOLS.flatMap((symbol) =>
 	SYMBOL_GEOM_PROPS.map((prop) => `${symbol.id}${prop}` as SymbolGeomKey),
 );
+
+// ── PANTALLA DE CARGA (drop 14-09) ──────────────────────────────────────────
+// 5 claves × 4 elementos (título · UI de intro · ícono de carga · texto). Las
+// consume `LoadingOverlay.svelte`, que es HTML puro: X/Y son fracciones del
+// VIEWPORT, `Scale` multiplica el tamaño base que el CSS le da a cada elemento
+// en `min(vw, vh)`, y Alpha/Z son `opacity` / `z-index` dentro del overlay.
+
+/** Las 20 claves de la pantalla de carga, en el orden del panel. */
+export const INTRO_GEOM_KEYS = LAB_INTRO_ELEMENTS.flatMap((element) =>
+	INTRO_GEOM_PROPS.map((prop) => `${element.id}${prop}` as IntroGeomKey),
+);
+
+/**
+ * Encuadre de arranque, medido contra Desktop (1920×1080) con el arte real:
+ * título arriba (el logo cuelga del borde superior), la ventana del intro
+ * ocupando el medio, y abajo el bate girando con el texto debajo. Cada bucket
+ * lo pisa desde el UI LAB si lo necesita distinto — en portrait, por ejemplo,
+ * la ventana entra mucho más chica contra el ancho.
+ */
+const INTRO_GEOM_DEFAULTS: Record<IntroLabId, { X: number; Y: number; Z: number }> = {
+	introTitle: { X: 0.5, Y: 0.14, Z: 3 },
+	introAnim: { X: 0.5, Y: 0.55, Z: 2 },
+	introSpin: { X: 0.5, Y: 0.88, Z: 4 },
+	introText: { X: 0.5, Y: 0.965, Z: 4 },
+};
+
+const INTRO_DEFAULTS = Object.fromEntries(
+	LAB_INTRO_ELEMENTS.flatMap((element) => {
+		const seed = INTRO_GEOM_DEFAULTS[element.id];
+		return [
+			[`${element.id}X`, seed.X],
+			[`${element.id}Y`, seed.Y],
+			[`${element.id}Scale`, 1],
+			[`${element.id}Alpha`, 1],
+			[`${element.id}Z`, seed.Z],
+		];
+	}),
+) as Record<IntroGeomKey, number>;
 
 // ── ÍCONOS + MARCOS APROBADOS — UN SOLO JUEGO PARA LOS 7 BUCKETS (09-09) ────
 // El usuario ajustó los 6 diales × 12 símbolos a dedo en el UI LAB sobre el viewport de
@@ -316,6 +358,8 @@ const DEFAULTS: Tweak = {
 	antMarcoScale: 1,
 	// Las 96 claves de geometría por símbolo (ver SYMBOL_GEOM_DEFAULTS).
 	...SYMBOL_GEOM_DEFAULTS,
+	// Las 20 de la pantalla de carga (ver INTRO_GEOM_DEFAULTS).
+	...INTRO_DEFAULTS,
 };
 
 // ── Buckets de resolución — 1:1 con los tamaños del ACP de Stake ────────
@@ -371,6 +415,31 @@ export const bucketFor = (w: number, h: number): ResBucketKey =>
 //   · portrait → `titleAlpha` 0.05 (logo casi apagado) y `fsZ` 3.
 // El resto de `antMarco*` va por bucket en los 7: es lo único de este drop que
 // se encuadra contra el board Y contra la grilla a la vez.
+// ── PANTALLA DE CARGA, POR BUCKET (drop 14-09) ──────────────────────────────
+// Encuadres aprobados por el usuario en /sizes, uno por preset del ACP. Estos
+// bloques tocan SOLO las 12 claves de posición/tamaño del intro: opacidad y
+// capa de los 4 elementos quedan en su DEFAULT en los 7 buckets, así que no se
+// repiten. El resto del layout de cada bucket no se modificó en este drop.
+//
+// Los 3 portrait comparten UN encuadre —el aprobado en Mobile L (425×812)—,
+// por pedido del usuario: X/Y son fracciones de viewport y el tamaño base del
+// CSS ya va en `min(vw, vh, vmax)`, así que el mismo juego de valores da la
+// misma composición relativa en Mobile S y en Mobile M.
+const INTRO_PORTRAIT = {
+	introTitleX: 0.5,
+	introTitleY: 0.202,
+	introTitleScale: 1.41,
+	introAnimX: 0.5,
+	introAnimY: 0.55,
+	introAnimScale: 1,
+	introSpinX: 0.5,
+	introSpinY: 0.88,
+	introSpinScale: 1,
+	introTextX: 0.5,
+	introTextY: 0.965,
+	introTextScale: 1,
+} as const;
+
 const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 	// Aprobado por el usuario en /sizes (10-09, viewport 425×812 — Mobile L).
 	// Este es el bucket MODELO de los 3 portrait: Mobile M y Mobile S copian de
@@ -415,6 +484,8 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		antMarcoX: 0.075,
 		antMarcoY: 0.145,
 		antMarcoScale: 1.355,
+		// pantalla de carga — bucket MODELO de los 3 portrait
+		...INTRO_PORTRAIT,
 	},
 	// Aprobado por el usuario en /sizes (08-09, viewport 375×667 — Mobile M).
 	// Título / free spins / marco de columna: mismos valores que Mobile L (los
@@ -457,6 +528,8 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		antMarcoX: 0.075,
 		antMarcoY: 0.145,
 		antMarcoScale: 1.355,
+		// pantalla de carga (= Mobile L)
+		...INTRO_PORTRAIT,
 	},
 	// Aprobado por el usuario en /sizes (08-09, viewport 320×568 — Mobile S).
 	// Título / free spins / marco de columna: mismos valores que Mobile L.
@@ -497,6 +570,8 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		antMarcoX: 0.075,
 		antMarcoY: 0.145,
 		antMarcoScale: 1.355,
+		// pantalla de carga (= Mobile L)
+		...INTRO_PORTRAIT,
 	},
 	// Aprobado por el usuario en /sizes (viewport 1200×675 — Desktop). Board /
 	// Kash / botonera / título son del 08-09; el HUD superior se re-ajustó el
@@ -551,6 +626,23 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		// TODAS las resoluciones, y mientras estuvieran acá desktop se las pisaba
 		// al resto de los buckets. Ningún dial de símbolo debería volver a este
 		// bloque salvo que un tamaño necesite una excepción real.
+		// pantalla de carga (intro) — reencuadrado en 1200×675 contra la
+		// animación nueva (15-09): el título baja 1 punto y la ventana 2, que
+		// es lo que pedía el clip nuevo al abrir y cerrar solo. Con esto
+		// `introAnimY` pasa a coincidir con el anclaje ancho (ver WIDE_SEED),
+		// así que hoy NINGUNA clave del intro cambia entre 1200×675 y 1912×956.
+		introTitleX: 0.5,
+		introTitleY: 0.162,
+		introTitleScale: 1,
+		introAnimX: 0.5,
+		introAnimY: 0.536,
+		introAnimScale: 1.085,
+		introSpinX: 0.5,
+		introSpinY: 0.88,
+		introSpinScale: 1,
+		introTextX: 0.5,
+		introTextY: 0.96,
+		introTextScale: 1.34,
 	},
 	// Aprobado por el usuario en /sizes (08-09, viewport 400×225 — Popout S).
 	// HUD vertical, free spins y marco de columna: copiados de Popout L (mismo
@@ -589,6 +681,27 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		antMarcoX: 0.075,
 		antMarcoY: 0.145,
 		antMarcoScale: 1.355,
+		// pantalla de carga (intro) — el bate baja a 0.385 de escala: a 400×225
+		// el `clamp(72px, 15vmin, 132px)` del CSS le da 72 px sobre una pantalla
+		// de 225 px de alto y tapaba el intro.
+		//
+		// Reencuadrado contra la animación nueva (15-09): en esta pantalla, que
+		// es la más apretada de las dos que se tocaron, la ventana se achica a
+		// 0.875 y sube a 0.506, y el título se achica a 0.945 y baja a 0.172 —
+		// el clip nuevo abre con un overshoot más grande que la ventana en
+		// reposo y a 225 px de alto necesita ese aire.
+		introTitleX: 0.5,
+		introTitleY: 0.172,
+		introTitleScale: 0.945,
+		introAnimX: 0.5,
+		introAnimY: 0.506,
+		introAnimScale: 0.875,
+		introSpinX: 0.5,
+		introSpinY: 0.848,
+		introSpinScale: 0.385,
+		introTextX: 0.5,
+		introTextY: 0.94,
+		introTextScale: 1,
 	},
 	// Aprobado por el usuario en /sizes (10-09, viewport 800×450 — Popout L).
 	// Bucket MODELO de Popout S.
@@ -626,6 +739,19 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		antMarcoX: 0.075,
 		antMarcoY: 0.145,
 		antMarcoScale: 1.355,
+		// pantalla de carga (intro)
+		introTitleX: 0.5,
+		introTitleY: 0.172,
+		introTitleScale: 1,
+		introAnimX: 0.5,
+		introAnimY: 0.55,
+		introAnimScale: 1,
+		introSpinX: 0.5,
+		introSpinY: 0.88,
+		introSpinScale: 1,
+		introTextX: 0.5,
+		introTextY: 0.965,
+		introTextScale: 1,
 	},
 	// Aprobado por el usuario en /sizes (10-09, viewport 1024×576 — Laptop).
 	laptop: {
@@ -663,6 +789,19 @@ const PER_BUCKET_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		antMarcoX: 0.055,
 		antMarcoY: 0.17,
 		antMarcoScale: 1.385,
+		// pantalla de carga (intro)
+		introTitleX: 0.5,
+		introTitleY: 0.182,
+		introTitleScale: 1,
+		introAnimX: 0.5,
+		introAnimY: 0.55,
+		introAnimScale: 1,
+		introSpinX: 0.5,
+		introSpinY: 0.88,
+		introSpinScale: 1,
+		introTextX: 0.5,
+		introTextY: 0.965,
+		introTextScale: 1,
 	},
 };
 
@@ -708,6 +847,13 @@ const WIDE_SEED: Partial<Record<ResBucketKey, Partial<Tweak>>> = {
 		fsX: 0.829,
 		fsY: 0.114,
 		fsScale: 1.76,
+		// pantalla de carga — esta era la ÚNICA clave del intro que cambiaba
+		// entre 1200×675 y 1912×956. Con el reencuadre del 15-09 el anclaje
+		// base subió a este mismo 0.536, así que hoy el valor es idéntico y la
+		// línea no mueve nada: se deja para que la banda ancha siga clavada acá
+		// si alguna vez se vuelve a tocar el anclaje base. El resto de las 12
+		// claves del intro se hereda del base y queda igual en toda la banda.
+		introAnimY: 0.536,
 	},
 };
 
@@ -771,6 +917,9 @@ const TWEAKABLE_KEYS = [
 const ALL_TWEAKABLE_KEYS: readonly (keyof Tweak)[] = [
 	...TWEAKABLE_KEYS,
 	...SYMBOL_GEOM_KEYS,
+	// …y las 20 de la pantalla de carga, por el mismo motivo: la misma
+	// composición se encuadra distinto en Desktop que en Mobile portrait.
+	...INTRO_GEOM_KEYS,
 ];
 
 type Overrides = Partial<Record<ResBucketKey, Partial<Tweak>>>;
@@ -857,6 +1006,10 @@ const DISCRETE_KEYS = new Set<keyof Tweak>([
 	'iconAlpha',
 	'iconZ',
 	...SYMBOL_GEOM_KEYS,
+	// Opacidad y capa de la pantalla de carga: mismo criterio que el resto de
+	// los alpha/Z — no se interpolan entre anclajes, salta el del más cercano.
+	// X/Y/Scale del intro SÍ se mezclan (quedan fuera de este set).
+	...INTRO_GEOM_KEYS.filter((k) => k.endsWith('Alpha') || k.endsWith('Z')),
 ]);
 
 /** Valores completos de un anclaje: DEFAULTS → seed → override del usuario. */
@@ -1012,10 +1165,19 @@ if (typeof window !== 'undefined') {
 //   · luz   → fuerza el `_luz` de W / S / CASH STACK sin tener que ganar.
 // Sirven para revisar encuadre y jerarquía sin depender de que caiga un
 // cluster; no se persisten y solo existen en DEV.
+//   · introHold    → la pantalla de carga NO se cierra al click. Sin esto es
+//                    imposible encuadrar sus 4 elementos: el primer click
+//                    sobre cualquier lado (el overlay ENTERO es el botón) la
+//                    manda a jugar.
+//   · introSpinner → fuerza el bate girando visible aunque los assets ya
+//                    estén listos, para poder ubicarlo con la pantalla en su
+//                    estado final (CLICK TO SKIP).
 export const labPreview = $state({
 	marco: false,
 	luz: false,
 	marcoColumna: false,
+	introHold: false,
+	introSpinner: false,
 } as Record<string, boolean>);
 if (import.meta.env.DEV && typeof window !== 'undefined') {
 	(globalThis as Record<string, unknown>).__labPreview = labPreview;

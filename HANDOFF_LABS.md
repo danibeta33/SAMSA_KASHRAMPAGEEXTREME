@@ -175,7 +175,47 @@ las publica el juego dentro de `diagnostics().guides`, ya convertidas a
 canvas→pantalla la conoce unicamente el juego. El checkbox `Guias sobre el
 canvas` es local al panel; `fijar ref` y `limpiar` son acciones registradas.
 
-### 3.5 Situaciones de juego reales
+### 3.5 Pantalla de carga / intro
+
+La pantalla de carga (`LoadingOverlay.svelte`) existe una sola vez por sesion
+y se cierra con el primer click en cualquier parte, asi que sin ayuda no hay
+forma de encuadrar sus elementos. La categoria `PANTALLA DE CARGA` del AnimLab
+resuelve eso con tres entradas:
+
+- `MOSTRAR de nuevo` vuelve a poner `stateLayout.showLoadingScreen` en `true`
+  y ademas activa el candado, para que el primer click no la cierre otra vez.
+- `No cerrar al click` es el candado (`labPreview.introHold`): mientras esta
+  activo, `dismiss()` no hace nada.
+- `Icono de carga siempre visible` (`labPreview.introSpinner`) fuerza el bate
+  girando aunque los assets ya esten listos, para ubicarlo contra el estado
+  final de la pantalla (`CLICK TO SKIP`).
+
+Las tres son solo DEV y ninguna se persiste. El encuadre en si se hace con los
+sliders del UiLab (ver 4.2); el flujo completo es: MOSTRAR de nuevo -> candado
+-> tecla `T` -> mover sliders -> SAVE -> apagar candado -> click para entrar.
+
+Volver a mostrar la pantalla con el juego ya montado desmonta el board y el
+`<Sound />` (es la rama `{#if showLoadingScreen}` de `Game.svelte`) y los
+vuelve a montar al cerrarla. Es el comportamiento normal del arranque, no un
+modo aparte.
+
+**El asset del intro.** La ventana animada (`introAnim`) no es un sprite del
+juego: es `static/assets/loading/intro.webp`, un WebP animado que genera
+`tools/build_intro.py` a partir del multi-pack de TexturePacker que entrega el
+equipo en `art-src/intro/`. Si llega un re-export nuevo, se reemplazan esas
+hojas y se corre el script — lee la geometria (cantidad de hojas, frames,
+recortes, rotaciones) de los JSON, no la tiene hardcodeada.
+
+Lo unico que hay que mirar despues de regenerar es la linea que imprime el
+script al terminar: el asset lleva un margen transparente alrededor de la
+ventana (para que entre el overshoot de la apertura), y ese margen se compensa
+en el ancho base de `.load__intro` dentro de `LoadingOverlay.svelte`. Si la
+razon que imprime el script cambia, hay que actualizar ese `min(...)`. Se hace
+asi —y no tocando `introAnimScale`— para que los encuadres aprobados por
+bucket sigan valiendo sin retocar los 7. El recorte es simetrico respecto del
+centro de la ventana, asi que `introAnimX/Y` no se mueven nunca.
+
+### 3.6 Situaciones de juego reales
 
 Las acciones registradas no dibujan imitaciones de las animaciones: emiten
 eventos del mismo `eventEmitter` que usa el juego (los callbacks viven en
@@ -201,7 +241,7 @@ La secuencia de rampage de produccion se controla en
 [`src/game/bookEventHandlerMap.ts`](src/game/bookEventHandlerMap.ts) y el
 render/strike en `Background.svelte`. AnimLab solo sirve de disparador.
 
-### 3.6 Soundboard
+### 3.7 Soundboard
 
 La lista de SFX se genera en `labActions.svelte.ts` a partir de `SFX_MAP` de
 [`src/game/sound.ts`](src/game/sound.ts) (el panel ya no importa `sound.ts`):
@@ -256,6 +296,30 @@ Los controles salen de `LAB_SLIDERS`:
 | `kashH` | Kash size | 0.3 - 1.2 | 0.002 | alto relativo de Kash |
 | `kashX` | Kash X | -0.1 - 0.5 | 0.001 | centro horizontal de Kash |
 | `kashY` | Kash Y | 0.2 - 0.9 | 0.001 | centro vertical de Kash |
+
+La categoria `PANTALLA DE CARGA (INTRO)` agrega 20 claves mas: los 4 elementos
+de la pantalla de arranque (`introTitle` el titulo, `introAnim` la ventana
+animada del intro, `introSpin` el bate girando, `introText` el texto
+LOADING / CLICK TO SKIP), cada uno con 5 diales.
+
+| Sufijo | Label | Rango | Paso | Efecto |
+|---|---|---:|---:|---|
+| `X` | X | 0 - 1 | 0.002 | centro horizontal, fraccion del VIEWPORT |
+| `Y` | Y | 0 - 1 | 0.002 | centro vertical, fraccion del VIEWPORT |
+| `Scale` | Tamano | 0.2 - 2.5 | 0.005 | multiplica el tamano base del CSS |
+| `Alpha` | Opacidad | 0 - 1 | 0.01 | `opacity` del elemento |
+| `Z` | Capa | -20 - 40 | 1 | `z-index` DENTRO del overlay |
+
+A diferencia del resto del panel estas no son coordenadas de canvas sino de
+ventana: la pantalla de carga es HTML puro y tapa todo (`z-index: 200`), asi
+que su `Z` solo ordena a los 4 entre ellos. El tamano base de cada uno lo fija
+el CSS de `LoadingOverlay.svelte` en `min(vw, vh, vmax)` y `Scale` lo
+multiplica. Se guardan por bucket como todo lo demas.
+
+Los 7 buckets ya vienen sembrados en `PER_BUCKET_SEED` (y el anclaje ancho de
+desktop en `WIDE_SEED`) con los encuadres aprobados el 14-09. Los 3 portrait
+comparten uno solo, el de Mobile L, via la constante `INTRO_PORTRAIT`.
+Opacidad y capa de los 4 elementos quedaron en su default en los 7.
 
 El checkbox **LIBRE** escribe `freeScale` como `1` o `0`. Con valor libre
 activo, `hudLayout.boardTransform` omite los caps anti-solape y usa el dial

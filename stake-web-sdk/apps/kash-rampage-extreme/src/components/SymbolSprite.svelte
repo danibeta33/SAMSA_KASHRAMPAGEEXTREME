@@ -1,18 +1,15 @@
 <script lang="ts" module>
-	// ── Constantes y estado COMPARTIDO del marco de victoria ─────────────────
-	// `Marco_Icono`: 21 frames (0..20). Los tramos los pidió dirección:
-	//   0..15  entrada, mientras el cluster se ilumina
-	//   4..15  bucle de espera hasta que termina de iluminarse TODO el cluster
-	//   …→18   salida, desde el frame en curso, al hacer el boing de desaparición
-	export const MARCO_INTRO_END = 15;
-	export const MARCO_LOOP_START = 4;
-	// La salida CIERRA en el 18 y no en el 20: los dos últimos frames del export
-	// son el marco ya relleno (amarillo pleno y después bloque rojo), que con el
-	// marco por ENCIMA del ícono taparían la celda entera justo cuando el
-	// símbolo se está yendo. Pedido de dirección: terminar en el 18.
-	export const MARCO_LAST_FRAME = 18;
-	const MARCO_ANIM_SPEED = 24 / 60; // entrada y bucle: 24 fps
-	const MARCO_CELL_RATIO = 1.12; // lado del marco en celdas, antes del dial
+	// ── Estado COMPARTIDO del marco de victoria ──────────────────────────────
+	// Los tramos y la velocidad se mudaron a `game/marco.ts`: la cascada de
+	// victoria (`winFlash.svelte.ts`) necesita la duración de la ENTRADA para
+	// escalonar los símbolos, y un .ts no debería importar de un .svelte.
+	import {
+		MARCO_INTRO_END,
+		MARCO_LOOP_START,
+		MARCO_LAST_FRAME,
+		MARCO_ANIM_SPEED,
+		MARCO_CELL_RATIO,
+	} from '../game/marco';
 
 	// Frame ABSOLUTO en el que va el bucle. Vive en el módulo (compartido por
 	// todas las celdas) a propósito: la salida se dibuja en componentes
@@ -70,6 +67,10 @@
 		// Tweens del pop/boing de cluster ganador (winPop.svelte.ts). Se aplican
 		// al Container DEL SPRITE — la celda (SymbolWrap) queda intacta.
 		winPop?: WinPop;
+		// Turno de esta celda en la cascada de victoria (winFlash.svelte.ts).
+		// `false` = ya ganó pero todavía no le toca enmarcarse; `undefined` =
+		// no hay cascada (tumble board, AnimLab) → se dibuja como siempre.
+		winLit?: boolean;
 		// Tweens del feedback de victoria (winFlash.svelte.ts): alpha del
 		// brillo trasero + escala del ícono, en contenedores SEPARADOS.
 		winFlash?: WinFlashCell;
@@ -329,9 +330,14 @@
 			// símbolo volvía al estático en el frame justo antes del boing.
 			props.symbolState === 'explosion',
 	);
-	const dimmed = $derived(
-		stateWinHighlight.active && !isWinning && props.symbolState === 'static',
-	);
+	// El símbolo GANÓ y además ya le llegó su turno en la cascada. Es lo que
+	// separa "pertenece al cluster" (isWinning → no se atenúa) de "ya se
+	// encendió" (marco + carta `_luz` a full). El dim del resto del board sigue
+	// mirando `isWinning`: el cluster entero se despega del fondo de una, lo que
+	// entra uno por uno es el marco.
+	const winLit = $derived(props.winLit ?? true);
+	const isWinningLit = $derived(isWinning && winLit);
+	const dimmed = $derived(stateWinHighlight.active && !isWinning && props.symbolState === 'static');
 	// ── ANTICIPACIÓN: el símbolo ES el efecto ────────────────────────────────
 	// Sustituye a los 3 rectángulos lima de Anticipation.svelte. La columna que
 	// sigue girando se ilumina con su PROPIA carta/clip `_luz` —conserva su
@@ -370,9 +376,7 @@
 	const luzKey = $derived(LUZ_KEY[props.symbolInfo.assetKey]);
 	const luzReady = $derived(
 		!!luzKey &&
-			!!appContext.stateApp.loadedAssets?.[
-				luzKey as keyof typeof appContext.stateApp.loadedAssets
-			],
+			!!appContext.stateApp.loadedAssets?.[luzKey as keyof typeof appContext.stateApp.loadedAssets],
 	);
 	// La carta ocupa la celda completa (no el 0.8 del icono suelto) y conserva
 	// el aspect 1080×970 del arte para no estirar el marco.
@@ -393,13 +397,17 @@
 	//  · flashScale → SOLO la escala del ícono, en su propio Container: el
 	//    brillo no escala (si no, el halo respira y pisa la celda vecina) y la
 	//    celda tampoco (eso movería la grilla).
-	const glowAlpha = $derived(props.winFlash?.glow.current ?? (isWinning ? 1 : 0));
+	// Sin celda de winFlash (ESPECIALES: W / S / KASH) el brillo es binario, y
+	// hasta el 15-09 se prendía en todo el cluster a la vez. Ahora respeta el
+	// mismo turno que el marco, así el especial se enciende con su marco y no
+	// antes que el resto.
+	const glowAlpha = $derived(props.winFlash?.glow.current ?? (isWinningLit ? 1 : 0));
 	const flashScale = $derived(props.winFlash?.scale.current ?? 1);
 	// Sin secuencia activa la carta luz SUSTITUYE al ícono — es el resalte
 	// aprobado el 26-08 (y el caso de los especiales, que quedan fuera de la
 	// cascada). Con secuencia, el ícono se dibuja ENCIMA del brillo para que
 	// el boing tenga algo que golpear.
-	const glowReplacesIcon = $derived(!props.winFlash && isWinning && luzReady);
+	const glowReplacesIcon = $derived(!props.winFlash && isWinningLit && luzReady);
 	// Alpha efectivo de la carta trasera: win o anticipación, el que mande.
 	const luzShowAlpha = $derived(Math.max(glowAlpha, antGlow));
 	// Copia aditiva del MISMO ícono, ENCIMA. Va SIEMPRE que haya anticipación,
@@ -452,9 +460,7 @@
 	//    El alpha va por debajo de 1 (`specialAddMult`) para que el oro del
 	//    SCATTER se realce sin quemarse a blanco.
 	const antLuzOnTop = $derived(!specialGlowOn && antGlow > 0);
-	const specialLuzAlpha = $derived(
-		specialGlowOn ? 1 : antGlow * ANTICIPATION.specialAddMult,
-	);
+	const specialLuzAlpha = $derived(specialGlowOn ? 1 : antGlow * ANTICIPATION.specialAddMult);
 
 	type MarcoPhase = 'intro' | 'loop' | 'outro' | 'done';
 	// Arranca YA en salida si el componente nace explotando. Es el caso normal
@@ -489,7 +495,13 @@
 	// COLUMNA entera que dibuja Anticipations.svelte — un nodo por reel en vez
 	// de uno por celda. Ver AnticipationColumnFrame.svelte.
 	// `labPreview.marco` lo fuerza desde el AnimLab sin tener que ganar.
-	const marcoOn = $derived(marcoReady && (labPreview.marco || isWinning) && marcoPhase !== 'done');
+	// `isWinningLit` y no `isWinning`: el marco entra CUANDO LE TOCA a esta celda
+	// (feedback de dirección 15-09 — "se marcan todos de una"). El `{#if}` de
+	// abajo monta el AnimatedSprite recién en ese momento, así que la entrada
+	// arranca en su frame 0 sola, sin tener que pausarla ni saltearla.
+	const marcoOn = $derived(
+		marcoReady && (labPreview.marco || isWinningLit) && marcoPhase !== 'done',
+	);
 	// Tamaño y posición salen de los 3 diales PROPIOS del símbolo
 	// (`<id>MarcoX/Y/Scale`): el encuadre del marco depende del ícono que
 	// enmarca, así que cada uno lleva el suyo. La base es la CELDA, no el ícono.
@@ -545,20 +557,25 @@
 		(MARCO_LAST_FRAME + 1 - marcoOutroStart) / (winPopTotalMs / 1000) / 60,
 	);
 
-	// El frame del bucle es COMPARTIDO entre instancias (ver el `<script
-	// module>`): la presentación del cluster corre en el board principal y el
-	// boing en el TUMBLE board, que monta componentes nuevos. Sin ese puente el
-	// marco del tumble arrancaría su salida desde el frame 4 en vez de "desde
-	// donde estaba". Todos los marcos arrancan a la vez —
-	// `boardWithAnimateSymbols` pone en `win` a TODO el cluster de una, la
-	// cascada solo escalona el GLOW — así que un único contador los describe a
-	// todos y además los hace salir sincronizados.
+	// Frame del bucle: PROPIO y compartido a la vez.
+	//
+	// Propio (`ownLoopFrame`) porque desde el 15-09 los marcos YA NO arrancan
+	// todos juntos: la cascada los enciende uno por uno (ver `winLit`), así que
+	// cada celda está en un punto distinto del bucle cuando llega el boing y un
+	// único contador global ya no las describe a todas.
+	//
+	// Compartido (`marcoLoopFrame`, en el `<script module>`) porque la salida se
+	// dibuja en componentes DISTINTOS de los que corrieron el bucle: la
+	// presentación es del board principal y el boing del TUMBLE board, que monta
+	// símbolos nuevos. Esos nacen sin historia propia, y sin este puente su
+	// marco arrancaría la salida desde el frame 4 en vez de "desde donde estaba".
+	let ownLoopFrame: number | null = null;
 	$effect(() => {
 		const state = props.symbolState;
 		if (state === 'explosion') {
 			untrack(() => {
 				if (marcoPhase === 'intro' || marcoPhase === 'loop') {
-					marcoOutroStart = marcoLoopFrame;
+					marcoOutroStart = ownLoopFrame ?? marcoLoopFrame;
 					marcoPhase = 'outro';
 				}
 			});
@@ -609,13 +626,7 @@
 	     el bucle no se ven afectados. Los 3 animados (W/S/KASH) reciben winPop
 	     desde el 10-09 —su marco boinguea con ellos, más lento— pero NO winFlash,
 	     así que su `flashScale` queda en 1. -->
-	<Container
-		x={marcoX}
-		y={marcoY}
-		zIndex={1}
-		scale={winScale * flashScale}
-		rotation={winRotation}
-	>
+	<Container x={marcoX} y={marcoY} zIndex={1} scale={winScale * flashScale} rotation={winRotation}>
 		{#key marcoPhase}
 			<AnimatedSprite
 				anchor={0.5}
@@ -626,9 +637,14 @@
 				loop={marcoPhase === 'loop'}
 				play
 				onFrameChange={(frame: number) => {
-					// Solo el bucle publica el frame compartido: es el que hay que
-					// retomar cuando arranque la salida.
-					if (marcoPhase === 'loop') marcoLoopFrame = MARCO_LOOP_START + frame;
+					// Solo el bucle publica el frame: es el que hay que retomar
+					// cuando arranque la salida. Va al contador propio (esta celda
+					// retoma EXACTO donde estaba) y al compartido (los símbolos que
+					// monta el tumble board no tienen otro del que agarrarse).
+					if (marcoPhase === 'loop') {
+						ownLoopFrame = MARCO_LOOP_START + frame;
+						marcoLoopFrame = ownLoopFrame;
+					}
 				}}
 				onComplete={() => {
 					// intro → bucle de espera · salida → apagar (destruye el nodo)
@@ -652,10 +668,34 @@
 			alpha={0.18}
 		/>
 		<!-- border -->
-		<Rectangle x={-w / 2} y={-h / 2} width={w} height={2} backgroundColor={colorOf(props.rawSymbol)} />
-		<Rectangle x={-w / 2} y={h / 2 - 2} width={w} height={2} backgroundColor={colorOf(props.rawSymbol)} />
-		<Rectangle x={-w / 2} y={-h / 2} width={2} height={h} backgroundColor={colorOf(props.rawSymbol)} />
-		<Rectangle x={w / 2 - 2} y={-h / 2} width={2} height={h} backgroundColor={colorOf(props.rawSymbol)} />
+		<Rectangle
+			x={-w / 2}
+			y={-h / 2}
+			width={w}
+			height={2}
+			backgroundColor={colorOf(props.rawSymbol)}
+		/>
+		<Rectangle
+			x={-w / 2}
+			y={h / 2 - 2}
+			width={w}
+			height={2}
+			backgroundColor={colorOf(props.rawSymbol)}
+		/>
+		<Rectangle
+			x={-w / 2}
+			y={-h / 2}
+			width={2}
+			height={h}
+			backgroundColor={colorOf(props.rawSymbol)}
+		/>
+		<Rectangle
+			x={w / 2 - 2}
+			y={-h / 2}
+			width={2}
+			height={h}
+			backgroundColor={colorOf(props.rawSymbol)}
+		/>
 		<!-- label -->
 		<Text
 			text={labelOf(props.rawSymbol)}

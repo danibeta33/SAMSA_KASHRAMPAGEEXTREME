@@ -21,8 +21,8 @@
 	 * Ruta del sheet, RELATIVA AL DOCUMENTO (igual que el resto de los assets
 	 * del loading): el CSS de la app se inlinea en el index.html del build, así
 	 * que el `url()` de abajo y este string resuelven al MISMO recurso — y el
-	 * preload de GameLoader pega en la misma entrada de cache. Si se cambia
-	 * uno, cambiar el otro.
+	 * un preload contra este string pega en la misma entrada de cache. Si se
+	 * cambia uno, cambiar el otro.
 	 */
 	export const SPINNER_SRC = 'assets/loading/spinner.webp';
 

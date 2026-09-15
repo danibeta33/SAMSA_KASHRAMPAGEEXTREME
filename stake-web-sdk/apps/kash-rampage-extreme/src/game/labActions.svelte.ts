@@ -69,7 +69,7 @@ const WINS = [
 ];
 
 const MUSIC_LIST: { label: string; name: MusicName }[] = [
-	{ label: 'AU-01 — música base', name: 'bgm_main' },
+	{ label: 'MusicaBase — música base', name: 'bgm_main' },
 	{ label: 'AU-03 — música bonus', name: 'bgm_freespin' },
 	{ label: 'AU-04 — música Rage', name: 'bgm_freespin_rage' },
 ];
@@ -168,6 +168,8 @@ export const registerGameLabActions = (context: GameContext) => {
 		previewMarco: 'marco',
 		previewLuz: 'luz',
 		previewMarcoColumna: 'marcoColumna',
+		introHold: 'introHold',
+		introSpinner: 'introSpinner',
 	};
 
 	animInspector.configure({
@@ -211,6 +213,37 @@ export const registerGameLabActions = (context: GameContext) => {
 	animInspector.registerToggle('previewMarcoColumna', {
 		label: 'MARCO COLUMNA en bucle (todas las columnas)',
 		category: 'winfx',
+		order: 2,
+	});
+
+	// ── Pantalla de carga / INTRO (drop 14-09) ────────────────────────────
+	// Los 4 elementos de la pantalla (título · UI del intro · bate · texto) se
+	// encuadran con los sliders del UI LAB (tecla T → PANTALLA DE CARGA), pero
+	// esa pantalla existe UNA sola vez por sesión y se cierra al primer click.
+	// Estas tres entradas la vuelven a poner en pantalla y la dejan quieta.
+	//
+	// Flujo de ajuste: "MOSTRAR de nuevo" → prender "no cerrar al click" →
+	// tecla T y mover los sliders → SAVE en el panel (guarda el bucket actual)
+	// → apagar el candado y click para entrar.
+	animInspector.registerCategory('intro', { label: 'PANTALLA DE CARGA', order: 2.5 });
+	animInspector.registerAction('intro:show', {
+		label: 'MOSTRAR de nuevo 🎬',
+		category: 'intro',
+		order: 0,
+		variant: 'accent',
+		callback: () => {
+			labPreview.introHold = true;
+			context.stateLayout.showLoadingScreen = true;
+		},
+	});
+	animInspector.registerToggle('introHold', {
+		label: 'No cerrar al click (candado para ajustar)',
+		category: 'intro',
+		order: 1,
+	});
+	animInspector.registerToggle('introSpinner', {
+		label: 'Ícono de carga siempre visible',
+		category: 'intro',
 		order: 2,
 	});
 

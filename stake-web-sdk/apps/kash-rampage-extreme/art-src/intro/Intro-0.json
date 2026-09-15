@@ -1,0 +1,352 @@
+{"frames": {
+
+"Episode 16_00000.png":
+{
+	"frame": {"x":1,"y":1,"w":283,"h":144},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":773,"y":491,"w":283,"h":144},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00001.png":
+{
+	"frame": {"x":1241,"y":1,"w":1182,"h":595},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":614,"y":79,"w":1182,"h":595},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00002.png":
+{
+	"frame": {"x":2425,"y":1,"w":1283,"h":687},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":523,"y":68,"w":1283,"h":687},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00003.png":
+{
+	"frame": {"x":3710,"y":1,"w":1453,"h":754},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":362,"y":58,"w":1453,"h":754},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00014.png":
+{
+	"frame": {"x":1711,"y":6598,"w":1719,"h":840},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":105,"y":49,"w":1719,"h":840},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00015.png":
+{
+	"frame": {"x":3432,"y":6636,"w":1722,"h":843},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":103,"y":49,"w":1722,"h":843},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00016.png":
+{
+	"frame": {"x":5156,"y":6636,"w":1722,"h":846},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":103,"y":49,"w":1722,"h":846},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00038.png":
+{
+	"frame": {"x":6841,"y":795,"w":1708,"h":841},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":841},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00047.png":
+{
+	"frame": {"x":6841,"y":2505,"w":1708,"h":839},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":839},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00056.png":
+{
+	"frame": {"x":6841,"y":4215,"w":1708,"h":839},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":839},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00068.png":
+{
+	"frame": {"x":1,"y":6439,"w":1708,"h":838},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":838},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00097.png":
+{
+	"frame": {"x":1,"y":5602,"w":1708,"h":835},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":835},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00098.png":
+{
+	"frame": {"x":1711,"y":5694,"w":1708,"h":835},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":835},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00099.png":
+{
+	"frame": {"x":3421,"y":5761,"w":1708,"h":835},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":835},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00100.png":
+{
+	"frame": {"x":5131,"y":5799,"w":1708,"h":835},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":835},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00151.png":
+{
+	"frame": {"x":1,"y":598,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00152.png":
+{
+	"frame": {"x":1711,"y":690,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00153.png":
+{
+	"frame": {"x":3421,"y":757,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00154.png":
+{
+	"frame": {"x":5131,"y":795,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00187.png":
+{
+	"frame": {"x":1,"y":1432,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00188.png":
+{
+	"frame": {"x":1711,"y":1524,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00189.png":
+{
+	"frame": {"x":3421,"y":1591,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00190.png":
+{
+	"frame": {"x":5131,"y":1629,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00223.png":
+{
+	"frame": {"x":1,"y":2266,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00224.png":
+{
+	"frame": {"x":1711,"y":2358,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00225.png":
+{
+	"frame": {"x":3421,"y":2425,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00226.png":
+{
+	"frame": {"x":5131,"y":2463,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00259.png":
+{
+	"frame": {"x":1,"y":3100,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00260.png":
+{
+	"frame": {"x":1711,"y":3192,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00261.png":
+{
+	"frame": {"x":3421,"y":3259,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00262.png":
+{
+	"frame": {"x":5131,"y":3297,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00295.png":
+{
+	"frame": {"x":1,"y":3934,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00296.png":
+{
+	"frame": {"x":1711,"y":4026,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00297.png":
+{
+	"frame": {"x":3421,"y":4093,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00298.png":
+{
+	"frame": {"x":5131,"y":4131,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00331.png":
+{
+	"frame": {"x":1,"y":4768,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00332.png":
+{
+	"frame": {"x":1711,"y":4860,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00333.png":
+{
+	"frame": {"x":3421,"y":4927,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00334.png":
+{
+	"frame": {"x":5131,"y":4965,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00357.png":
+{
+	"frame": {"x":6358,"y":1,"w":1367,"h":792},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":448,"y":59,"w":1367,"h":792},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00358.png":
+{
+	"frame": {"x":5165,"y":1,"w":1191,"h":758},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":615,"y":68,"w":1191,"h":758},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00359.png":
+{
+	"frame": {"x":286,"y":1,"w":953,"h":554},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":843,"y":79,"w":953,"h":554},
+	"sourceSize": {"w":1920,"h":1080}
+}},
+"animations": {
+	"Episode 16": ["Episode 16_00000.png","Episode 16_00001.png","Episode 16_00002.png","Episode 16_00003.png","Episode 16_00004.png","Episode 16_00005.png","Episode 16_00006.png","Episode 16_00007.png","Episode 16_00008.png","Episode 16_00009.png","Episode 16_00010.png","Episode 16_00011.png","Episode 16_00012.png","Episode 16_00013.png","Episode 16_00014.png","Episode 16_00015.png","Episode 16_00016.png","Episode 16_00017.png","Episode 16_00018.png","Episode 16_00019.png","Episode 16_00020.png","Episode 16_00021.png","Episode 16_00022.png","Episode 16_00023.png","Episode 16_00024.png","Episode 16_00025.png","Episode 16_00026.png","Episode 16_00027.png","Episode 16_00028.png","Episode 16_00029.png","Episode 16_00030.png","Episode 16_00031.png","Episode 16_00032.png","Episode 16_00033.png","Episode 16_00034.png","Episode 16_00035.png","Episode 16_00036.png","Episode 16_00037.png","Episode 16_00038.png","Episode 16_00039.png","Episode 16_00040.png","Episode 16_00041.png","Episode 16_00042.png","Episode 16_00043.png","Episode 16_00044.png","Episode 16_00045.png","Episode 16_00046.png","Episode 16_00047.png","Episode 16_00048.png","Episode 16_00049.png","Episode 16_00050.png","Episode 16_00051.png","Episode 16_00052.png","Episode 16_00053.png","Episode 16_00054.png","Episode 16_00055.png","Episode 16_00056.png","Episode 16_00057.png","Episode 16_00058.png","Episode 16_00059.png","Episode 16_00060.png","Episode 16_00061.png","Episode 16_00062.png","Episode 16_00063.png","Episode 16_00064.png","Episode 16_00065.png","Episode 16_00066.png","Episode 16_00067.png","Episode 16_00068.png","Episode 16_00069.png","Episode 16_00070.png","Episode 16_00071.png","Episode 16_00072.png","Episode 16_00073.png","Episode 16_00074.png","Episode 16_00075.png","Episode 16_00076.png","Episode 16_00077.png","Episode 16_00078.png","Episode 16_00079.png","Episode 16_00080.png","Episode 16_00081.png","Episode 16_00082.png","Episode 16_00083.png","Episode 16_00084.png","Episode 16_00085.png","Episode 16_00086.png","Episode 16_00087.png","Episode 16_00088.png","Episode 16_00089.png","Episode 16_00090.png","Episode 16_00091.png","Episode 16_00092.png","Episode 16_00093.png","Episode 16_00094.png","Episode 16_00095.png","Episode 16_00096.png","Episode 16_00097.png","Episode 16_00098.png","Episode 16_00099.png","Episode 16_00100.png","Episode 16_00101.png","Episode 16_00102.png","Episode 16_00103.png","Episode 16_00104.png","Episode 16_00105.png","Episode 16_00106.png","Episode 16_00107.png","Episode 16_00108.png","Episode 16_00109.png","Episode 16_00110.png","Episode 16_00111.png","Episode 16_00112.png","Episode 16_00113.png","Episode 16_00114.png","Episode 16_00115.png","Episode 16_00116.png","Episode 16_00117.png","Episode 16_00118.png","Episode 16_00119.png","Episode 16_00120.png","Episode 16_00121.png","Episode 16_00122.png","Episode 16_00123.png","Episode 16_00124.png","Episode 16_00125.png","Episode 16_00126.png","Episode 16_00127.png","Episode 16_00128.png","Episode 16_00129.png","Episode 16_00130.png","Episode 16_00131.png","Episode 16_00132.png","Episode 16_00133.png","Episode 16_00134.png","Episode 16_00135.png","Episode 16_00136.png","Episode 16_00137.png","Episode 16_00138.png","Episode 16_00139.png","Episode 16_00140.png","Episode 16_00141.png","Episode 16_00142.png","Episode 16_00143.png","Episode 16_00144.png","Episode 16_00145.png","Episode 16_00146.png","Episode 16_00147.png","Episode 16_00148.png","Episode 16_00149.png","Episode 16_00150.png","Episode 16_00151.png","Episode 16_00152.png","Episode 16_00153.png","Episode 16_00154.png","Episode 16_00155.png","Episode 16_00156.png","Episode 16_00157.png","Episode 16_00158.png","Episode 16_00159.png","Episode 16_00160.png","Episode 16_00161.png","Episode 16_00162.png","Episode 16_00163.png","Episode 16_00164.png","Episode 16_00165.png","Episode 16_00166.png","Episode 16_00167.png","Episode 16_00168.png","Episode 16_00169.png","Episode 16_00170.png","Episode 16_00171.png","Episode 16_00172.png","Episode 16_00173.png","Episode 16_00174.png","Episode 16_00175.png","Episode 16_00176.png","Episode 16_00177.png","Episode 16_00178.png","Episode 16_00179.png","Episode 16_00180.png","Episode 16_00181.png","Episode 16_00182.png","Episode 16_00183.png","Episode 16_00184.png","Episode 16_00185.png","Episode 16_00186.png","Episode 16_00187.png","Episode 16_00188.png","Episode 16_00189.png","Episode 16_00190.png","Episode 16_00191.png","Episode 16_00192.png","Episode 16_00193.png","Episode 16_00194.png","Episode 16_00195.png","Episode 16_00196.png","Episode 16_00197.png","Episode 16_00198.png","Episode 16_00199.png","Episode 16_00200.png","Episode 16_00201.png","Episode 16_00202.png","Episode 16_00203.png","Episode 16_00204.png","Episode 16_00205.png","Episode 16_00206.png","Episode 16_00207.png","Episode 16_00208.png","Episode 16_00209.png","Episode 16_00210.png","Episode 16_00211.png","Episode 16_00212.png","Episode 16_00213.png","Episode 16_00214.png","Episode 16_00215.png","Episode 16_00216.png","Episode 16_00217.png","Episode 16_00218.png","Episode 16_00219.png","Episode 16_00220.png","Episode 16_00221.png","Episode 16_00222.png","Episode 16_00223.png","Episode 16_00224.png","Episode 16_00225.png","Episode 16_00226.png","Episode 16_00227.png","Episode 16_00228.png","Episode 16_00229.png","Episode 16_00230.png","Episode 16_00231.png","Episode 16_00232.png","Episode 16_00233.png","Episode 16_00234.png","Episode 16_00235.png","Episode 16_00236.png","Episode 16_00237.png","Episode 16_00238.png","Episode 16_00239.png","Episode 16_00240.png","Episode 16_00241.png","Episode 16_00242.png","Episode 16_00243.png","Episode 16_00244.png","Episode 16_00245.png","Episode 16_00246.png","Episode 16_00247.png","Episode 16_00248.png","Episode 16_00249.png","Episode 16_00250.png","Episode 16_00251.png","Episode 16_00252.png","Episode 16_00253.png","Episode 16_00254.png","Episode 16_00255.png","Episode 16_00256.png","Episode 16_00257.png","Episode 16_00258.png","Episode 16_00259.png","Episode 16_00260.png","Episode 16_00261.png","Episode 16_00262.png","Episode 16_00263.png","Episode 16_00264.png","Episode 16_00265.png","Episode 16_00266.png","Episode 16_00267.png","Episode 16_00268.png","Episode 16_00269.png","Episode 16_00270.png","Episode 16_00271.png","Episode 16_00272.png","Episode 16_00273.png","Episode 16_00274.png","Episode 16_00275.png","Episode 16_00276.png","Episode 16_00277.png","Episode 16_00278.png","Episode 16_00279.png","Episode 16_00280.png","Episode 16_00281.png","Episode 16_00282.png","Episode 16_00283.png","Episode 16_00284.png","Episode 16_00285.png","Episode 16_00286.png","Episode 16_00287.png","Episode 16_00288.png","Episode 16_00289.png","Episode 16_00290.png","Episode 16_00291.png","Episode 16_00292.png","Episode 16_00293.png","Episode 16_00294.png","Episode 16_00295.png","Episode 16_00296.png","Episode 16_00297.png","Episode 16_00298.png","Episode 16_00299.png","Episode 16_00300.png","Episode 16_00301.png","Episode 16_00302.png","Episode 16_00303.png","Episode 16_00304.png","Episode 16_00305.png","Episode 16_00306.png","Episode 16_00307.png","Episode 16_00308.png","Episode 16_00309.png","Episode 16_00310.png","Episode 16_00311.png","Episode 16_00312.png","Episode 16_00313.png","Episode 16_00314.png","Episode 16_00315.png","Episode 16_00316.png","Episode 16_00317.png","Episode 16_00318.png","Episode 16_00319.png","Episode 16_00320.png","Episode 16_00321.png","Episode 16_00322.png","Episode 16_00323.png","Episode 16_00324.png","Episode 16_00325.png","Episode 16_00326.png","Episode 16_00327.png","Episode 16_00328.png","Episode 16_00329.png","Episode 16_00330.png","Episode 16_00331.png","Episode 16_00332.png","Episode 16_00333.png","Episode 16_00334.png","Episode 16_00335.png","Episode 16_00336.png","Episode 16_00337.png","Episode 16_00338.png","Episode 16_00339.png","Episode 16_00340.png","Episode 16_00341.png","Episode 16_00342.png","Episode 16_00343.png","Episode 16_00344.png","Episode 16_00345.png","Episode 16_00346.png","Episode 16_00347.png","Episode 16_00348.png","Episode 16_00349.png","Episode 16_00350.png","Episode 16_00351.png","Episode 16_00352.png","Episode 16_00353.png","Episode 16_00354.png","Episode 16_00355.png","Episode 16_00356.png","Episode 16_00357.png","Episode 16_00358.png","Episode 16_00359.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "Intro-0.webp",
+	"format": "RGBA8888",
+	"size": {"w":7726,"h":7483},
+	"scale": "1",
+	"related_multi_packs": [ "Intro-1.json", "Intro-2.json", "Intro-3.json", "Intro-4.json", "Intro-5.json", "Intro-6.json", "Intro-7.json", "Intro-8.json" ],
+	"smartupdate": "$TexturePacker:SmartUpdate:3c447845622dab3f636d46bf427bd220:391d3852c10668362e8bb73e73018434:490f16e6a1a650d1add2c4bf95c496da$"
+}
+}

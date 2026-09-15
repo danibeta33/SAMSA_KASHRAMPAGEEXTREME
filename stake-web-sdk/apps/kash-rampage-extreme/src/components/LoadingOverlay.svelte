@@ -1,14 +1,32 @@
 <script lang="ts">
-	// Pantalla de carga / click-to-continue — HTML overlay componible
-	// (assets del pack Downloads/loading): fondo exterior "KASH" + panel
-	// interior vault + logo + loader del wild girando (sin cards de bonus —
-	// Feedback N1 #1). Click/tap en cualquier lado entra al juego (mismo
-	// estado que consumía la LoadingScreen Pixi).
+	// PANTALLA DE CARGA / INTRO — overlay HTML a pantalla completa.
+	//
+	// Composición (drop 14-09, pedido del usuario): el fondo del pack
+	// `loading` (exterior KASH + panel interior vault), el TÍTULO arriba, la
+	// ventana animada del INTRO en el medio, y abajo el bate girando con el
+	// texto. Mientras los assets bajan dice LOADING; con todo listo pasa a
+	// CLICK TO SKIP y el click entra al juego.
+	//
+	// Esta pantalla es AHORA la única del arranque: `GameLoader.svelte` (el
+	// rectángulo negro con solo el bate) se eliminó. Era redundante —
+	// `+layout.svelte` monta este overlay en el primer render, antes que
+	// `Authenticate`, y `stateApp.loaded` arranca en false, así que este
+	// componente ya cubría desde el frame 1 con el mismo spinner y el mismo
+	// LOADING, pero además con el fondo, el título y el intro.
+	//
+	// Los 4 elementos se encuadran desde el UI LAB (tecla T → PANTALLA DE
+	// CARGA), por bucket de resolución: X/Y son fracciones del VIEWPORT y
+	// `Scale` multiplica el tamaño base que les da el CSS. Para poder tunear
+	// hace falta que la pantalla esté visible — ANIM LAB (tecla A) → PANTALLA
+	// DE CARGA la vuelve a abrir y tiene el candado que evita que el click la
+	// cierre.
 	import { onMount } from 'svelte';
 	import { getContextApp } from 'pixi-svelte';
 
 	import { getContext } from '../game/context';
 	import { htmlAssets } from '../game/htmlAssets.svelte';
+	import { labPreview, stateTweak } from '../game/stateTweak.svelte';
+	import { playUiSfx } from '../game/ambientAudio.svelte';
 	import LoadingSpinner from './LoadingSpinner.svelte';
 
 	const context = getContext();
@@ -23,6 +41,10 @@
 	// el jugador recarga — jamás entrar con el board a medias.
 	// htmlAssets: las imágenes HTML del HUD/overlays (cards del buy, botones)
 	// también deben estar en cache — si no, el buy menu abre con pop-in.
+	//
+	// El intro (9.0 MB) NO entra en esta cuenta a propósito: es decoración de
+	// la espera, no parte del juego. Si baja tarde aparece con un fade; si el
+	// juego queda listo antes, el jugador entra sin esperarlo.
 	const ready = $derived(appContext.stateApp.loaded && htmlAssets.loaded);
 
 	// Salida animada tipo TELÓN: al click el juego se monta inmediatamente
@@ -30,44 +52,140 @@
 	// abajo fuera de pantalla (650ms), revelando el board desde arriba.
 	let closing = $state(false);
 	const dismiss = () => {
+		// Candado del laboratorio: mientras se encuadran los 4 elementos, el
+		// click no puede cerrar la pantalla que se está ajustando.
+		if (import.meta.env.DEV && labPreview.introHold) return;
 		if (closing || !ready) return;
 		closing = true;
+		// SWIPE del telón: acompaña los 650 ms del `translateY` de salida. No
+		// va por el eventEmitter porque `<Sound />` se monta recién con el
+		// juego —en el tick que abre esta misma función— y todavía no está
+		// suscrito: el evento se perdería. Ver `game/ambientAudio.svelte.ts`.
+		playUiSfx('sfx_intro_swipe');
 		context.stateLayout.showLoadingScreen = false;
 		setTimeout(() => (closing = false), 680);
 	};
 
 	// Touch (mobile/tablet) → TAP; puntero fino (desktop) → CLICK.
-	const continueLabel =
+	// "SKIP" y no "CONTINUE": lo que se saltea es el intro, que si nadie toca
+	// nada queda en bucle.
+	const skipLabel =
 		typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
-			? 'TAP TO CONTINUE'
-			: 'CLICK TO CONTINUE';
+			? 'TAP TO SKIP'
+			: 'CLICK TO SKIP';
 
+	// El bate solo tiene sentido mientras algo está cargando. El toggle del
+	// ANIM LAB lo fuerza visible para poder encuadrarlo con el juego ya listo.
+	const showSpinner = $derived(!ready || (import.meta.env.DEV && labPreview.introSpinner));
+
+	// El webp animado del intro pesa lo suyo: hasta que no terminó de bajar se
+	// mantiene en opacidad 0 y entra con un fade, en vez de aparecer de golpe
+	// a mitad de la carga.
+	let introLoaded = $state(false);
+
+	// Latido del texto. Va por JS y no por una `animation` de CSS a proposito:
+	// una animacion CSS sobre `opacity` le gana al `style` inline, y el slider
+	// de opacidad del laboratorio quedaria sin efecto sobre este elemento.
 	let pulse = $state(true);
 	onMount(() => {
 		const id = setInterval(() => (pulse = !pulse), 600);
 		return () => clearInterval(id);
 	});
+
+	// Un elemento = posición (fracción de viewport) + escala + opacidad + capa.
+	// Se arma acá y no en el markup para que los 4 usen exactamente la misma
+	// fórmula: `translate(-50%, -50%)` centra el elemento en (X, Y) y el
+	// `scale()` crece desde ese mismo centro.
+	//
+	// `posId` permite tomar la POSICIÓN de otro elemento conservando escala,
+	// opacidad y capa propias — lo usa el texto para mudarse al hueco del bate.
+	type IntroId = 'introTitle' | 'introAnim' | 'introSpin' | 'introText';
+	const place = (id: IntroId, alpha = 1, posId: IntroId = id) => {
+		const t = stateTweak as unknown as Record<string, number>;
+		return [
+			`left: ${t[`${posId}X`] * 100}%`,
+			`top: ${t[`${posId}Y`] * 100}%`,
+			`transform: translate(-50%, -50%) scale(${t[`${id}Scale`]})`,
+			`opacity: ${t[`${id}Alpha`] * alpha}`,
+			`z-index: ${Math.round(t[`${id}Z`])}`,
+		].join('; ');
+	};
+
+	// Cuando los assets terminan, el bate desaparece y el texto SUBE a ocupar
+	// su lugar (pedido del usuario): sin esto quedaba un hueco donde estaba el
+	// bate y el CLICK TO SKIP solo, pegado al borde de abajo.
+	//
+	// Se mira `showSpinner` y no `ready` a propósito: con el toggle del ANIM
+	// LAB que fuerza el bate visible, los dos elementos conviven y el texto
+	// tiene que quedarse en su propia posición para poder encuadrarlo.
+	const textPos: IntroId = $derived(showSpinner ? 'introText' : 'introSpin');
 </script>
 
 {#if context.stateLayout.showLoadingScreen || closing}
-	<button class="load" class:load--out={closing} onclick={dismiss} aria-label={continueLabel} style="background-image: url('assets/loading/bg_outer.jpg')">
-		<div class="load__panel" style="background-image: url('assets/loading/bg_inner.jpg')">
-			<!-- Sin cards de bonus (Feedback N1 #1): la intro no debe anticipar
-			     los modos de compra — solo logo + loader del bate (wild) girando. -->
-			<!-- TODO-KRE Fase 3: logo.png sigue siendo el de KS1 (placeholder) -->
-			<img class="load__logo" src="assets/loading/logo.png" alt="KASH RAMPAGE EXTREME" />
-			<div class="load__foot">
-				<!-- El loader del wild vive en GameLoader (fase post-cartel de
-				     Stake Engine). Acá solo se muestra si los assets del juego
-				     siguen cargando; con todo listo, CLICK/TAP TO CONTINUE pelado. -->
-				{#if !ready}
-					<LoadingSpinner />
-					<span class="load__tap load__tap--load">LOADING</span>
-				{:else}
-					<span class="load__tap" style="opacity: {pulse ? 1 : 0.35}">{continueLabel}</span>
-				{/if}
-			</div>
-		</div>
+	<button
+		class="load"
+		class:load--out={closing}
+		onclick={dismiss}
+		aria-label={skipLabel}
+		style="background-image: url('assets/loading/bg_outer.jpg')"
+	>
+		<!-- Panel interior del vault: es el TELÓN de fondo de la composición.
+		     Los 4 elementos NO cuelgan de él sino del overlay, porque sus X/Y
+		     del laboratorio son fracciones del viewport. -->
+		<div class="load__panel" style="background-image: url('assets/loading/bg_inner.jpg')"></div>
+
+		<!-- TÍTULO — arriba (antes iba centrado en el panel). -->
+		<img
+			class="load__title"
+			src="assets/loading/logo.png"
+			alt="KASH RAMPAGE EXTREME"
+			style={place('introTitle')}
+		/>
+
+		<!-- UI DEL INTRO — la ventana con el crawl de texto del Episode 16.
+		     Es un WebP ANIMADO en bucle, no un spritesheet: las hojas que
+		     entrega el equipo (9 atlas de ~7700x7600) son cientos de MB ya
+		     decodificadas y el browser no las aguanta. Lo genera
+		     `tools/build_intro.py` desde `art-src/intro/`.
+
+		     El ciclo —15 s de animación + 3 s en transparente, 18 s en
+		     total— está HORNEADO en el archivo, no acá: el WebP corre con el
+		     reloj del decodificador del browser, que no empieza ni en el
+		     `load` del `<img>` ni en el montaje de este componente, así que
+		     ninguna animación CSS puede quedar en fase con él. Para cambiar
+		     esos tiempos se re-genera el asset (`--hold-seconds`).
+
+		     La animación ABRE y CIERRA sola (la ventana crece desde nada y se
+		     vuelve a cerrar), así que el asset NO lleva el fundido por
+		     software que tenía el pack anterior — ver `--fade-frames` en el
+		     script. Corre a 24 fps PAREJOS (pedido de dirección 15-09): hasta
+		     el 15-09 el crawl iba decimado a 12 fps para ahorrar peso, y
+		     igualar la tasa llevó el asset de 5.1 a 9.0 MB. `--crawl-step 2`
+		     en el script vuelve al asset anterior. -->
+		<img
+			class="load__intro"
+			src="assets/loading/intro.webp"
+			alt=""
+			decoding="async"
+			onload={() => (introLoaded = true)}
+			style={place('introAnim', introLoaded ? 1 : 0)}
+		/>
+
+		<!-- ÍCONO DE CARGA — el bate girando (Cargador_Bate). -->
+		{#if showSpinner}
+			<span class="load__spin" style={place('introSpin')}>
+				<LoadingSpinner size="clamp(72px, 15vmin, 132px)" />
+			</span>
+		{/if}
+
+		<!-- TEXTO — LOADING mientras baja, CLICK/TAP TO SKIP cuando se puede entrar. -->
+		<span
+			class="load__text"
+			class:load__text--load={!ready}
+			style={place('introText', pulse ? 1 : 0.35, textPos)}
+		>
+			{ready ? skipLabel : 'LOADING'}
+		</span>
 	</button>
 {/if}
 
@@ -98,58 +216,89 @@
 	}
 	.load__panel {
 		position: relative;
+		z-index: 0;
 		width: min(96vw, 170vh);
 		height: min(92vh, 60vw);
 		border-radius: 18px;
 		background: center / cover no-repeat;
 		box-shadow: 0 0 40px rgba(0, 0, 0, 0.65);
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: space-between;
-		padding: 2vmin 3vmin 3.5vmin;
 	}
-	.load__logo {
-		height: clamp(90px, 34vmin, 280px);
-		width: auto;
-		margin: auto 0; /* centrado vertical en el espacio libre (sin cards) */
+
+	/* Los 4 elementos del laboratorio comparten anclaje: `position: absolute`
+	   contra el overlay (= el viewport) y su centro en el (X, Y) que les dan
+	   los sliders. Ninguno recibe clicks: el botón de abajo es toda la
+	   pantalla, así que tocar cualquier lado entra al juego. */
+	.load__title,
+	.load__intro,
+	.load__spin,
+	.load__text {
+		position: absolute;
+		pointer-events: none;
+		/* el transform lo arma `place()` — acá solo el origen del scale */
+		transform-origin: center center;
+	}
+
+	/* Tamaños BASE (con el slider de tamaño en 1). Son un `min()` de TRES
+	   términos, y cada uno cubre una forma de pantalla:
+	     · vw   → tope contra el ancho (manda en PORTRAIT, donde el límite es
+	              lo angosta que es la pantalla).
+	     · vh   → tope contra el alto (manda en landscape bajito, tipo el
+	              popout 800×450, donde el intro se comería el título).
+	     · vmax → el tamaño de diseño en landscape normal, atado al lado
+	              LARGO: sin este término un desktop ancho recibiría el mismo
+	              tope de ancho que un teléfono y el intro saldría gigante.
+	   Sin el vmax el default solo servía en landscape y en portrait entraba
+	   todo diminuto. El encuadre fino igual es por bucket, desde el UI LAB. */
+	.load__title {
+		width: min(60vw, 56vh, 32vmax);
+		height: auto;
 		filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.5));
 	}
-	.load__foot {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 1.4vmin;
-		min-height: clamp(28px, 6vmin, 56px);
-		justify-content: flex-end;
+	/* El intro es el único que NO mide lo mismo que lo que se ve: el asset
+	   lleva un margen transparente alrededor de la ventana para que entre el
+	   OVERSHOOT de la apertura (la ventana se pasa de tamaño antes de
+	   asentarse). La ventana en reposo ocupa el 89.3% del ancho de la imagen,
+	   así que los tres términos van x1.119 respecto de los del resto — 92/112/60
+	   eran los aprobados cuando el asset era exactamente la ventana.
+
+	   Se compensa ACÁ y no en los sliders porque `introAnimScale` tiene un
+	   valor aprobado por bucket en el UI LAB: tocando el ancho base una sola
+	   vez, los ~8 juegos de valores siguen valiendo tal cual. El recorte del
+	   asset es simétrico respecto del centro de la ventana (ver
+	   `tools/build_intro.py`), así que `introAnimX/Y` tampoco se mueven. */
+	.load__intro {
+		width: min(103vw, 125vh, 67vmax);
+		height: auto;
+		/* fade de entrada cuando termina de bajar el webp (ver `introLoaded`) */
+		transition: opacity 0.45s ease;
 	}
-	.load__tap {
+	.load__spin {
+		display: block;
+	}
+	.load__text {
 		color: #f6ef1b;
 		font-size: clamp(12px, 2.4vmin, 20px);
 		font-weight: 900;
 		letter-spacing: 5px;
+		/* compensa el tracking del último caracter al centrar */
+		text-indent: 5px;
+		white-space: nowrap;
 		text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
-		transition: opacity 0.3s ease;
+		/* `left`/`top` también entran en la transición: al terminar la carga el
+		   texto se MUEVE al lugar que deja el bate, y sin esto saltaba. */
+		transition:
+			opacity 0.3s ease,
+			left 0.4s ease,
+			top 0.4s ease;
 	}
-	.load__tap--load {
+	.load__text--load {
 		letter-spacing: 8px;
-		animation: load-pulse 1s ease-in-out infinite;
+		text-indent: 8px;
 	}
-	@keyframes load-pulse {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0.35;
-		}
-	}
-	/* El bate girando (Cargador_Bate) vive en LoadingSpinner.svelte: el sheet
-	   nuevo trae los 6 frames RECORTADOS en una columna y con altos distintos,
-	   así que ya no se puede animar con un steps() sobre background-position.
-	   Acá solo queda el encuadre. */
 
-	/* Portrait — panel a lo alto */
+	/* Portrait — el panel de fondo a lo alto. El encuadre de los 4 elementos
+	   NO se corrige acá: cada bucket tiene su propio juego de valores en el UI
+	   LAB (los defaults son los de Desktop). */
 	@media (max-aspect-ratio: 1/1) {
 		.load__panel {
 			width: 94vw;
