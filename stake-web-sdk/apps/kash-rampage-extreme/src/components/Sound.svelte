@@ -27,7 +27,13 @@
 
 	import { getContext } from '../game/context';
 	// SoundName ya viene importado en el module script de arriba.
-	import { SFX_MAP, SFX_GAIN, SFX_BASE_VOLUME, BGM_BASE_VOLUME } from '../game/sound';
+	import {
+		SFX_MAP,
+		SFX_GAIN,
+		SFX_POLYPHONY,
+		SFX_BASE_VOLUME,
+		BGM_BASE_VOLUME,
+	} from '../game/sound';
 
 	const context = getContext();
 
@@ -68,6 +74,15 @@
 	// cancels the previous tween (prevents racing fades from compounding).
 	const fadeIntervals = new Map<SoundName, ReturnType<typeof setInterval>>();
 
+	// ── Voces extra de los clips POLIFÓNICOS ────────────────────────────────
+	// `sfxCache` guarda LA voz principal de cada clip: es la que `stopSfx` y
+	// `fadeSfx` manipulan, así que sigue siendo una sola y esas dos no cambian.
+	// Los clips con entrada en `SFX_POLYPHONY` tienen además un anillo de voces
+	// alternativas para que dos disparos seguidos se ENCIMEN en vez de cortarse
+	// (ver la nota de SFX_POLYPHONY en sound.ts).
+	const sfxVoices = new Map<SoundName, HTMLAudioElement[]>();
+	const sfxVoiceCursor = new Map<SoundName, number>();
+
 	const getOrCreateAudio = (name: SoundName, { loop }: { loop: boolean }) => {
 		const path = SFX_MAP[name];
 		if (!path) return null;
@@ -81,16 +96,217 @@
 		return audio;
 	};
 
+	/**
+	 * Devuelve la voz con la que hay que reproducir ESTE disparo.
+	 *
+	 * Sin polifonía es siempre la voz principal — o sea, exactamente lo que
+	 * hacía antes. Con polifonía se reparte por turno entre el anillo, creando
+	 * cada voz recién cuando el turno llega a ella: un cluster de 5 símbolos no
+	 * paga los 6 elementos de audio del techo.
+	 *
+	 * Los LOOPS quedan siempre en la voz principal: un loop polifónico no
+	 * tendría cómo pararse (`stopSfx` conoce una sola voz) y se quedaría
+	 * sonando para siempre.
+	 */
+	const voiceFor = (name: SoundName, { loop }: { loop: boolean }) => {
+		const main = getOrCreateAudio(name, { loop });
+		if (!main) return null;
+		const limit = SFX_POLYPHONY[name] ?? 1;
+		if (loop || limit <= 1) return main;
+
+		const ring = sfxVoices.get(name) ?? [main];
+		if (!sfxVoices.has(name)) sfxVoices.set(name, ring);
+		const next = ((sfxVoiceCursor.get(name) ?? 0) + 1) % limit;
+		sfxVoiceCursor.set(name, next);
+		if (!ring[next]) {
+			const extra = new Audio(main.src);
+			extra.preload = 'auto';
+			ring[next] = extra;
+		}
+		ring[next].loop = false;
+		return ring[next];
+	};
+
+	/**
+	 * Crea y BAJA el anillo entero de un clip polifónico, de una y por
+	 * adelantado.
+	 *
+	 * `voiceFor` crea cada voz recién cuando le llega el turno, o sea EN EL
+	 * MISMO TICK en que tiene que sonar: un `HTMLAudioElement` nuevo arranca en
+	 * `readyState 0` y su `play()` no emite hasta que cargó y decodificó, así
+	 * que las primeras voces de cada sesión llegan tarde o directamente no se
+	 * oyen. En un cluster GRANDE eso se disimula —la cascada da la vuelta al
+	 * anillo y para el final las voces ya están calientes—, pero en uno de 3 o 4
+	 * símbolos CADA disparo cae en una voz fría distinta y el enmarcado se oye
+	 * mudo. Es exactamente el reporte "no suena en los spins normales, sí en el
+	 * bonus": los clusters del bonus son más grandes.
+	 *
+	 * El camino bueno sigue siendo Web Audio (`playBuffered`), pero el fallback
+	 * tiene que ser un fallback de verdad — hasta que el buffer termine de
+	 * decodificar, o si el browser no da Web Audio, es lo único que hay.
+	 */
+	const warmVoices = (name: SoundName) => {
+		const limit = SFX_POLYPHONY[name] ?? 1;
+		const main = getOrCreateAudio(name, { loop: false });
+		if (!main) return;
+		main.load();
+		if (limit <= 1) return;
+		const ring = sfxVoices.get(name) ?? [main];
+		sfxVoices.set(name, ring);
+		for (let i = 1; i < limit; i += 1) {
+			if (ring[i]) continue;
+			const extra = new Audio(main.src);
+			extra.preload = 'auto';
+			extra.load();
+			ring[i] = extra;
+		}
+	};
+
 	const sfxVolume = (name?: SoundName) =>
 		// volumeSoundEffect already folds master in; SFX_BASE_VOLUME caps the
 		// per-clip ceiling so SFX sit under BGM by default. SFX_GAIN aplica el
 		// trim por clip (Feedback N1 #8 — nivelar la mezcla).
-		SFX_BASE_VOLUME *
-		stateSoundDerived.volumeSoundEffect() *
-		(name ? (SFX_GAIN[name] ?? 1) : 1);
+		SFX_BASE_VOLUME * stateSoundDerived.volumeSoundEffect() * (name ? (SFX_GAIN[name] ?? 1) : 1);
+
+	// ── DISPARO REAL DE LOS CLIPS POLIFÓNICOS (Web Audio) ───────────────────
+	// El anillo de `HTMLAudioElement` de acá arriba resolvió que los disparos no
+	// se CORTARAN entre sí, pero no alcanzó para que TODOS SUENEN: un
+	// `HTMLAudioElement` recién creado arranca en `readyState 0` y su `play()`
+	// no emite hasta que el elemento cargó y decodificó. Las voces del anillo se
+	// creaban de a una, EN EL MISMO TICK en que tenían que sonar, así que las
+	// primeras de cada sesión llegaban tarde o directamente no se oían.
+	//
+	// Eso explica el reporte (15-09): en un cluster GRANDE la cascada da la
+	// vuelta al anillo y las últimas voces —ya cargadas— suenan apiladas, pero
+	// en uno de 3 o 4 símbolos cada disparo cae en una voz FRÍA distinta y el
+	// enmarcado se oye mudo o con un solo eslabón.
+	//
+	// La solución no es precargar más elementos: aunque estén calientes, cada
+	// `play()` de un `HTMLAudioElement` pasa por el scheduler de media del
+	// browser y puede llegar decenas de ms tarde. Para un golpe que tiene que
+	// caer EXACTO en el frame del marco, el camino correcto es Web Audio: se
+	// decodifica el wav UNA vez a un `AudioBuffer` y cada disparo es un
+	// `AudioBufferSourceNode` nuevo, que arranca en el instante y no compite con
+	// ningún otro. La polifonía deja de tener techo —cada símbolo tiene su
+	// fuente— y `SFX_POLYPHONY` queda solo para el fallback de abajo.
+	//
+	// Si Web Audio no está o el buffer todavía no terminó de decodificar,
+	// `playBuffered` devuelve `false` y `playSfx` cae al anillo de siempre.
+	let audioCtx: AudioContext | undefined;
+	const sfxBuffers = new Map<SoundName, AudioBuffer>();
+	const decoding = new Set<SoundName>();
+
+	// Un `resume()` pedido FUERA de un gesto puede quedar pendiente o ser
+	// rechazado, y el contexto se queda suspendido para el resto de la sesión.
+	// Con esto, el siguiente gesto del jugador —el click de SPIN, típicamente—
+	// lo levanta. Se arma una sola vez: `ctxResumeArmed` evita apilar listeners
+	// en cada disparo.
+	let ctxResumeArmed = false;
+	const armCtxResume = () => {
+		if (ctxResumeArmed) return;
+		ctxResumeArmed = true;
+		const onGesture = () => {
+			ctxResumeArmed = false;
+			for (const type of ['pointerdown', 'touchstart', 'keydown'] as const) {
+				window.removeEventListener(type, onGesture);
+			}
+			void audioCtx?.resume().catch(() => {});
+		};
+		for (const type of ['pointerdown', 'touchstart', 'keydown'] as const) {
+			window.addEventListener(type, onGesture, { once: true });
+		}
+	};
+
+	const getAudioCtx = () => {
+		if (!audioCtx) {
+			const Ctor =
+				window.AudioContext ??
+				(window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+			if (!Ctor) return undefined;
+			audioCtx = new Ctor();
+		}
+		// El contexto nace `suspended` si el browser todavía no vio un gesto.
+		// `<Sound />` se monta DESPUÉS del click de la pantalla de carga, así que
+		// normalmente ya arranca corriendo; el resume cubre el caso en que el
+		// browser lo suspende solo (pestaña en segundo plano).
+		if (audioCtx.state === 'suspended') {
+			void audioCtx.resume().catch(() => {});
+			armCtxResume();
+		}
+		return audioCtx;
+	};
+
+	/** Baja y decodifica el clip una sola vez. Idempotente. */
+	const preloadBuffer = async (name: SoundName) => {
+		const path = SFX_MAP[name];
+		if (!path || sfxBuffers.has(name) || decoding.has(name)) return;
+		const ctx = getAudioCtx();
+		if (!ctx) return;
+		decoding.add(name);
+		try {
+			const response = await fetch(srcFor(path));
+			sfxBuffers.set(name, await ctx.decodeAudioData(await response.arrayBuffer()));
+		} catch (e) {
+			// Sin buffer el clip sigue sonando por el anillo de <audio>.
+			if (import.meta.env.DEV) console.debug(`[Sound] decode(${name}) failed:`, e);
+		} finally {
+			decoding.delete(name);
+		}
+	};
+
+	/** @returns `true` si el disparo salió por Web Audio. */
+	const playBuffered = (name: SoundName) => {
+		const buffer = sfxBuffers.get(name);
+		if (!buffer) return false;
+		const ctx = getAudioCtx();
+		if (!ctx) return false;
+		// ── EL CONTEXTO TIENE QUE ESTAR CORRIENDO (fix 15-09) ────────────────
+		// Sin esta guarda, un contexto `suspended` (o ya cerrado) igual aceptaba
+		// el `source.start()` —el reloj está congelado, así que no se oye nada— y
+		// esta función devolvía `true`. Con ese `true`, `playSfx` daba el disparo
+		// por hecho y NO caía al anillo de `<audio>`, que sí habría sonado: los
+		// elementos de audio tienen su propia política de autoplay y a esa altura
+		// ya está satisfecha. O sea que el eslabón se perdía ENTERO, en silencio.
+		//
+		// Devolviendo `false` el fallback vuelve a entrar, y `getAudioCtx()` ya
+		// dejó armado el reintento por gesto para los disparos siguientes.
+		if (ctx.state !== 'running') return false;
+		const source = ctx.createBufferSource();
+		source.buffer = buffer;
+		// Gain propio por disparo: el volumen se lee AL DISPARAR, igual que en
+		// `playSfx`, así que el mezclador (master × sfx × SFX_GAIN) sigue mandando.
+		const gain = ctx.createGain();
+		gain.gain.value = sfxVolume(name);
+		source.connect(gain).connect(ctx.destination);
+		source.onended = () => {
+			source.disconnect();
+			gain.disconnect();
+		};
+		source.start();
+		return true;
+	};
 
 	const playSfx = (name: SoundName, { loop }: { loop: boolean }) => {
-		const audio = getOrCreateAudio(name, { loop });
+		// Clips POLIFÓNICOS (hoy: la cadena del marco): salen por Web Audio, que
+		// es lo único que garantiza un golpe audible POR SÍMBOLO. Si el buffer
+		// todavía no está, sigue de largo al anillo de <audio> de siempre.
+		if (!loop && (SFX_POLYPHONY[name] ?? 1) > 1) {
+			// Traza de DEV: si algún día vuelve a faltar un golpe, esto dice si
+			// el disparo llegó y por qué camino salió — sin tener que instrumentar
+			// la cascada entera.
+			const viaWebAudio = playBuffered(name);
+			if (import.meta.env.DEV) console.debug(`[Sound] ${name}`, viaWebAudio ? 'webaudio' : '<audio>');
+			if (viaWebAudio) return;
+			// Salió por el anillo de `<audio>`, o sea que el buffer NO estaba:
+			// o el decode del montaje falló (red, un 404 momentáneo) o el
+			// contexto todavía no corría. Se reintenta acá para que el camino
+			// bueno se recupere solo — si no, una decodificación fallida al
+			// arranque condenaba al clip al fallback POR TODA LA SESIÓN, que es
+			// justo donde los clusters chicos se oyen flojos. `preloadBuffer` es
+			// idempotente: si ya está o ya se está bajando, no hace nada.
+			void preloadBuffer(name);
+		}
+		const audio = voiceFor(name, { loop });
 		if (!audio) return; // no file delivered — silent no-op
 		// Cancel any in-flight fade so the new play starts at full volume.
 		const existingFade = fadeIntervals.get(name);
@@ -157,10 +373,17 @@
 		}
 		// PRECARGA de la cadena del marco: el resto de los SFX se crean en su
 		// primer play (no tiene sentido pedir 40 clips que la ronda no toca),
-		// pero este pesa 600 KB —es el único wav sin pasar por el pipeline— y
-		// tiene que caer EN EL FRAME en que arranca el marco. Sin esto, el
-		// primer cluster ganador de la sesión se enmarca mudo mientras baja.
-		getOrCreateAudio('sfx_marco_chain', { loop: false });
+		// pero este tiene que caer EN EL FRAME en que arranca el marco. Sin
+		// esto, el primer cluster ganador de la sesión se enmarca mudo mientras
+		// baja. Es un wav de 79 KB, así que la precarga sale barata.
+		// …y con ÉL, sus 6 voces del anillo, todas bajadas de entrada (ver
+		// `warmVoices`): es el fallback del Web Audio de acá abajo y tiene que
+		// estar listo para el PRIMER cluster, no calentarse con el tercero.
+		warmVoices('sfx_marco_chain');
+		// …y su AudioBuffer, que es por donde sale de verdad cada eslabón (ver
+		// `playBuffered`). El fetch + decode corre en background; hasta que
+		// termine, el anillo de <audio> cubre.
+		void preloadBuffer('sfx_marco_chain');
 
 		// Expose for headless tests / debugging
 		(globalThis as unknown as { __bgm?: HTMLAudioElement }).__bgm = bgm;
@@ -182,6 +405,13 @@
 			audio.src = '';
 		}
 		sfxCache.clear();
+		sfxVoices.clear();
+		sfxVoiceCursor.clear();
+		sfxBuffers.clear();
+		if (audioCtx) {
+			void audioCtx.close().catch(() => {});
+			audioCtx = undefined;
+		}
 	});
 
 	// React to volume changes — master at 0 pauses BGM and mutes all cached

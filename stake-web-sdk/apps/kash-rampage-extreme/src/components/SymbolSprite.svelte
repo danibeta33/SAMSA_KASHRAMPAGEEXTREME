@@ -421,15 +421,17 @@
 	const antAddAlpha = $derived(antGlow * ANTICIPATION.addMult);
 
 	// ── Ciclo de vida del brillo de los ESPECIALES (drop 09-09) ─────────────
-	// A diferencia de los 10 regulares —cuya carta `_luz` acompaña todo
-	// `isWinning`, o sea también `postWinStatic` y `explosion`— el clip de luz
-	// de W/S/H4 vive SOLO mientras dura el estado `win`.
+	// El clip de luz de W/S/H4 acompaña TODA la vida del símbolo ganador, igual
+	// que la carta `_luz` de los 10 regulares: `win`, `postWinStatic` y también
+	// `explosion`.
 	//
-	// El brillo acompaña toda la PRESENTACIÓN del cluster (`win` +
-	// `postWinStatic`) y se apaga al explotar. `explosion` es el único estado
-	// que se excluye a propósito: ahí el símbolo ya está saliendo del board y
-	// dejar un clip en loop por detrás es justamente el overlay residual que se
-	// quiere evitar.
+	// 15-09: `explosion` ENTRA a la ventana. Antes se excluía por miedo a dejar
+	// un clip en loop por DETRÁS del símbolo que ya sale del board; ahora el
+	// `_luz` no va detrás sino que SUSTITUYE al clip base (ver
+	// `specialLuzReplaces`), así que no hay overlay residual posible — es el
+	// mismo sprite, encendido. Sin esto el especial se apagaba justo en el
+	// boing de salida: el momento más visible del cluster se veía con el arte
+	// SIN luz (reporte con captura del wild y el scatter en pleno boing).
 	//
 	// Al caer este flag el bloque `{#if}` se desmonta y `createContextParent`
 	// destruye el nodo en su cleanup (`return () => node.destroy()`): no queda
@@ -442,15 +444,32 @@
 	// especial no anima nada en esa cascada — el clip de 6 frames a 10 fps ni
 	// llegaba a media vuelta.
 	// `labPreview.luz` lo fuerza desde el AnimLab sin tener que ganar.
+	// `winLit` lo suma al MISMO turno de la cascada que el marco: el especial se
+	// enciende cuando le toca, no antes que el resto del cluster (durante
+	// `explosion` la cascada ya está limpia y `isWinCellLit` devuelve true, así
+	// que la salida nunca queda a oscuras por este gate).
 	const specialGlowOn = $derived(
-		labPreview.luz || props.symbolState === 'win' || props.symbolState === 'postWinStatic',
+		labPreview.luz ||
+			(winLit &&
+				(props.symbolState === 'win' ||
+					props.symbolState === 'postWinStatic' ||
+					props.symbolState === 'explosion')),
 	);
 	// El MISMO clip `_luz` sirve a los dos efectos, pero NO de la misma forma.
 	// Es la vía por la que se ilumina el SCATTER (`anim_sym_scatter_luz`), que
 	// es el caso de prueba del near-miss.
 	//
-	//  · VICTORIA → alpha pleno, DETRÁS del clip base (zIndex 0). El glow
-	//    sangra alrededor de la silueta y el ícono queda nítido. Sin cambios.
+	//  · VICTORIA → alpha pleno y EN LUGAR del clip base (`specialLuzReplaces`).
+	//    Hasta el 15-09 iba DETRÁS (zIndex 0), copiando la jerarquía de los 10
+	//    regulares — y ahí está el bug que reportó dirección con captura: en los
+	//    regulares el `_luz` es una CARTA más grande que el ícono, así que
+	//    asoma por los cuatro costados; en los especiales el `_luz` es EL MISMO
+	//    arte re-pintado sobre el MISMO canvas 256², o sea que el clip base lo
+	//    tapa pixel por pixel. El caso extremo es el fajo KASH (`sym_h4`), cuyo
+	//    clip base va a sangre (fill 1.0 × 0.93): el `anim_sym_premium_luz` no
+	//    se veía NUNCA y el premium parecía no encenderse. Sustituirlo es lo
+	//    único que hace visible el arte iluminado, y no desalinea nada porque
+	//    los dos sheets comparten lienzo, geometría y velocidad.
 	//  · ANTICIPACIÓN → el mismo clip va ENCIMA (zIndex 2) y en `blendMode`
 	//    aditivo. Detrás casi no se notaba: el clip base es opaco y solo dejaba
 	//    ver el borde. Aditivo y adelante SUMA luz sobre el arte entero, que es
@@ -461,6 +480,11 @@
 	//    SCATTER se realce sin quemarse a blanco.
 	const antLuzOnTop = $derived(!specialGlowOn && antGlow > 0);
 	const specialLuzAlpha = $derived(specialGlowOn ? 1 : antGlow * ANTICIPATION.specialAddMult);
+	// El `_luz` SUSTITUYE al clip base (no se apila con él) mientras el símbolo
+	// está encendido. Solo cuando el sheet ya bajó: va sin `preload`, y si
+	// todavía no está, el especial gana con su clip de siempre — degrada, no
+	// deja la celda vacía.
+	const specialLuzReplaces = $derived(specialGlowOn && specialLuzReady);
 
 	type MarcoPhase = 'intro' | 'loop' | 'outro' | 'done';
 	// Arranca YA en salida si el componente nace explotando. Es el caso normal
@@ -587,6 +611,13 @@
 			});
 		}
 	});
+
+	// El SONIDO del marco (la cadena) NO se dispara desde acá. Vivió un tiempo
+	// en este componente, colgado de un `$effect` sobre `marcoOn`, para que
+	// imagen y sonido salieran de la misma condición; el resultado fue el
+	// contrario — celdas que se enmarcaban mudas. Ahora lo emite `playWinFlash`
+	// en el mismo turno en que enciende la celda, que es el único punto que
+	// recorre los símbolos de a uno. Ver la nota allá.
 
 	// POP de aparición SOLO para WILD y SCATTER (resaltan al caer). Bounce de
 	// escala al montar el símbolo (~250ms). Premium/H4 no popea.
@@ -739,10 +770,12 @@
 		sortableChildren={true}
 	>
 		{#if specialLuzReady && specialLuzAlpha > 0}
-			<!-- ILUMINACIÓN DE VICTORIA del especial (drop 09-09). Misma
-			     jerarquía que la carta `_luz` de los 10 regulares: va PRIMERA =
-			     DETRÁS del clip base, que se dibuja encima y queda nítido
-			     mientras el glow sangra alrededor de la silueta.
+			<!-- ILUMINACIÓN DE VICTORIA del especial (drop 09-09).
+			     En victoria OCUPA EL LUGAR del clip base (zIndex 1 y el base
+			     desmontado, ver `specialLuzReplaces`): el `_luz` de los
+			     especiales no es un halo que asome por detrás como la carta de
+			     los 10 regulares, es el MISMO arte encendido, así que detrás no
+			     se ve. En anticipación sí se apila, encima y en aditivo.
 			     Comparte `width`/`height`/`x`/`y` con el clip base a propósito:
 			     los dos sheets salen del mismo canvas 256² con el personaje en
 			     la misma posición, así que la misma geometría ES el registro
@@ -752,7 +785,7 @@
 			     en el mismo instante que la animación de victoria. -->
 			<SpriteSheet
 				anchor={0.5}
-				zIndex={antLuzOnTop ? 2 : 0}
+				zIndex={antLuzOnTop ? 2 : specialLuzReplaces ? 1 : 0}
 				alpha={specialLuzAlpha}
 				blendMode={antLuzOnTop ? 'add' : 'normal'}
 				x={specialOffsetX}
@@ -765,18 +798,24 @@
 				play
 			/>
 		{/if}
-		<SpriteSheet
-			anchor={0.5}
-			zIndex={1}
-			x={specialOffsetX}
-			y={specialOffsetY}
-			key={special.key}
-			width={specialW}
-			height={specialH}
-			animationSpeed={SPECIAL_ANIM_SPEED}
-			loop
-			play
-		/>
+		{#if !specialLuzReplaces}
+			<!-- Clip BASE. Se desmonta mientras el `_luz` está puesto: los dos
+			     son el mismo arte sobre el mismo lienzo, así que dibujarlos
+			     juntos solo sirve para que el de arriba tape al de abajo (era
+			     el bug del fajo KASH, que nunca se veía encendido). -->
+			<SpriteSheet
+				anchor={0.5}
+				zIndex={1}
+				x={specialOffsetX}
+				y={specialOffsetY}
+				key={special.key}
+				width={specialW}
+				height={specialH}
+				animationSpeed={SPECIAL_ANIM_SPEED}
+				loop
+				play
+			/>
+		{/if}
 	</Container>
 {:else}
 	<!-- Mismo `sortableChildren` que en la rama del especial y por el mismo

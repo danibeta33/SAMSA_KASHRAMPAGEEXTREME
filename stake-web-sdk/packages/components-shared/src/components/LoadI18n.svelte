@@ -31,12 +31,18 @@
 			const messages = loadMessages(stateUrlDerived.lang());
 			stateI18nDerived.init(stateUrlDerived.lang(), messages);
 		} catch (error) {
-			console.error("Loading fallback locale 'en' because of error", error);
+			// Gateados a DEV: consola de prod en CERO es requisito de approval.
+			// Un `?lang=` desconocido cae acá y el juego sigue andando en
+			// inglés — o sea que esto puede dispararse en una sesión sana, que
+			// es justo el caso donde el log es peor.
+			if (import.meta.env.DEV)
+				console.error("Loading fallback locale 'en' because of error", error);
 			try {
 				const messages = loadMessages('en');
 				stateI18nDerived.init('en', messages);
 			} catch (error) {
-				console.error("Loading fallback locale 'en' without any messages because of error", error);
+				if (import.meta.env.DEV)
+					console.error("Loading fallback locale 'en' without any messages because of error", error);
 				stateI18nDerived.init('en', {});
 			}
 		}

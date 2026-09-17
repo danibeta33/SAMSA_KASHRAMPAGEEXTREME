@@ -1,6 +1,7 @@
 packages/components-pixi/src/components/Amount.svelte
 packages/components-shared/src/components/Authenticate.svelte
 packages/components-shared/src/components/Button.svelte
+packages/components-shared/src/components/LoadI18n.svelte
 packages/components-shared/src/components/Popup.svelte
 packages/components-ui-html/src/components/BaseContent.svelte
 packages/components-ui-html/src/components/BaseScrollable.svelte
@@ -62,6 +63,7 @@ packages/components-ui-pixi/src/i18n/messagesMap/ru.ts
 packages/components-ui-pixi/src/i18n/messagesMap/tr.ts
 packages/components-ui-pixi/src/i18n/messagesMap/vi.ts
 packages/components-ui-pixi/src/i18n/messagesMap/zh.ts
+packages/pixi-svelte/src/lib/assetLoad.ts
 packages/pixi-svelte/src/lib/components/AnimatedSprite.svelte
 packages/pixi-svelte/src/lib/components/AssetsLoader.svelte
 packages/pixi-svelte/src/lib/components/InitialiseApplication.svelte
@@ -73,6 +75,7 @@ packages/state-shared/src/stateBet.svelte.ts
 packages/state-shared/src/stateI18n.svelte.ts
 packages/state-shared/src/stateModal.svelte.ts
 packages/state-shared/src/stateUrl.svelte.ts
+packages/utils-book/src/createPlayBookUtils.ts
 packages/utils-book/src/utils.ts
 packages/utils-shared/amount.ts
 packages/utils-shared/wait.ts
@@ -83,4 +86,5 @@ packages/utils-slots/src/types.ts
 packages/utils-xstate/src/createIntermediateMachineAutoBet.ts
 packages/utils-xstate/src/createIntermediateMachineBet.ts
 packages/utils-xstate/src/createIntermediateMachineResumeBet.ts
+packages/utils-xstate/src/createPrimaryMachines.ts
 pnpm-lock.yaml

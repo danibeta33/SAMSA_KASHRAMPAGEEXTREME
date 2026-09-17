@@ -1,0 +1,343 @@
+{"frames": {
+
+"Kash_Batea_00000.png":
+{
+	"frame": {"x":4005,"y":1866,"w":452,"h":928},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":315,"y":263,"w":452,"h":928},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00001.png":
+{
+	"frame": {"x":3887,"y":3673,"w":438,"h":928},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":312,"y":263,"w":438,"h":928},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00002.png":
+{
+	"frame": {"x":3887,"y":3228,"w":443,"h":928},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":311,"y":263,"w":443,"h":928},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00003.png":
+{
+	"frame": {"x":2976,"y":2938,"w":453,"h":929},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":307,"y":262,"w":453,"h":929},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00004.png":
+{
+	"frame": {"x":3431,"y":2938,"w":454,"h":928},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":306,"y":262,"w":454,"h":928},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00005.png":
+{
+	"frame": {"x":4379,"y":1,"w":456,"h":928},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":306,"y":262,"w":456,"h":928},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00006.png":
+{
+	"frame": {"x":4379,"y":931,"w":456,"h":928},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":306,"y":262,"w":456,"h":928},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00007.png":
+{
+	"frame": {"x":3762,"y":936,"w":456,"h":928},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":306,"y":262,"w":456,"h":928},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00008.png":
+{
+	"frame": {"x":3377,"y":3869,"w":456,"h":928},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":306,"y":262,"w":456,"h":928},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00009.png":
+{
+	"frame": {"x":3550,"y":1902,"w":453,"h":928},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":297,"y":262,"w":453,"h":928},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00010.png":
+{
+	"frame": {"x":2322,"y":1986,"w":455,"h":951},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":291,"y":239,"w":455,"h":951},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00011.png":
+{
+	"frame": {"x":1,"y":4508,"w":464,"h":1005},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":288,"y":186,"w":464,"h":1005},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00012.png":
+{
+	"frame": {"x":624,"y":2244,"w":455,"h":1056},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":302,"y":135,"w":455,"h":1056},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00013.png":
+{
+	"frame": {"x":622,"y":1153,"w":447,"h":1089},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":320,"y":102,"w":447,"h":1089},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00014.png":
+{
+	"frame": {"x":1,"y":3423,"w":478,"h":1083},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":336,"y":108,"w":478,"h":1083},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00015.png":
+{
+	"frame": {"x":481,"y":3423,"w":501,"h":1056},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":352,"y":135,"w":501,"h":1056},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00016.png":
+{
+	"frame": {"x":1071,"y":1153,"w":505,"h":1038},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":362,"y":153,"w":505,"h":1038},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00017.png":
+{
+	"frame": {"x":1202,"y":1,"w":545,"h":1032},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":367,"y":159,"w":545,"h":1032},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00018.png":
+{
+	"frame": {"x":984,"y":3302,"w":580,"h":1029},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":370,"y":162,"w":580,"h":1029},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00019.png":
+{
+	"frame": {"x":1008,"y":4333,"w":638,"h":1023},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":374,"y":168,"w":638,"h":1023},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00020.png":
+{
+	"frame": {"x":1081,"y":2193,"w":638,"h":1022},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":374,"y":168,"w":638,"h":1022},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00021.png":
+{
+	"frame": {"x":1566,"y":3217,"w":638,"h":1022},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":374,"y":168,"w":638,"h":1022},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00022.png":
+{
+	"frame": {"x":1578,"y":1035,"w":638,"h":1022},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":374,"y":168,"w":638,"h":1022},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00023.png":
+{
+	"frame": {"x":1749,"y":1,"w":638,"h":1022},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":374,"y":168,"w":638,"h":1022},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00024.png":
+{
+	"frame": {"x":1721,"y":2059,"w":599,"h":1012},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":367,"y":179,"w":599,"h":1012},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00025.png":
+{
+	"frame": {"x":2033,"y":4241,"w":738,"h":820},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":219,"y":370,"w":738,"h":820},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00026.png":
+{
+	"frame": {"x":3835,"y":4113,"w":786,"h":922},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":405,"y":270,"w":786,"h":922},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00027.png":
+{
+	"frame": {"x":1,"y":1161,"w":619,"h":1151},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":401,"y":40,"w":619,"h":1151},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00028.png":
+{
+	"frame": {"x":1,"y":2314,"w":621,"h":1107},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":357,"y":84,"w":621,"h":1107},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00029.png":
+{
+	"frame": {"x":2779,"y":1986,"w":769,"h":950},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":208,"y":241,"w":769,"h":950},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00030.png":
+{
+	"frame": {"x":2206,"y":3073,"w":768,"h":951},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":209,"y":240,"w":768,"h":951},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00031.png":
+{
+	"frame": {"x":1,"y":1,"w":578,"h":1158},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":399,"y":33,"w":578,"h":1158},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00032.png":
+{
+	"frame": {"x":581,"y":1,"w":619,"h":1150},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":401,"y":41,"w":619,"h":1150},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00033.png":
+{
+	"frame": {"x":2943,"y":1,"w":811,"h":957},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":402,"y":234,"w":811,"h":957},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00034.png":
+{
+	"frame": {"x":2218,"y":1025,"w":775,"h":959},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":402,"y":232,"w":775,"h":959},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00035.png":
+{
+	"frame": {"x":2389,"y":1,"w":552,"h":959},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":378,"y":231,"w":552,"h":959},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00036.png":
+{
+	"frame": {"x":2855,"y":4026,"w":520,"h":951},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":321,"y":239,"w":520,"h":951},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00037.png":
+{
+	"frame": {"x":2995,"y":960,"w":765,"h":940},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":250,"w":765,"h":940},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00038.png":
+{
+	"frame": {"x":3756,"y":1,"w":621,"h":933},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":140,"y":257,"w":621,"h":933},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00039.png":
+{
+	"frame": {"x":4005,"y":2320,"w":452,"h":928},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":314,"y":263,"w":452,"h":928},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Batea_00040.png":
+{
+	"frame": {"x":4005,"y":2774,"w":452,"h":928},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":314,"y":263,"w":452,"h":928},
+	"sourceSize": {"w":1250,"h":1230}
+}},
+"animations": {
+	"Kash_Batea": ["Kash_Batea_00000.png","Kash_Batea_00001.png","Kash_Batea_00002.png","Kash_Batea_00003.png","Kash_Batea_00004.png","Kash_Batea_00005.png","Kash_Batea_00006.png","Kash_Batea_00007.png","Kash_Batea_00008.png","Kash_Batea_00009.png","Kash_Batea_00010.png","Kash_Batea_00011.png","Kash_Batea_00012.png","Kash_Batea_00013.png","Kash_Batea_00014.png","Kash_Batea_00015.png","Kash_Batea_00016.png","Kash_Batea_00017.png","Kash_Batea_00018.png","Kash_Batea_00019.png","Kash_Batea_00020.png","Kash_Batea_00021.png","Kash_Batea_00022.png","Kash_Batea_00023.png","Kash_Batea_00024.png","Kash_Batea_00025.png","Kash_Batea_00026.png","Kash_Batea_00027.png","Kash_Batea_00028.png","Kash_Batea_00029.png","Kash_Batea_00030.png","Kash_Batea_00031.png","Kash_Batea_00032.png","Kash_Batea_00033.png","Kash_Batea_00034.png","Kash_Batea_00035.png","Kash_Batea_00036.png","Kash_Batea_00037.png","Kash_Batea_00038.png","Kash_Batea_00039.png","Kash_Batea_00040.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "anim_kash_swing.webp",
+	"format": "RGBA8888",
+	"size": {"w":4980,"h":4980},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:b723616a9457d9dae20c41f29fc08f1b:536babfb5d3e28d4f3df33e191b797a7:d8cba7ea77f0cafea9be60cdb7c93c89$"
+}
+}

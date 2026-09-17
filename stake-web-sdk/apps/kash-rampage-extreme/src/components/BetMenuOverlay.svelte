@@ -43,7 +43,7 @@
 		onclick={(e) => e.target === e.currentTarget && close()}
 	>
 		<div class="bm__panel">
-			<button class="bm__close" onclick={close} aria-label="Cerrar">
+			<button class="bm__close" onclick={close} aria-label="Close">
 				<img src="assets/buy/close.png" alt="" />
 			</button>
 			<h2 class="bm__title">BET AMOUNT</h2>

@@ -70,6 +70,54 @@ del SDK hacía**, no solo lo visible. Lo que se olvidó en Kash Smash y hubo que
   no cae solo a WebGL → canvas negro. Retry explícito con `preference: 'webgl'`. (Ya en
   `InitialiseApplication.svelte`.)
 
+## RGS / `rgs_url` y fuga de datos por stack trace (rechazo 16-09, punto 1)
+
+El reviewer del ACP **rompe el `rgs_url` a propósito** (puso literalmente
+`&rgs_url=sdasda:85:602`) y mira qué hace el juego. Pide dos cosas: que NO sea
+jugable, y que muestre solo un "Failed to fetch" sin detalle técnico.
+
+- **El stack trace de un `fetch` fallido contiene el `sessionID` y el `rgs_url`.**
+  No porque algo los loguee: el build inlinea todo el bundle en `index.html`
+  (`assetsInlineLimit: Infinity` + `bundleStrategy: 'inline'`), así que los frames
+  del stack se atribuyen a la URL del documento — y en el iframe del ACP esa URL
+  lleva los query params. Imprimir el error en pantalla = publicar la sesión.
+  **Regla: ningún objeto de error llega nunca a la UI.** `packages/rgs-fetcher`
+  normaliza todo fallo de red/parseo/timeout a `{ error, message: 'Failed to fetch' }`
+  — un objeto PLANO, sin `stack`. `ModalError` solo imprime un `userMessage` que
+  alguien marcó explícitamente como apto para el jugador; no tiene código para
+  imprimir otra cosa, ni siquiera detrás de un gate de DEV (un gate por entorno
+  se filtra al primer build con `mode=development`).
+
+- **"Not playable" ≠ "hay un modal encima".** El `Authenticate` del SDK ponía
+  `authenticated = true` aunque fallara, o sea que el juego entero se montaba
+  detrás del modal. Peor en KRE: la pantalla de carga (z-index 200) tapaba el
+  modal (z-index 180), así que el jugador veía LOADING → "CLICK TO SKIP" como si
+  todo estuviera bien. Y la `BottomBar` y los overlays se montan **fuera** de
+  `<Authenticate>` en `+layout.svelte`, así que el botón de SPIN quedaba vivo.
+  Fix: `stateAuth.status` (`state-shared`) como interruptor único — en `'failed'`
+  `<Authenticate>` renderiza `FatalError.svelte` **en lugar** del juego y el
+  bloque de overlays del layout queda fuera del render. No se monta nada.
+
+- **Validar el `rgs_url` ANTES de la red.** `new URL('https://sdasda:85:602')`
+  tira por el puerto inválido: sin chequeo previo ese throw sale de `fetch()`
+  como error nativo con stack.
+
+- **Timeout obligatorio** (20 s, `RGS_REQUEST_TIMEOUT_MS`). Un host que traga la
+  conexión dejaba el juego cargando para siempre — que tampoco es "mostrar el
+  mensaje de error".
+
+- **Un 200 con JSON cualquiera no es autenticarse.** Si la respuesta no trae
+  `balance.amount` y `config.betLevels`, se trata como fallo: apuntar el
+  `rgs_url` a otro servidor no puede dejar el juego "jugable" a medias.
+
+- **Los `console.*` gateados a mano no alcanzan.** No cubren las dependencias:
+  medido sobre el build real, `console.log("PixiJS ...")` seguía ahí. Ahora el
+  plugin `stake-strip-console-on-build` (`packages/config-vite`) los borra del
+  chunk final en `vite build` — dos pasadas de esbuild, porque `drop: ['console']`
+  no reconoce el `globalThis.console.log(...)` que usa pixi.js. `vite dev` queda
+  intacto. `tools/verify-build.mjs` (corre dentro de `pnpm build`) falla si
+  sobrevive alguno.
+
 ## xstate v5
 
 - Un error no manejado en un actor invocado **detiene el actor raíz** → el juego queda congelado fuera

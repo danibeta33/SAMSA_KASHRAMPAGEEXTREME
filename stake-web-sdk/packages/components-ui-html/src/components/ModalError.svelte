@@ -4,25 +4,37 @@
 
 	import BaseContent from './BaseContent.svelte';
 
-	// El error puede llegar como string, como Response-shape { error, message }
-	// o como objeto arbitrario del RGS ({ code, message }) — nunca imprimirlo
-	// crudo (termina en "[object Object]").
-	const describe = (error: unknown): string => {
-		if (error == null) return 'unknown error';
-		if (typeof error === 'string') return error;
-		// Un Error tiene message/stack NO enumerables → JSON.stringify da "{}".
-		// Extraerlos a mano para ver la causa real.
-		if (error instanceof Error) {
-			return `${error.name}: ${error.message}${error.stack ? '\n\n' + error.stack : ''}`;
-		}
-		const anyE = error as Record<string, unknown>;
-		if (typeof anyE.message === 'string') return anyE.message;
-		try {
-			// getOwnPropertyNames captura props no-enumerables (Error-like)
-			return JSON.stringify(error, Object.getOwnPropertyNames(error), 1);
-		} catch {
-			return String(error);
-		}
+	// ⚠ CERO INFO TÉCNICA — requisito de approval, sin excepciones ni gates.
+	//
+	// Feedback Stake 16-09, punto 1: con `rgs_url=sdasda:85:602` este modal
+	// mostraba el stack trace completo en un <pre> scrolleable, y ahí adentro
+	// iban el `sessionID` y el `rgs_url` de la sesión. El pedido textual fue
+	// "only an appropriate 'Failed to fetch' error message should be displayed,
+	// without any unnecessary technical details or code".
+	//
+	// De dónde salían los query params: el build inlinea el bundle entero en
+	// `index.html` (`assetsInlineLimit: Infinity` en config-vite, que es lo que
+	// produce el archivo único que espera el ACP). Con el código viviendo en el
+	// propio documento, los frames del stack se atribuyen a la URL del
+	// documento — que en el iframe del ACP lleva los parámetros.
+	//
+	// El primer parche escondió el <pre> detrás de `import.meta.env.DEV`. Ese
+	// bloque YA NO EXISTE: un gate por entorno sigue siendo un camino de código
+	// que imprime internals, y basta un build con mode=development para que
+	// vuelva a aparecer en producción. Para depurar está la consola de DEV
+	// (`rgs-fetcher` loguea ahí la causa real; en prod el build elimina todos
+	// los console.*). Este componente no tiene forma de imprimir un error.
+	//
+	// ALLOWLIST EXPLÍCITO, no heurístico: solo se muestra lo que alguien marcó
+	// como apto para el jugador poniendo `userMessage` en el objeto de error
+	// (ver ResumeBet.svelte). Un "¿este message parece seguro?" por regex falla
+	// en los dos sentidos — deja pasar un `message` crudo del RGS, y degrada en
+	// silencio un texto curado que use dos puntos o llaves.
+	const GENERIC = 'Failed to fetch. Please reload the game to keep playing.';
+
+	const userMessage = (error: unknown): string => {
+		const candidate = (error as { userMessage?: unknown } | null | undefined)?.userMessage;
+		return typeof candidate === 'string' && candidate.trim() ? candidate : GENERIC;
 	};
 </script>
 
@@ -32,10 +44,7 @@
 			{@const error = stateModal.modal?.error}
 			<div class="kash-error">
 				<h2 class="kash-error__title">SOMETHING WENT WRONG</h2>
-				<p class="kash-error__hint">Reload the game to keep playing.</p>
-				<div class="scrollY kash-error__detail">
-					<pre>{describe(error?.error && error?.message ? { error: error.error, message: error.message } : error)}</pre>
-				</div>
+				<p class="kash-error__hint">{userMessage(error)}</p>
 			</div>
 		</BaseContent>
 	</Popup>
@@ -72,24 +81,5 @@
 		opacity: 0.9;
 		font-size: 13px;
 		text-align: center;
-	}
-
-	.kash-error__detail {
-		max-height: 110px;
-		width: 100%;
-		border-radius: 10px;
-		border: 2px solid rgba(236, 72, 153, 0.55);
-		padding: 10px 14px;
-		box-sizing: border-box;
-
-		pre {
-			margin: 0;
-			color: var(--kash-lime);
-			font-size: 11px;
-			line-height: 1.5;
-			white-space: pre-wrap;
-			word-break: break-word;
-			font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-		}
 	}
 </style>

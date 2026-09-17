@@ -1,0 +1,335 @@
+{"frames": {
+
+"Kash_Bate2_00000.png":
+{
+	"frame": {"x":2058,"y":927,"w":446,"h":922},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":271,"y":127,"w":446,"h":922},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00001.png":
+{
+	"frame": {"x":2027,"y":1854,"w":450,"h":922},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":269,"y":127,"w":450,"h":922},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00002.png":
+{
+	"frame": {"x":1615,"y":2778,"w":453,"h":922},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":268,"y":127,"w":453,"h":922},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00003.png":
+{
+	"frame": {"x":1560,"y":1854,"w":465,"h":922},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":262,"y":127,"w":465,"h":922},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00004.png":
+{
+	"frame": {"x":1,"y":2884,"w":469,"h":931},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":260,"y":118,"w":469,"h":931},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00005.png":
+{
+	"frame": {"x":459,"y":968,"w":474,"h":945},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":255,"y":104,"w":474,"h":945},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00006.png":
+{
+	"frame": {"x":1,"y":1933,"w":479,"h":949},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":252,"y":100,"w":479,"h":949},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00007.png":
+{
+	"frame": {"x":1967,"y":1,"w":485,"h":924},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":250,"y":125,"w":485,"h":924},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00008.png":
+{
+	"frame": {"x":1054,"y":1862,"w":504,"h":925},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":249,"y":124,"w":504,"h":925},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00009.png":
+{
+	"frame": {"x":927,"y":3811,"w":553,"h":925},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":250,"y":124,"w":553,"h":925},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00010.png":
+{
+	"frame": {"x":1404,"y":1,"w":561,"h":925},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":250,"y":124,"w":561,"h":925},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00011.png":
+{
+	"frame": {"x":935,"y":935,"w":566,"h":925},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":250,"y":124,"w":566,"h":925},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00012.png":
+{
+	"frame": {"x":1045,"y":2842,"w":568,"h":925},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":250,"y":124,"w":568,"h":925},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00013.png":
+{
+	"frame": {"x":472,"y":2884,"w":571,"h":925},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":251,"y":124,"w":571,"h":925},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00014.png":
+{
+	"frame": {"x":482,"y":1915,"w":570,"h":925},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":252,"y":124,"w":570,"h":925},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00015.png":
+{
+	"frame": {"x":1503,"y":928,"w":553,"h":924},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":253,"y":125,"w":553,"h":924},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00016.png":
+{
+	"frame": {"x":1,"y":3817,"w":506,"h":924},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":254,"y":125,"w":506,"h":924},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00017.png":
+{
+	"frame": {"x":924,"y":1,"w":478,"h":932},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":116,"w":478,"h":932},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00018.png":
+{
+	"frame": {"x":1,"y":1,"w":467,"h":965},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":271,"y":83,"w":467,"h":965},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00019.png":
+{
+	"frame": {"x":1,"y":968,"w":456,"h":963},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":281,"y":84,"w":456,"h":963},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00020.png":
+{
+	"frame": {"x":470,"y":1,"w":452,"h":944},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":290,"y":103,"w":452,"h":944},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00021.png":
+{
+	"frame": {"x":1854,"y":3702,"w":464,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":283,"y":125,"w":464,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00022.png":
+{
+	"frame": {"x":2777,"y":3697,"w":463,"h":917},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":280,"y":129,"w":463,"h":917},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00023.png":
+{
+	"frame": {"x":2967,"y":3161,"w":446,"h":918},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":284,"y":129,"w":446,"h":918},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00024.png":
+{
+	"frame": {"x":3363,"y":2733,"w":426,"h":919},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":287,"y":129,"w":426,"h":919},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00025.png":
+{
+	"frame": {"x":3887,"y":3161,"w":425,"h":919},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":275,"y":129,"w":425,"h":919},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00026.png":
+{
+	"frame": {"x":3341,"y":1,"w":427,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":265,"y":128,"w":427,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00027.png":
+{
+	"frame": {"x":2952,"y":924,"w":431,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":258,"y":128,"w":431,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00028.png":
+{
+	"frame": {"x":2927,"y":1848,"w":434,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":256,"y":128,"w":434,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00029.png":
+{
+	"frame": {"x":2454,"y":1,"w":439,"h":922},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":258,"y":127,"w":439,"h":922},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00030.png":
+{
+	"frame": {"x":2522,"y":2774,"w":443,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":263,"y":128,"w":443,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00031.png":
+{
+	"frame": {"x":3363,"y":2284,"w":447,"h":920},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":268,"y":128,"w":447,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00032.png":
+{
+	"frame": {"x":3385,"y":1833,"w":449,"h":920},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":273,"y":128,"w":449,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00033.png":
+{
+	"frame": {"x":3770,"y":1,"w":452,"h":920},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":276,"y":128,"w":452,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00034.png":
+{
+	"frame": {"x":3385,"y":924,"w":453,"h":920},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":277,"y":128,"w":453,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00035.png":
+{
+	"frame": {"x":3385,"y":1379,"w":452,"h":920},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":277,"y":128,"w":452,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00036.png":
+{
+	"frame": {"x":2070,"y":2778,"w":450,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":275,"y":128,"w":450,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00037.png":
+{
+	"frame": {"x":2479,"y":1851,"w":446,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":274,"y":128,"w":446,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00038.png":
+{
+	"frame": {"x":2506,"y":925,"w":444,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":272,"y":128,"w":444,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Bate2_00039.png":
+{
+	"frame": {"x":2895,"y":1,"w":444,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":271,"y":128,"w":444,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+}},
+"animations": {
+	"Kash_Bate2": ["Kash_Bate2_00000.png","Kash_Bate2_00001.png","Kash_Bate2_00002.png","Kash_Bate2_00003.png","Kash_Bate2_00004.png","Kash_Bate2_00005.png","Kash_Bate2_00006.png","Kash_Bate2_00007.png","Kash_Bate2_00008.png","Kash_Bate2_00009.png","Kash_Bate2_00010.png","Kash_Bate2_00011.png","Kash_Bate2_00012.png","Kash_Bate2_00013.png","Kash_Bate2_00014.png","Kash_Bate2_00015.png","Kash_Bate2_00016.png","Kash_Bate2_00017.png","Kash_Bate2_00018.png","Kash_Bate2_00019.png","Kash_Bate2_00020.png","Kash_Bate2_00021.png","Kash_Bate2_00022.png","Kash_Bate2_00023.png","Kash_Bate2_00024.png","Kash_Bate2_00025.png","Kash_Bate2_00026.png","Kash_Bate2_00027.png","Kash_Bate2_00028.png","Kash_Bate2_00029.png","Kash_Bate2_00030.png","Kash_Bate2_00031.png","Kash_Bate2_00032.png","Kash_Bate2_00033.png","Kash_Bate2_00034.png","Kash_Bate2_00035.png","Kash_Bate2_00036.png","Kash_Bate2_00037.png","Kash_Bate2_00038.png","Kash_Bate2_00039.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "anim_kash_idle_bat2.webp",
+	"format": "RGBA8888",
+	"size": {"w":4365,"h":4365},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:13fb9cb1f3766585f38b833f1b115a85:bba08b856077c84ccf76c0f46384e906:1548933933dd0bae437a68bc4e13950b$"
+}
+}

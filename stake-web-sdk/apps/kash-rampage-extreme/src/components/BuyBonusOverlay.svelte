@@ -16,6 +16,7 @@
 
 	import { getContext } from '../game/context';
 	import { money } from '../game/money';
+	import { betModeByKey, type BetModeKey } from '../game/betModes';
 	import { createCurtain } from '../game/curtain.svelte';
 
 	const context = getContext();
@@ -29,13 +30,19 @@
 	const curtain = createCurtain(() => stateModal.modal?.name === 'buyBonusKash');
 
 
-	// `accent` = color del costo según el acento de cada card (Figma).
-	type Card = { mode: string; img: string; mult: number; accent: string };
-	const CARDS: Card[] = [
-		{ mode: 'VAULT_CRACK', img: 'assets/buy/card_vault.png', mult: 100, accent: '#f5333f' },
-		{ mode: 'SMASH_MODE', img: 'assets/buy/card_smash.png', mult: 250, accent: '#f6ef1b' },
-		{ mode: 'RAGE_MODE', img: 'assets/buy/card_rage.png', mult: 500, accent: '#d32b25' },
-	];
+	// `accent` = color del costo según el acento de cada card (Figma). Solo el
+	// arte (imagen + acento) vive acá: el multiplicador sale de
+	// `game/betModes.ts`, la misma fuente que alimenta las tablas de reglas y
+	// el `betModeMeta` — así el costo de la card no puede divergir del
+	// publicado en las reglas.
+	type Card = { mode: BetModeKey; img: string; mult: number; accent: string };
+	const CARDS: Card[] = (
+		[
+			{ mode: 'VAULT_CRACK', img: 'assets/buy/card_vault.png', accent: '#f5333f' },
+			{ mode: 'SMASH_MODE', img: 'assets/buy/card_smash.png', accent: '#f6ef1b' },
+			{ mode: 'RAGE_MODE', img: 'assets/buy/card_rage.png', accent: '#d32b25' },
+		] as const
+	).map((card) => ({ ...card, mult: betModeByKey[card.mode].costMultiplier }));
 
 	const close = () => (stateModal.modal = null);
 
@@ -55,7 +62,7 @@
 	     El panel queda transparente — la pantalla ES el diseño, sin marco. -->
 	<div class="buy" class:buy--out={curtain.closing} style="background-image: url('assets/buy/bg.jpg')">
 		<div class="buy__panel">
-			<button class="buy__close" onclick={close} aria-label="Cerrar">
+			<button class="buy__close" onclick={close} aria-label="Close">
 				<img src="assets/buy/close.png" alt="" />
 			</button>
 			{#if isSocial}

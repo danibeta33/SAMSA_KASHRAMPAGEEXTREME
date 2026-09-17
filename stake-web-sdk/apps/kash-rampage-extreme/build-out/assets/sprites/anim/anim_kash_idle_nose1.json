@@ -1,0 +1,327 @@
+{"frames": {
+
+"Kash_Mocos_00000.png":
+{
+	"frame": {"x":1890,"y":2901,"w":447,"h":920},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":270,"y":129,"w":447,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00001.png":
+{
+	"frame": {"x":2339,"y":2863,"w":447,"h":920},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":270,"y":129,"w":447,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00002.png":
+{
+	"frame": {"x":2788,"y":2826,"w":447,"h":920},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":270,"y":129,"w":447,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00003.png":
+{
+	"frame": {"x":3142,"y":483,"w":447,"h":920},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":270,"y":129,"w":447,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00004.png":
+{
+	"frame": {"x":2220,"y":493,"w":447,"h":920},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":270,"y":129,"w":447,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00005.png":
+{
+	"frame": {"x":2950,"y":942,"w":447,"h":920},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":270,"y":129,"w":447,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00006.png":
+{
+	"frame": {"x":1942,"y":1941,"w":451,"h":920},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":267,"y":129,"w":451,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00007.png":
+{
+	"frame": {"x":2395,"y":1904,"w":450,"h":920},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":263,"y":129,"w":450,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00008.png":
+{
+	"frame": {"x":3311,"y":1864,"w":450,"h":919},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":259,"y":130,"w":450,"h":919},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00009.png":
+{
+	"frame": {"x":3862,"y":932,"w":451,"h":919},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":258,"y":130,"w":451,"h":919},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00010.png":
+{
+	"frame": {"x":3701,"y":2785,"w":452,"h":918},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":258,"y":131,"w":452,"h":918},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00011.png":
+{
+	"frame": {"x":3237,"y":3705,"w":455,"h":917},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":259,"y":132,"w":455,"h":917},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00012.png":
+{
+	"frame": {"x":3399,"y":932,"w":461,"h":916},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":259,"y":133,"w":461,"h":916},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00013.png":
+{
+	"frame": {"x":2847,"y":1864,"w":462,"h":915},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":259,"y":134,"w":462,"h":915},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00014.png":
+{
+	"frame": {"x":3763,"y":1853,"w":462,"h":915},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":259,"y":134,"w":462,"h":915},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00015.png":
+{
+	"frame": {"x":3237,"y":2785,"w":462,"h":915},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":259,"y":134,"w":462,"h":915},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00016.png":
+{
+	"frame": {"x":1847,"y":3860,"w":462,"h":915},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":259,"y":134,"w":462,"h":915},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00017.png":
+{
+	"frame": {"x":2486,"y":942,"w":462,"h":917},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":259,"y":132,"w":462,"h":917},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00018.png":
+{
+	"frame": {"x":497,"y":2860,"w":468,"h":920},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":260,"y":129,"w":468,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00019.png":
+{
+	"frame": {"x":967,"y":3381,"w":477,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":128,"w":477,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00020.png":
+{
+	"frame": {"x":1263,"y":501,"w":478,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":128,"w":478,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00021.png":
+{
+	"frame": {"x":539,"y":1882,"w":478,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":128,"w":478,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00022.png":
+{
+	"frame": {"x":1,"y":3782,"w":478,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":128,"w":478,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00023.png":
+{
+	"frame": {"x":633,"y":958,"w":478,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":128,"w":478,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00024.png":
+{
+	"frame": {"x":1113,"y":981,"w":478,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":128,"w":478,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00025.png":
+{
+	"frame": {"x":1113,"y":1461,"w":478,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":128,"w":478,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00026.png":
+{
+	"frame": {"x":3142,"y":1,"w":480,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":128,"w":480,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00027.png":
+{
+	"frame": {"x":1019,"y":1941,"w":478,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":128,"w":478,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00028.png":
+{
+	"frame": {"x":1019,"y":2421,"w":478,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":128,"w":478,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00029.png":
+{
+	"frame": {"x":967,"y":2901,"w":478,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":261,"y":128,"w":478,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00030.png":
+{
+	"frame": {"x":660,"y":1,"w":601,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":252,"y":128,"w":601,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00031.png":
+{
+	"frame": {"x":1,"y":958,"w":630,"h":922},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":242,"y":127,"w":630,"h":922},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00032.png":
+{
+	"frame": {"x":1263,"y":1,"w":498,"h":955},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":237,"y":94,"w":498,"h":955},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00033.png":
+{
+	"frame": {"x":1,"y":1882,"w":536,"h":976},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":201,"y":73,"w":536,"h":976},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00034.png":
+{
+	"frame": {"x":1,"y":1,"w":657,"h":955},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":83,"y":94,"w":657,"h":955},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00035.png":
+{
+	"frame": {"x":1,"y":2860,"w":494,"h":920},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":253,"y":129,"w":494,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00036.png":
+{
+	"frame": {"x":2220,"y":1,"w":490,"h":920},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":264,"y":129,"w":490,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00037.png":
+{
+	"frame": {"x":924,"y":3860,"w":467,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":269,"y":128,"w":467,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Mocos_00038.png":
+{
+	"frame": {"x":2036,"y":981,"w":448,"h":921},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":270,"y":128,"w":448,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+}},
+"animations": {
+	"Kash_Mocos": ["Kash_Mocos_00000.png","Kash_Mocos_00001.png","Kash_Mocos_00002.png","Kash_Mocos_00003.png","Kash_Mocos_00004.png","Kash_Mocos_00005.png","Kash_Mocos_00006.png","Kash_Mocos_00007.png","Kash_Mocos_00008.png","Kash_Mocos_00009.png","Kash_Mocos_00010.png","Kash_Mocos_00011.png","Kash_Mocos_00012.png","Kash_Mocos_00013.png","Kash_Mocos_00014.png","Kash_Mocos_00015.png","Kash_Mocos_00016.png","Kash_Mocos_00017.png","Kash_Mocos_00018.png","Kash_Mocos_00019.png","Kash_Mocos_00020.png","Kash_Mocos_00021.png","Kash_Mocos_00022.png","Kash_Mocos_00023.png","Kash_Mocos_00024.png","Kash_Mocos_00025.png","Kash_Mocos_00026.png","Kash_Mocos_00027.png","Kash_Mocos_00028.png","Kash_Mocos_00029.png","Kash_Mocos_00030.png","Kash_Mocos_00031.png","Kash_Mocos_00032.png","Kash_Mocos_00033.png","Kash_Mocos_00034.png","Kash_Mocos_00035.png","Kash_Mocos_00036.png","Kash_Mocos_00037.png","Kash_Mocos_00038.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "anim_kash_idle_nose1.webp",
+	"format": "RGBA8888",
+	"size": {"w":4328,"h":4328},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:4d6c44b03a94b2597964701e8627356e:09200f4d369c4ab4329e836011fec956:9591780c57da790e6312c47b5ed21018$"
+}
+}

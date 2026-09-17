@@ -13,9 +13,11 @@
 //   2. el `Swipe` del telón — el efecto del momento en que la pantalla de
 //      carga se va hacia abajo y aparece el board.
 //
-// Los dos respetan el mezclador del juego: la cama va por el bus **Music**
-// (`volumeMusic`) y el swipe por **SFX** (`volumeSoundEffect`), igual que si
-// hubieran salido de `Sound.svelte`.
+// Los dos respetan el mezclador del juego y los dos van por el bus **SFX**
+// (`volumeSoundEffect`), igual que si hubieran salido de `Sound.svelte`.
+// La cama vivió en **Music** hasta el 15-09; dirección la movió a SFX para
+// dejar la perilla MUSIC mandando SOLO sobre las pistas de `Sound.svelte`
+// (base ↔ free spins ↔ rage) y que bajarla no se lleve puesto el ambiente.
 //
 // Es un SINGLETON de módulo y no un componente porque tiene que sobrevivir al
 // montaje/desmontaje de la pantalla de carga: el overlay se puede volver a
@@ -35,7 +37,17 @@ import {
 let bed: HTMLAudioElement | undefined;
 const uiCache = new Map<SoundName, HTMLAudioElement>();
 
-const ambientVolume = () => AMBIENT_BASE_VOLUME * stateSoundDerived.volumeMusic();
+const ambientVolume = () => AMBIENT_BASE_VOLUME * stateSoundDerived.volumeSoundEffect();
+
+// ── La cama cuelga del bus SFX, no solo del MASTER ─────────────────────────
+// `volumeSoundEffect()` ya multiplica master × sfx, así que el VOLUMEN sale de
+// las dos perillas. Falta el APAGADO: sin esto el elemento solo se pausa con el
+// master en 0, y con SFX en OFF (o en 0) queda corriendo en silencio — o sea
+// sonando de nuevo en cuanto el `pause`/`visibilitychange` de más abajo lo
+// levanta. Esta guarda es la que hace que la categoría SFX del mezclador
+// (`SettingsOverlay`) mande sobre la cama.
+const ambientAudible = () =>
+	stateSound.volumeValueMaster > 0 && stateSound.volumeValueSoundEffect > 0;
 
 // ── Autoplay: el arranque real puede caer en el primer gesto ────────────────
 // En el ACP el juego vive en un iframe y el jugador ya interactuó con el
@@ -72,7 +84,7 @@ export const startAmbientMusic = () => {
 	bed = audio;
 
 	const resume = () => {
-		if (stateSound.volumeValueMaster > 0) void audio.play().catch(() => {});
+		if (ambientAudible()) void audio.play().catch(() => {});
 	};
 	void audio.play().catch(() => armGestureRetry(resume));
 
@@ -81,14 +93,36 @@ export const startAmbientMusic = () => {
 	// efectos. Nunca se destruye: la cama dura lo que dura la sesión.
 	$effect.root(() => {
 		$effect(() => {
-			const master = stateSoundDerived.volumeMaster();
+			// Leer las dos perillas ACÁ (no dentro de un helper que el efecto no
+			// llame en todos los caminos) es lo que las deja como dependencias
+			// del efecto: mover MASTER **o** SFX re-corre este bloque.
+			const audible = ambientAudible();
 			audio.volume = ambientVolume();
-			if (master === 0) {
+			if (!audible) {
 				if (!audio.paused) audio.pause();
 			} else if (audio.paused) {
 				void audio.play().catch(() => {});
 			}
 		});
+	});
+
+	// ── La cama NO se puede quedar callada ──────────────────────────────────
+	// El efecto de arriba solo corre cuando se MUEVE el mezclador, así que si el
+	// browser pausa el elemento por su cuenta —pestaña al fondo en mobile, una
+	// llamada entrante, el sistema robándole el foco de audio— la cama queda
+	// muerta para el resto de la sesión y la música de fondo del juego pasa a
+	// sonar sola. Esta guarda la vuelve a levantar: cualquier `pause` que NO
+	// haya pedido el mezclador se revierte, y al volver a la pestaña se
+	// reintenta por las dudas.
+	// (el pause del mezclador —master o SFX en 0— es el único legítimo, y por
+	// eso las dos guardas preguntan por `ambientAudible()` y no solo por el
+	// master: si no, apagar SFX pausaba y este listener la volvía a prender.)
+	audio.addEventListener('pause', () => {
+		if (ambientAudible()) void audio.play().catch(() => {});
+	});
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState !== 'visible') return;
+		if (ambientAudible() && audio.paused) void audio.play().catch(() => {});
 	});
 
 	// El swipe del telón tiene que sonar EN el click, no medio segundo después:

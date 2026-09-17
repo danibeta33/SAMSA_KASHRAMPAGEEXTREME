@@ -31,7 +31,7 @@
 {#if curtain.visible}
 	<div class="st" class:st--out={curtain.closing}>
 		<div class="st__panel">
-			<button class="st__close" onclick={close} aria-label="Cerrar">
+			<button class="st__close" onclick={close} aria-label="Close">
 				<img src="assets/buy/close.png" alt="" />
 			</button>
 			<h2 class="st__title">SOUND</h2>

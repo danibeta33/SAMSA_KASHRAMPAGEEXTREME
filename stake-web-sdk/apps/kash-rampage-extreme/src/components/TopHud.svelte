@@ -30,6 +30,7 @@
 	import Contenedor1, { CONTENEDOR1_ASPECT } from './Contenedor1.svelte';
 	import { getContext } from '../game/context';
 	import { money, moneyWinFromBookAmount } from '../game/money';
+	import { socialLabel } from '../game/social';
 	import { uiScaleFor } from '../game/hudLayout';
 	import { stateTweak } from '../game/stateTweak.svelte';
 
@@ -65,12 +66,22 @@
 
 	// Se arma como lista para que el layout no dependa de cuántos items haya
 	// (en replay BALANCE se reemplaza por BET, no se agrega uno más).
+	//
+	// `socialLabel` es OBLIGATORIO acá: estos labels los dibuja `Contenedor1`
+	// con un <Text> de Pixi, o sea WebGL — el MutationObserver de social.ts
+	// recorre text nodes del DOM y nunca los ve. El reviewer encontró
+	// exactamente esto ("BET GC 1.00" en el panel derecho del replay, feedback
+	// 16-09 punto 6). En social BET→PLAY; los otros tres pasan sin cambio.
 	const items = $derived([
 		isReplay
-			? { key: 'bet', label: 'BET', value: money(stateBet.wageredBetAmount) }
-			: { key: 'balance', label: 'BALANCE', value: money(stateBet.balanceAmount) },
-		{ key: 'lastwin', label: 'LAST WIN', value: moneyWinFromBookAmount(lastWinBookAmount) },
-		{ key: 'tumble', label: 'TUMBLE', value: `X${globalMult}` },
+			? { key: 'bet', label: socialLabel('BET'), value: money(stateBet.wageredBetAmount) }
+			: { key: 'balance', label: socialLabel('BALANCE'), value: money(stateBet.balanceAmount) },
+		{
+			key: 'lastwin',
+			label: socialLabel('LAST WIN'),
+			value: moneyWinFromBookAmount(lastWinBookAmount),
+		},
+		{ key: 'tumble', label: socialLabel('TUMBLE'), value: `X${globalMult}` },
 	]);
 
 	// AUTO LAYOUT: el toggle `hudVertical` decide si el paso se aplica en Y

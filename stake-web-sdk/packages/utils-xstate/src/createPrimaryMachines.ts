@@ -25,16 +25,20 @@ const handleRequestBet = async ({ onError }: { onError: () => void }) => {
 
 			return data;
 		} else {
-			throw {
-				error: 'Empty state in data.round',
-				message: JSON.stringify({ data }),
-			};
+			// El `message` NO lleva el dump de la respuesta: este objeto termina
+			// en `stateModal.modal.error` y de ahí a un modal que ve el jugador.
+			// Volcar `data` ahí era la misma clase de fuga que el stack trace
+			// que marcó el reviewer (feedback Stake 16-09, punto 1). Para
+			// debug, el dump va a la consola de DEV.
+			if (import.meta.env.DEV) console.debug('empty round state', { data });
+			throw { error: 'EMPTY_ROUND_STATE', message: 'Empty state in data.round' };
 		}
 	} catch (error) {
 		onError();
 		stateBet.autoSpinsCounter = 0;
 		stateModal.modal = { name: 'error', error };
-		console.error(error);
+		// Gateado a DEV: consola limpia en prod es requisito de approval.
+		if (import.meta.env.DEV) console.error(error);
 		throw error;
 	}
 };
@@ -55,13 +59,14 @@ const handleRequestEndRound = async () => {
 		if (data?.balance?.amount !== undefined) {
 			return data;
 		} else {
-			throw {
-				error: 'Empty amount in data.balance',
-				message: JSON.stringify({ data }),
-			};
+			// Mismo criterio que handleRequestBet: sin dump de `data` en el
+			// objeto lanzado (este no abre modal, pero el shape se comparte).
+			if (import.meta.env.DEV) console.debug('empty balance amount', { data });
+			throw { error: 'EMPTY_BALANCE_AMOUNT', message: 'Empty amount in data.balance' };
 		}
 	} catch (error) {
-		console.error(error);
+		// Gateado a DEV: consola limpia en prod es requisito de approval.
+		if (import.meta.env.DEV) console.error(error);
 	}
 };
 

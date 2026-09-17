@@ -14,9 +14,9 @@ const HTML_ASSETS = [
 	'assets/buy/card_smash.png',
 	'assets/buy/card_rage.png',
 	'assets/buy/close.png',
-	// fondos compartidos por buy/autospin (el loading ya los muestra, pero
-	// así quedan garantizados en cache aunque el loading cambie)
-	'assets/loading/bg_outer.jpg',
+	// fondo de la pantalla de carga (único desde el 16-09: `bg_outer` se
+	// eliminó junto con el panel recortado). Se deja acá para garantizarlo en
+	// cache aunque el loading cambie.
 	'assets/loading/bg_inner.jpg',
 	// bottom HUD
 	'assets/ui/icon_menu.png',

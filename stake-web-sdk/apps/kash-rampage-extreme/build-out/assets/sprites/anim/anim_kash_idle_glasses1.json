@@ -1,0 +1,199 @@
+{"frames": {
+
+"Kash_Gafas_00000.png":
+{
+	"frame": {"x":1040,"y":921,"w":447,"h":919},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":431,"y":187,"w":447,"h":919},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00001.png":
+{
+	"frame": {"x":1040,"y":921,"w":447,"h":919},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":431,"y":187,"w":447,"h":919},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00002.png":
+{
+	"frame": {"x":1036,"y":2290,"w":496,"h":919},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":429,"y":189,"w":496,"h":919},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00003.png":
+{
+	"frame": {"x":1,"y":923,"w":516,"h":919},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":428,"y":189,"w":516,"h":919},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00004.png":
+{
+	"frame": {"x":1040,"y":1,"w":518,"h":918},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":428,"y":190,"w":518,"h":918},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00005.png":
+{
+	"frame": {"x":1,"y":2764,"w":517,"h":917},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":428,"y":191,"w":517,"h":917},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00006.png":
+{
+	"frame": {"x":1840,"y":2808,"w":517,"h":917},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":427,"y":191,"w":517,"h":917},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00007.png":
+{
+	"frame": {"x":1957,"y":2290,"w":516,"h":917},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":428,"y":191,"w":516,"h":917},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00008.png":
+{
+	"frame": {"x":2876,"y":2290,"w":516,"h":917},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":428,"y":191,"w":516,"h":917},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00009.png":
+{
+	"frame": {"x":1560,"y":1,"w":517,"h":918},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":427,"y":190,"w":517,"h":918},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00010.png":
+{
+	"frame": {"x":2079,"y":1,"w":517,"h":918},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":427,"y":190,"w":517,"h":918},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00011.png":
+{
+	"frame": {"x":2598,"y":1,"w":517,"h":918},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":427,"y":190,"w":517,"h":918},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00012.png":
+{
+	"frame": {"x":1036,"y":1370,"w":517,"h":918},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":427,"y":190,"w":517,"h":918},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00013.png":
+{
+	"frame": {"x":1555,"y":1370,"w":517,"h":918},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":427,"y":190,"w":517,"h":918},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00014.png":
+{
+	"frame": {"x":1,"y":1844,"w":516,"h":918},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":428,"y":190,"w":516,"h":918},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00015.png":
+{
+	"frame": {"x":2074,"y":1370,"w":516,"h":918},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":428,"y":190,"w":516,"h":918},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00016.png":
+{
+	"frame": {"x":2592,"y":1370,"w":516,"h":918},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":428,"y":190,"w":516,"h":918},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00017.png":
+{
+	"frame": {"x":519,"y":1844,"w":515,"h":918},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":428,"y":190,"w":515,"h":918},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00018.png":
+{
+	"frame": {"x":920,"y":2788,"w":515,"h":918},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":428,"y":190,"w":515,"h":918},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00019.png":
+{
+	"frame": {"x":520,"y":1,"w":518,"h":919},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":428,"y":189,"w":518,"h":919},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00020.png":
+{
+	"frame": {"x":1,"y":1,"w":517,"h":920},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":429,"y":188,"w":517,"h":920},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00021.png":
+{
+	"frame": {"x":519,"y":923,"w":475,"h":919},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":431,"y":187,"w":475,"h":919},
+	"sourceSize": {"w":1250,"h":1230}
+},
+"Kash_Gafas_00022.png":
+{
+	"frame": {"x":1961,"y":921,"w":447,"h":919},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":431,"y":187,"w":447,"h":919},
+	"sourceSize": {"w":1250,"h":1230}
+}},
+"animations": {
+	"Kash_Gafas": ["Kash_Gafas_00000.png","Kash_Gafas_00001.png","Kash_Gafas_00002.png","Kash_Gafas_00003.png","Kash_Gafas_00004.png","Kash_Gafas_00005.png","Kash_Gafas_00006.png","Kash_Gafas_00007.png","Kash_Gafas_00008.png","Kash_Gafas_00009.png","Kash_Gafas_00010.png","Kash_Gafas_00011.png","Kash_Gafas_00012.png","Kash_Gafas_00013.png","Kash_Gafas_00014.png","Kash_Gafas_00015.png","Kash_Gafas_00016.png","Kash_Gafas_00017.png","Kash_Gafas_00018.png","Kash_Gafas_00019.png","Kash_Gafas_00020.png","Kash_Gafas_00021.png","Kash_Gafas_00022.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "anim_kash_idle_glasses1.webp",
+	"format": "RGBA8888",
+	"size": {"w":3393,"h":3393},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:148e27570da5786e518f4a0b4b2de022:bf10639596546bdc44db4879f0c2c64b:369d92662f6dcd310d6bdb2e9b9a613d$"
+}
+}

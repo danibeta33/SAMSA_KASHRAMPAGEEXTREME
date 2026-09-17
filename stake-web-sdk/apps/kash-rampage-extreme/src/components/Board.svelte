@@ -75,12 +75,10 @@
 						if (!reelSymbol) return undefined;
 						return getSymbolInfo({ rawSymbol: reelSymbol.rawSymbol, state: 'win' });
 					},
-					// CADENA del marco (drop 15-09): un disparo por símbolo, en el
-					// tick en que arranca su enmarcado. El stagger de la cascada es
-					// el que le da el ritmo — en clusters grandes se comprime hasta
-					// ~110 ms y la seguidilla se lee como una cadena tensándose.
-					onSymbolLit: () =>
-						context.eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_marco_chain' }),
+					// La CADENA del marco la emite la propia cascada, un eslabón
+					// por símbolo y en el mismo turno en que le enciende el marco
+					// (ver `playWinFlash`). El stagger fijo de 110 ms es, además,
+					// el que separa un eslabón del siguiente.
 				}),
 				waitForTimeout(WIN_HIGHLIGHT_FLOOR_MS),
 			]);

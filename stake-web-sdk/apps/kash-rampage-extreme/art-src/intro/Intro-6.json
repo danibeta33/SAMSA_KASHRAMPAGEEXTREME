@@ -1,192 +1,72 @@
 {"frames": {
 
-"Episode 16_00009.png":
+"Episode 16_00043.png":
 {
-	"frame": {"x":5242,"y":6841,"w":1895,"h":914},
+	"frame": {"x":1,"y":1,"w":1708,"h":840},
 	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":14,"y":42,"w":1895,"h":914},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00028.png":
-{
-	"frame": {"x":1,"y":6680,"w":1718,"h":854},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":106,"y":49,"w":1718,"h":854},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00029.png":
-{
-	"frame": {"x":1721,"y":6680,"w":1717,"h":854},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":107,"y":49,"w":1717,"h":854},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00035.png":
-{
-	"frame": {"x":6841,"y":1,"w":1708,"h":842},
-	"rotated": true,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":842},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00044.png":
-{
-	"frame": {"x":6841,"y":1711,"w":1708,"h":840},
-	"rotated": true,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":840},
 	"sourceSize": {"w":1920,"h":1080}
 },
-"Episode 16_00053.png":
+"Episode 16_00044.png":
 {
-	"frame": {"x":6841,"y":3421,"w":1708,"h":839},
-	"rotated": true,
+	"frame": {"x":1711,"y":1,"w":1708,"h":840},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":840},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00045.png":
+{
+	"frame": {"x":3421,"y":1,"w":1708,"h":839},
+	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":839},
 	"sourceSize": {"w":1920,"h":1080}
 },
-"Episode 16_00065.png":
+"Episode 16_00046.png":
 {
-	"frame": {"x":6841,"y":5131,"w":1708,"h":838},
+	"frame": {"x":5131,"y":1,"w":1708,"h":839},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":839},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00047.png":
+{
+	"frame": {"x":3421,"y":842,"w":1708,"h":839},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":839},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00048.png":
+{
+	"frame": {"x":5131,"y":842,"w":1708,"h":839},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":839},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00049.png":
+{
+	"frame": {"x":1,"y":843,"w":1708,"h":839},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":839},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00198.png":
+{
+	"frame": {"x":6841,"y":1,"w":1708,"h":832},
 	"rotated": true,
 	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":838},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00072.png":
-{
-	"frame": {"x":1,"y":5841,"w":1708,"h":837},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":837},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00073.png":
-{
-	"frame": {"x":1711,"y":5841,"w":1708,"h":837},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":837},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00074.png":
-{
-	"frame": {"x":3421,"y":5841,"w":1708,"h":837},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":837},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00075.png":
-{
-	"frame": {"x":5131,"y":5841,"w":1708,"h":837},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":837},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00110.png":
-{
-	"frame": {"x":1,"y":5005,"w":1708,"h":834},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":834},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00111.png":
-{
-	"frame": {"x":1711,"y":5005,"w":1708,"h":834},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":834},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00112.png":
-{
-	"frame": {"x":3421,"y":5005,"w":1708,"h":834},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":834},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00113.png":
-{
-	"frame": {"x":5131,"y":5005,"w":1708,"h":834},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":834},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00139.png":
-{
-	"frame": {"x":1,"y":1,"w":1708,"h":832},
-	"rotated": false,
-	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
 	"sourceSize": {"w":1920,"h":1080}
 },
-"Episode 16_00140.png":
+"Episode 16_00199.png":
 {
-	"frame": {"x":1711,"y":1,"w":1708,"h":832},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00141.png":
-{
-	"frame": {"x":3421,"y":1,"w":1708,"h":832},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00142.png":
-{
-	"frame": {"x":5131,"y":1,"w":1708,"h":832},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00175.png":
-{
-	"frame": {"x":1,"y":835,"w":1708,"h":832},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00176.png":
-{
-	"frame": {"x":1711,"y":835,"w":1708,"h":832},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00177.png":
-{
-	"frame": {"x":3421,"y":835,"w":1708,"h":832},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00178.png":
-{
-	"frame": {"x":5131,"y":835,"w":1708,"h":832},
-	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
-	"sourceSize": {"w":1920,"h":1080}
-},
-"Episode 16_00211.png":
-{
-	"frame": {"x":1,"y":1669,"w":1708,"h":832},
+	"frame": {"x":1711,"y":843,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
@@ -194,7 +74,7 @@
 },
 "Episode 16_00212.png":
 {
-	"frame": {"x":1711,"y":1669,"w":1708,"h":832},
+	"frame": {"x":1711,"y":1677,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
@@ -202,7 +82,7 @@
 },
 "Episode 16_00213.png":
 {
-	"frame": {"x":3421,"y":1669,"w":1708,"h":832},
+	"frame": {"x":1,"y":1684,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
@@ -210,15 +90,55 @@
 },
 "Episode 16_00214.png":
 {
-	"frame": {"x":5131,"y":1669,"w":1708,"h":832},
+	"frame": {"x":3421,"y":1683,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
 	"sourceSize": {"w":1920,"h":1080}
 },
-"Episode 16_00247.png":
+"Episode 16_00215.png":
 {
-	"frame": {"x":1,"y":2503,"w":1708,"h":832},
+	"frame": {"x":1711,"y":2511,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00229.png":
+{
+	"frame": {"x":1,"y":2518,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00230.png":
+{
+	"frame": {"x":5131,"y":1683,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00231.png":
+{
+	"frame": {"x":6841,"y":1711,"w":1708,"h":832},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00232.png":
+{
+	"frame": {"x":3421,"y":2517,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00233.png":
+{
+	"frame": {"x":1711,"y":3345,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
@@ -226,7 +146,7 @@
 },
 "Episode 16_00248.png":
 {
-	"frame": {"x":1711,"y":2503,"w":1708,"h":832},
+	"frame": {"x":1,"y":3352,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
@@ -234,7 +154,7 @@
 },
 "Episode 16_00249.png":
 {
-	"frame": {"x":3421,"y":2503,"w":1708,"h":832},
+	"frame": {"x":5131,"y":2517,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
@@ -242,15 +162,55 @@
 },
 "Episode 16_00250.png":
 {
-	"frame": {"x":5131,"y":2503,"w":1708,"h":832},
+	"frame": {"x":3421,"y":3351,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
 	"sourceSize": {"w":1920,"h":1080}
 },
-"Episode 16_00283.png":
+"Episode 16_00251.png":
 {
-	"frame": {"x":1,"y":3337,"w":1708,"h":832},
+	"frame": {"x":1711,"y":4179,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00265.png":
+{
+	"frame": {"x":1,"y":4186,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00266.png":
+{
+	"frame": {"x":5131,"y":3351,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00267.png":
+{
+	"frame": {"x":6841,"y":3421,"w":1708,"h":832},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00268.png":
+{
+	"frame": {"x":1,"y":5131,"w":1708,"h":832},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00269.png":
+{
+	"frame": {"x":1,"y":6841,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
@@ -258,31 +218,71 @@
 },
 "Episode 16_00284.png":
 {
-	"frame": {"x":1711,"y":3337,"w":1708,"h":832},
-	"rotated": false,
+	"frame": {"x":835,"y":5131,"w":1708,"h":832},
+	"rotated": true,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
 	"sourceSize": {"w":1920,"h":1080}
 },
 "Episode 16_00285.png":
 {
-	"frame": {"x":3421,"y":3337,"w":1708,"h":832},
-	"rotated": false,
+	"frame": {"x":1669,"y":5131,"w":1708,"h":832},
+	"rotated": true,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
 	"sourceSize": {"w":1920,"h":1080}
 },
 "Episode 16_00286.png":
 {
-	"frame": {"x":5131,"y":3337,"w":1708,"h":832},
+	"frame": {"x":1711,"y":6841,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
 	"sourceSize": {"w":1920,"h":1080}
 },
-"Episode 16_00319.png":
+"Episode 16_00287.png":
 {
-	"frame": {"x":1,"y":4171,"w":1708,"h":832},
+	"frame": {"x":2503,"y":5131,"w":1708,"h":832},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00301.png":
+{
+	"frame": {"x":3337,"y":5131,"w":1708,"h":832},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00302.png":
+{
+	"frame": {"x":3421,"y":6841,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00303.png":
+{
+	"frame": {"x":5131,"y":4185,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00304.png":
+{
+	"frame": {"x":3421,"y":4185,"w":1708,"h":832},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
+	"sourceSize": {"w":1920,"h":1080}
+},
+"Episode 16_00305.png":
+{
+	"frame": {"x":5131,"y":5019,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
@@ -290,15 +290,15 @@
 },
 "Episode 16_00320.png":
 {
-	"frame": {"x":1711,"y":4171,"w":1708,"h":832},
-	"rotated": false,
+	"frame": {"x":6841,"y":5131,"w":1708,"h":832},
+	"rotated": true,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
 	"sourceSize": {"w":1920,"h":1080}
 },
 "Episode 16_00321.png":
 {
-	"frame": {"x":3421,"y":4171,"w":1708,"h":832},
+	"frame": {"x":5131,"y":6841,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
@@ -306,18 +306,18 @@
 },
 "Episode 16_00322.png":
 {
-	"frame": {"x":5131,"y":4171,"w":1708,"h":832},
-	"rotated": false,
+	"frame": {"x":4171,"y":5019,"w":1708,"h":832},
+	"rotated": true,
 	"trimmed": true,
 	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
 	"sourceSize": {"w":1920,"h":1080}
 },
-"Episode 16_00348.png":
+"Episode 16_00323.png":
 {
-	"frame": {"x":3440,"y":6680,"w":1800,"h":870},
+	"frame": {"x":5005,"y":5853,"w":1708,"h":832},
 	"rotated": false,
 	"trimmed": true,
-	"spriteSourceSize": {"x":63,"y":48,"w":1800,"h":870},
+	"spriteSourceSize": {"x":116,"y":49,"w":1708,"h":832},
 	"sourceSize": {"w":1920,"h":1080}
 }},
 "meta": {
@@ -325,9 +325,9 @@
 	"version": "1.1",
 	"image": "Intro-6.webp",
 	"format": "RGBA8888",
-	"size": {"w":7684,"h":7756},
+	"size": {"w":7674,"h":7674},
 	"scale": "1",
 	"related_multi_packs": [ "Intro-0.json", "Intro-1.json", "Intro-2.json", "Intro-3.json", "Intro-4.json", "Intro-5.json", "Intro-7.json", "Intro-8.json" ],
-	"smartupdate": "$TexturePacker:SmartUpdate:3c447845622dab3f636d46bf427bd220:391d3852c10668362e8bb73e73018434:490f16e6a1a650d1add2c4bf95c496da$"
+	"smartupdate": "$TexturePacker:SmartUpdate:55028f2f55f9f37b114bcc0beef03d5c:a4fcad1ce34a2ad4341918bd25debd63:490f16e6a1a650d1add2c4bf95c496da$"
 }
 }

@@ -9,6 +9,8 @@
 // "BUY BONUS"/"x BET"/"BUY" del buy menu) se cubren por CSS en sus
 // componentes — un replacer de texto no llega a los bitmaps.
 
+import { stateUrlDerived } from 'state-shared';
+
 // Diccionario = tabla oficial "Social Mode Wording" del ACP (checkbox de
 // confirmación del submit), más derivaciones obvias (plurales, -ed/-ing) y
 // payout/paying (no listados pero mismo espíritu que pay→win).
@@ -83,6 +85,20 @@ const matchCase = (src: string, out: string) => {
 
 export const socializeText = (text: string) =>
 	RULES.reduce((acc, [re, out]) => acc.replace(re, (m) => matchCase(m, out)), text);
+
+// El MutationObserver de abajo solo ve TEXT NODES del DOM. Quedan afuera dos
+// superficies que igual muestran texto al jugador:
+//
+//   · los <Text> de Pixi (el HUD superior: BET / BALANCE / LAST WIN / TUMBLE)
+//     — son draw calls de WebGL, no hay nodo que observar. El "BET GC 1.00"
+//     del panel derecho fue rechazo en el feedback 16-09;
+//   · los ATRIBUTOS (aria-label, alt, title) — el walker es SHOW_TEXT.
+//
+// Para esos dos casos se envuelve el string en el origen. Se reusa el mismo
+// diccionario a propósito: un segundo listado a mano se desincroniza.
+// En real money es identidad, así que envolver strings ya limpios es gratis.
+export const socialLabel = (text: string) =>
+	stateUrlDerived.social() ? socializeText(text) : text;
 
 export const enableSocialText = () => {
 	const fix = (node: globalThis.Text) => {

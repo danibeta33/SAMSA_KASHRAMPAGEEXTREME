@@ -17,14 +17,15 @@
 //      Symbols` pone en `win` al cluster entero de un saque— y el cluster se
 //      leía como un bloque que aparecía de golpe (feedback de dirección 15-09).
 //      Ahora el marco entra con su símbolo, uno por uno.
-//   4. Y con el marco, su SONIDO: la cadena (`onSymbolLit` → Board.svelte lo
-//      rutea a `sfx_marco_chain`). Hasta el drop 15-09 el enmarcado era mudo.
+//   4. Y con el marco, su SONIDO: la cadena (`sfx_marco_chain`), un eslabón por
+//      turno, emitido desde este mismo bucle. Hasta el drop 15-09 el enmarcado
+//      era mudo; entre medio el disparo vivió en SymbolSprite y volvió acá (ver
+//      la nota larga en el paso 3 de `playWinFlash`).
 //
-// Por eso el stagger NOMINAL es `MARCO_INTRO_MS` y no los 90 ms de antes: el
-// pedido es "cuando el marco terminó su entrada, empieza el siguiente". En
-// clusters grandes eso no entra en la ronda, así que `maxSequenceMs` lo
-// comprime — hasta 5 símbolos corre a la entrada completa y de ahí para
-// arriba los marcos se van solapando (siguen entrando uno a uno, más juntos).
+// El ritmo de la cascada es SIEMPRE EL MISMO, gane 1 símbolo o gane 25:
+// `staggerMs` es un paso FIJO (ver su nota). `maxSequenceMs` sigue arriba como
+// techo, pero ya solo recorta los clusters enormes, que son los únicos que
+// llegarían a pasarse del segundo y medio.
 //
 // Reparto de propiedades en PixiJS (importante, ver SymbolSprite.svelte):
 //   · `glow`  → alpha del Sprite de brillo, que NO escala (si escalara con el
@@ -41,10 +42,10 @@ import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import { backOut, quadOut } from 'svelte/easing';
 import { waitForTimeout } from 'utils-shared/wait';
 
+import { eventEmitter } from './eventEmitter';
 import type { Position } from './types';
 import type { SymbolStateInfo } from './constants';
 import { hasOwnClip, TWEEN_ABORT_GUARD_MS } from './winPop.svelte';
-import { MARCO_INTRO_MS } from './marco';
 
 export const WIN_FLASH = {
 	// Estado inicial del brillo para TODO el cluster (paso 0).
@@ -52,17 +53,41 @@ export const WIN_FLASH = {
 	// Flash al llegarle el turno.
 	glowFlash: 1,
 	flashDuration: 90,
-	// Delay entre símbolo y símbolo = lo que dura la ENTRADA del marco, así el
-	// siguiente arranca cuando el anterior terminó de enmarcarse. Se comprime
-	// en clusters grandes (ver `staggerFor`) para que un cluster de 25 no se
-	// coma 16s de ronda.
-	staggerMs: MARCO_INTRO_MS,
-	// Techo de la cascada. 2600 ms está elegido para que un cluster de 5 —el
-	// mínimo que paga— corra a 650 ms por símbolo, o sea prácticamente la
-	// entrada completa del marco (667 ms); de 6 para arriba se comprime.
-	// ESTE es el número a mover si dirección quiere la presentación más corta
-	// o más larga: no hay ningún otro timing atado a él.
-	maxSequenceMs: 2600,
+	// ── PASO FIJO entre símbolo y símbolo: 110 ms, SIEMPRE ──────────────────
+	// Hasta el 15-09 esto era `MARCO_INTRO_MS` (667 ms): el siguiente símbolo
+	// arrancaba recién cuando el anterior había terminado de enmarcarse. Como
+	// el techo de abajo comprime el paso en los clusters grandes, la cascada
+	// terminaba corriendo a DOS velocidades: un cluster de 16 enmarcaba cada
+	// 110 ms —rápido, la cadena tensándose— y uno de 2 o 3 cada 667 ms, seis
+	// veces más lento y con los eslabones del SFX sonando sueltos en vez de
+	// apilados. Pedido de dirección: que la velocidad de los clusters grandes
+	// —marco Y sonido— sea la de TODOS, gane 1 símbolo, 2 o el board entero.
+	//
+	// El valor es el paso que ya tenía el cluster de 16 (1650 / 15 = 110), o
+	// sea el ritmo "rápido" que dirección aprobó de oído; ahora es el único.
+	// Con él, un cluster de 2 enmarca en 110 ms en vez de 667 y los dos
+	// eslabones se enciman igual que en una cadena larga (la polifonía de
+	// `sfx_marco_chain` ya está para eso, ver SFX_POLYPHONY en sound.ts).
+	//
+	// Nota: los clusters de hasta 16 símbolos quedan gobernados por ESTE
+	// número —el techo no los toca—, así que es el dial a mover si dirección
+	// quiere la cadena más lenta o más rápida.
+	staggerMs: 110,
+	// ── TECHO DE LA CASCADA: 1.65 s de punta a punta ─────────────────────────
+	// Tope de lo que puede durar la presentación entera. Con el paso fijo de
+	// 110 ms solo entra a jugar de 16 símbolos para arriba: ahí el delay pasa
+	// a ser `maxSequenceMs / (símbolos - 1)` y se comprime todavía más (el
+	// board lleno, 25, enmarca cada 69 ms). De 16 para abajo manda `staggerMs`
+	// y la cascada dura menos que este techo.
+	//
+	// Los marcos se SOLAPAN —cada entrada dura 667 ms y el siguiente arranca
+	// mucho antes—, pero eso no rompe la lectura de a uno: lo que el ojo sigue
+	// es el ORDEN en que aparecen, no que cada uno termine antes del próximo.
+	//
+	// Historial del valor, por si dirección quiere volver atrás: 2600 ms (un
+	// símbolo por entrada COMPLETA de marco; se sintió eterno), 700 ms (se leía
+	// como un barrido) y el 1650 de hoy, el medio de los dos.
+	maxSequenceMs: 1650,
 	// Boing: anticipación corta y seca, impacto con rebote.
 	anticipation: { scale: 0.85, duration: 80, easing: quadOut },
 	impact: { scale: 1.15, duration: 260, easing: backOut },
@@ -185,8 +210,9 @@ const settleTween = (tween: Promise<unknown>, durationMs: number) =>
 	Promise.race([tween, waitForTimeout(durationMs + TWEEN_ABORT_GUARD_MS)]);
 
 /**
- * Reparte los símbolos del cluster en el tiempo sin estirar la ronda: el
- * stagger nominal se comprime cuando el cluster es grande.
+ * Paso FIJO entre símbolo y símbolo —el mismo para un cluster de 2 que para
+ * uno de 16—, comprimido solo cuando el cluster es tan grande que la cascada
+ * entera se pasaría de `maxSequenceMs`.
  */
 const staggerFor = (count: number) =>
 	count > 1 ? Math.min(WIN_FLASH.staggerMs, WIN_FLASH.maxSequenceMs / (count - 1)) : 0;
@@ -198,21 +224,14 @@ const staggerFor = (count: number) =>
  *                      repetidas si un símbolo entra en dos wins).
  * @param getSymbolInfo resuelve el símbolo de cada celda — lo inyecta el caller
  *                      (Board.svelte) para no acoplar este módulo a game/utils.
- * @param onSymbolLit   se llama EN EL TURNO de cada celda, en el mismo tick en
- *                      que arranca la entrada de su marco. Lo inyecta el caller
- *                      por la misma razón que `getSymbolInfo`: este módulo es un
- *                      .ts sin contexto de componente, así que no tiene el
- *                      `eventEmitter` para disparar el SFX de la cadena él mismo.
  * @returns las posiciones del cluster, en el orden en que se enmarcaron.
  */
 export const playWinFlash = async ({
 	positions,
 	getSymbolInfo,
-	onSymbolLit,
 }: {
 	positions: Position[];
 	getSymbolInfo: (position: Position) => SymbolStateInfo | undefined;
-	onSymbolLit?: (position: Position, index: number) => void;
 }) => {
 	clearWinFlash();
 
@@ -255,12 +274,22 @@ export const playWinFlash = async ({
 			// TURNO de esta celda: se enciende su MARCO (y, en los especiales,
 			// su carta `_luz`). Lo lee SymbolSprite vía `isWinCellLit`.
 			litCells.add(keyOf(position));
-			// …y en el MISMO tick suena la cadena. Va acá y no en SymbolSprite
-			// —que es donde se dibuja el marco— porque acá está el turno: el
-			// sprite recién reacciona al `litCells` en el próximo render, y
-			// además el marco lo dibujan también los especiales y el preview del
-			// AnimLab, que no deberían sonar.
-			onSymbolLit?.(position, index);
+			// ── Y SU ESLABÓN DE CADENA, en el mismo turno ────────────────────
+			// El disparo vuelve ACÁ después de haber vivido un tiempo en
+			// SymbolSprite, colgado de un `$effect` sobre `marcoOn`. La idea allá
+			// era que imagen y sonido no pudieran separarse; en la práctica pasó
+			// al revés — el efecto dependía de TRES señales (`marcoOn`,
+			// `marcoPhase`, `symbolState`) más un latch que solo se rearmaba si
+			// el efecto llegaba a correr con el marco apagado, así que bastaba
+			// que dos de esos cambios cayeran en el MISMO flush de Svelte para
+			// que la celda se enmarcara muda. Reporte del usuario: "a veces, en
+			// spins normales, se marcan objetos y no suena".
+			//
+			// Este bucle no tiene esa fragilidad: es el único lugar del juego que
+			// decide "a ESTA celda le toca AHORA", corre exactamente una vez por
+			// símbolo y no puede batchearse — cada vuelta está separada por su
+			// propio `waitForTimeout`. Un símbolo marcado = un eslabón.
+			eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_marco_chain' });
 
 			const cell = cells.get(keyOf(position));
 			if (!cell) return; // especial: su propio clip ES toda la animación

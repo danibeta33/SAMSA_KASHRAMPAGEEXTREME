@@ -58,7 +58,7 @@
 	     pieza en el kit). -->
 	<div class="as" class:as--out={curtain.closing} style="background-image: url('assets/autospins/bg.jpg')">
 		<div class="as__panel">
-			<button class="as__close" onclick={close} aria-label="Cerrar">
+			<button class="as__close" onclick={close} aria-label="Close">
 				<img src="assets/autospins/close.png" alt="" />
 			</button>
 

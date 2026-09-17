@@ -14,6 +14,7 @@
 
 	import { getContext } from '../game/context';
 	import { money } from '../game/money';
+	import { socialLabel } from '../game/social';
 	import { stateUiTweak } from '../game/stateUiTweak.svelte';
 	import { uiScaleFor, isPortraitViewport, topBarHeight } from '../game/hudLayout';
 
@@ -235,11 +236,11 @@
 			{#if isSocial}
 				<span class="bb__pill-social">PLAY</span>
 			{/if}
-			<button class="bb__pill-minus" onclick={decrease} disabled={!isIdle} aria-label="Bajar apuesta"></button>
-			<button class="bb__pill-center" onclick={openBetMenu} disabled={!isIdle} aria-label="Elegir apuesta">
+			<button class="bb__pill-minus" onclick={decrease} disabled={!isIdle} aria-label={socialLabel('Decrease bet')}></button>
+			<button class="bb__pill-center" onclick={openBetMenu} disabled={!isIdle} aria-label={socialLabel('Choose bet')}>
 				<span class="bb__pill-amount">{money(stateBet.betAmount)}</span>
 			</button>
-			<button class="bb__pill-plus" onclick={increase} disabled={!isIdle} aria-label="Subir apuesta"></button>
+			<button class="bb__pill-plus" onclick={increase} disabled={!isIdle} aria-label={socialLabel('Increase bet')}></button>
 		</div>
 
 		<div class="bb__dock">

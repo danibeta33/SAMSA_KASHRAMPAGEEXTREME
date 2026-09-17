@@ -24,7 +24,7 @@
 {#if curtain.visible}
 	<div class="mn" class:mn--out={curtain.closing}>
 		<div class="mn__panel">
-			<button class="mn__close" onclick={close} aria-label="Cerrar">
+			<button class="mn__close" onclick={close} aria-label="Close">
 				<img src="assets/buy/close.png" alt="" />
 			</button>
 			<h2 class="mn__title">MENU</h2>

@@ -8,8 +8,9 @@
 		"lint": "eslint \"src\"",
 		"storybook": "PUBLIC_CHROMATIC=true storybook dev -p 6001 public",
 		"dev": "vite dev --host --port 3002",
-		"build": "vite build",
-		"preview": "vite preview"
+		"build": "vite build && node tools/verify-build.mjs",
+		"preview": "vite preview",
+		"verify": "node tools/verify-build.mjs"
 	},
 	"type": "module",
 	"devDependencies": {

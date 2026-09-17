@@ -56,7 +56,7 @@
 {#if curtain.visible}
 	<div class="bc" class:bc--out={curtain.closing}>
 		<div class="bc__panel">
-			<button class="bc__close" onclick={cancel} aria-label="Cerrar">
+			<button class="bc__close" onclick={cancel} aria-label="Close">
 				<img src="assets/buy/close.png" alt="" />
 			</button>
 			<!-- El scroll vive en este wrapper, NO en el panel: con overflow en

@@ -112,10 +112,13 @@ export const SFX_BASE_VOLUME = 0.7;
 
 // ─── Bus de MÚSICA ────────────────────────────────────────────────────────
 // Volumen base de la pista de música (lo multiplica el ratio master*music del
-// mezclador). Vivía dentro de Sound.svelte; se subió acá porque ahora hay DOS
-// emisores de música y los dos tienen que colgar del mismo número:
-//   · `bgm_main` y compañía — Sound.svelte, arranca al entrar al juego.
+// mezclador). Vivía dentro de Sound.svelte; se subió acá porque hay DOS
+// emisores que cuelgan del mismo número:
+//   · `bgm_main` y compañía — Sound.svelte, arranca al entrar al juego. Va por
+//     el bus **Music**.
 //   · la cama `BackgroundLoop` — ambientAudio.svelte.ts, arranca en la intro.
+//     Desde el 15-09 va por el bus **SFX** (ver `AMBIENT_BASE_VOLUME`), pero
+//     su nivel base se sigue derivando de acá: es la mezcla aprobada de oído.
 // Feedback del usuario (15-07): la música iba muy arriba en la mezcla —
 // bajada 0.45 → 0.3 para que los SFX (base 0.7 × gain) manden.
 export const BGM_BASE_VOLUME = 0.3;
@@ -132,8 +135,14 @@ export const BGM_BASE_VOLUME = 0.3;
 // mapa, un `soundMusic({ name: 'bgm_ambient' })` mataría la música de fondo.
 //
 // Pedido del usuario: "50% menos de volumen que la música de fondo" — de ahí
-// el ×0.5 exacto sobre BGM_BASE_VOLUME. Igual que la otra, la afecta el
-// mezclador del juego por el bus **Music**.
+// el ×0.5 exacto sobre BGM_BASE_VOLUME.
+//
+// BUS: **SFX** (`volumeSoundEffect`), no Music — pedido de dirección del
+// 15-09. La perilla MUSIC queda mandando solo sobre las pistas ruteables de
+// `Sound.svelte` (base ↔ free spins ↔ rage) y la cama se regula con el resto
+// del ambiente. El NÚMERO no se movió: los dos buses aplican el mismo
+// `valor/100 × master`, así que con el mezclador en su default (75/75/75) la
+// cama suena exactamente igual que antes del cambio de bus.
 export const AMBIENT_MUSIC_SRC = 'assets/audio/BackgroundLoop.mp3';
 export const AMBIENT_BASE_VOLUME = BGM_BASE_VOLUME * 0.5;
 
@@ -169,7 +178,7 @@ export const SFX_MAP: Record<SoundName, string | null> = {
 
 	// ── Triggers de free spins (layer: gold bar → bass drop → fanfare) ─
 	jng_intro_fs: AU('19'), // AU-19 fanfare de bonus trigger (2-3s), la celebración grande
-	sfx_scatter_win_v2: AU('21'), // AU-21 gold bar aterrizando pesado [CORREGIDO: estaba en retrigger]
+	sfx_scatter_win_v2: AU('21'), // AU-21 gold bar aterrizando pesado (a 0.8, ver SFX_GAIN)
 	sfx_superfreespin: AU('24'), // AU-24 FS Trigger Mark — bass drop + hit de batería
 	sfx_scatter_win: AU('19'), // AU-19 4+ scatters → fanfare
 
@@ -268,7 +277,15 @@ export const SFX_MAP: Record<SoundName, string | null> = {
 	// Un disparo por SÍMBOLO, en el mismo turno en que se enciende su marco
 	// dentro de la cascada de victoria (winFlash.svelte.ts → Board.svelte).
 	// Hasta acá el enmarcado era mudo.
-	sfx_marco_chain: RAW('Chain'),
+	//
+	// Apunta a `ChainLink`, NO al `Chain.wav` que entregó el equipo: ese master
+	// dura 3.5 s y arranca con 200 ms de rampa —es un colchón para tender
+	// debajo de una secuencia entera, no el golpe de un eslabón—, así que con
+	// un disparo por símbolo cada uno reiniciaba al anterior dentro de su parte
+	// inaudible y solo se oía el último. `tools/build_chain_link.py` recorta el
+	// cuerpo denso del master a un one-shot de 0.45 s que ataca en el primer
+	// milisegundo; el master queda en `static/` como fuente del recorte.
+	sfx_marco_chain: RAW('ChainLink'),
 	sfx_winlevel_nice: null, // cubierto por cluster win
 	sfx_winlevel_standard: null,
 	sfx_winlevel_substantial: null,
@@ -282,6 +299,37 @@ export const SFX_MAP: Record<SoundName, string | null> = {
 //   1.0 = techo (celebraciones/triggers) · 0.55 ≈ -5dB · 0.4 ≈ -8dB.
 // Anclados a los niveles efectivos que ya estaban aprobados de oído
 // (Feedback N1 #8): recurrentes abajo, celebraciones a full.
+// ─── POLIFONÍA — cuántas voces simultáneas admite un clip ──────────────────
+// `Sound.svelte` reproduce cada SFX con UN `HTMLAudioElement` por nombre y le
+// hace `currentTime = 0` en cada disparo, así que dos disparos seguidos del
+// mismo clip NO se superponen: el segundo CORTA al primero. Para casi todo
+// está bien —y a veces es lo que se quiere, como en los ticks del
+// multiplicador, donde encimarlos sonaría a barro.
+//
+// No está bien cuando el mismo clip es una SEGUIDILLA de golpes que tienen que
+// apilarse. El caso es la cadena del marco: un disparo por símbolo del cluster,
+// separados por menos de lo que dura el clip, así que cortándose entre ellos
+// solo se oía el último (reporte 15-09: "solo suena una vez"). Con N voces, el
+// player las usa por turno (round-robin) y los eslabones suenan encimados, como
+// una cadena tensándose.
+//
+// Sin entrada acá = 1 voz = el comportamiento de siempre.
+//
+// ATENCIÓN (fix 15-09): una entrada mayor a 1 hoy significa DOS cosas en
+// `Sound.svelte`. Primero, y principal, marca el clip como polifónico y lo
+// manda por WEB AUDIO —buffer decodificado una vez, una fuente nueva por
+// disparo—, que es lo único que garantiza que suene UNO POR SÍMBOLO: con
+// elementos `<audio>` las voces frías no llegaban a emitir y los clusters de 3
+// o 4 se enmarcaban casi mudos. Y segundo, el número sigue siendo el techo de
+// voces del anillo de `<audio>`, que queda como fallback por si el browser no
+// da Web Audio o el buffer todavía está decodificando.
+export const SFX_POLYPHONY: Partial<Record<SoundName, number>> = {
+	// El cluster más grande son 25 símbolos, pero el eslabón dura 0.45 s y el
+	// hueco más apretado de la cascada ronda los 70 ms: 6 voces cubren el
+	// solapamiento real sin crear 25 elementos de audio.
+	sfx_marco_chain: 6,
+};
+
 export const SFX_GAIN: Partial<Record<SoundName, number>> = {
 	// Landings de wild/scatter — sutiles (antes AU-21 crudo -19 LUFS × 0.55;
 	// con el archivo a -14 el mismo nivel efectivo pide ~0.45)
@@ -292,14 +340,22 @@ export const SFX_GAIN: Partial<Record<SoundName, number>> = {
 	sfx_scatter_stop_3: 0.55,
 	sfx_scatter_stop_4: 0.6,
 	sfx_scatter_stop_5: 0.65,
-	// Caídas de símbolos / reel stops — suenan en cada tumble, van bajo
-	sfx_symbols_landing: 0.5,
-	sfx_royals_landing: 0.5,
-	sfx_reel_stop_1: 0.5,
-	sfx_reel_stop_2: 0.5,
-	sfx_reel_stop_3: 0.5,
-	sfx_reel_stop_4: 0.5,
-	sfx_reel_stop_5: 0.5,
+	// Caídas de símbolos / reel stops — todos son el MISMO clip (AU-16, el
+	// whoosh + impacto de la tirada) y suenan en cada giro, así que van bajo.
+	//
+	// 0.5 → 0.425: -15% pedido por dirección sobre el sonido de la TIRADA, o
+	// sea lo que se oye mientras se mueven todos los íconos de la grilla. Hoy
+	// el único que dispara de verdad es `sfx_reel_stop_1` (una vez por columna,
+	// desde `onReelStopping` en stateGame.svelte.ts); los otros seis quedan
+	// cableados pero mudos, y bajan igual para que el día que se usen no salten
+	// por encima del que ya está aprobado de oído.
+	sfx_symbols_landing: 0.425,
+	sfx_royals_landing: 0.425,
+	sfx_reel_stop_1: 0.425,
+	sfx_reel_stop_2: 0.425,
+	sfx_reel_stop_3: 0.425,
+	sfx_reel_stop_4: 0.425,
+	sfx_reel_stop_5: 0.425,
 	// Ticks de multiplicador — recurrentes, sutiles (AU-17 quedó ~2dB más
 	// caliente tras el loudnorm → trim más profundo que el 0.7 anterior)
 	sfx_multiplier_up: 0.55,
@@ -313,10 +369,28 @@ export const SFX_GAIN: Partial<Record<SoundName, number>> = {
 	// Botón de spin — feedback de UI, por debajo del juego
 	sfx_btn_spin: 0.8,
 	// Cadena del marco — se dispara una vez POR SÍMBOLO del cluster (hasta 25
-	// en cascada, y en clusters grandes cada ~110 ms), así que va bajo: a 1.0
-	// una victoria larga se vuelve una ametralladora. Además el .wav todavía
-	// no pasó por el loudnorm, así que viene más caliente que el resto.
-	sfx_marco_chain: 0.45,
+	// en cascada), así que va por debajo de las celebraciones: a 1.0 una
+	// victoria larga se vuelve una ametralladora. El recorte además quedó
+	// normalizado a -1 dBFS, más caliente que el master.
+	//
+	// Historial: 0.45 → 0.34 cuando los eslabones pasaron a APILARSE en vez de
+	// cortarse (ver SFX_POLYPHONY), para que un cluster grande no se fuera de
+	// nivel. Pero ese número lo eligió el peor caso —25 símbolos encimados— y
+	// dejó el caso normal, 3 o 4 eslabones sueltos, tan abajo que el reporte
+	// fue directamente "no suena". 0.55 es el punto donde CADA eslabón se oye
+	// claro; el cluster de 25 sigue sin saturar porque el apilado real son ~4
+	// voces a la vez (el clip dura 0.45 s y el paso es 110 ms), no 25.
+	sfx_marco_chain: 0.55,
 	// Swipe del telón de la intro — transición, no celebración
 	sfx_intro_swipe: 0.7,
+	// Gold bar del trigger de free spins (AU-21). Pedido de dirección (15-09):
+	// -20% donde aparezca. No llevaba entrada —o sea que salía al techo, 1.0—
+	// y se comía la fanfarria que entra pegada atrás (`jng_intro_fs`, AU-19).
+	//
+	// Va por NOMBRE y no por archivo, así que cubre los tres lugares que lo
+	// disparan (los dos de `bookEventHandlerMap.ts` y el del laboratorio) sin
+	// tocar los OTROS usos de AU-21 —landings de wild/scatter, wins chicos/big—,
+	// que ya tienen su propio nivel aprobado de oído más abajo/arriba en esta
+	// misma tabla.
+	sfx_scatter_win_v2: 0.8,
 };

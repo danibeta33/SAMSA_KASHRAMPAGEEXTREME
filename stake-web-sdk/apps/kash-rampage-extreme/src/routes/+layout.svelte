@@ -15,7 +15,7 @@
 	// Laboratorios genéricos del SDK — el catálogo lo inyecta el juego más
 	// abajo (registerGameInspector / registerGameLabActions).
 	import { UiLab, AnimLab } from 'components-inspector';
-	import { stateModal, stateUi, stateUrlDerived, stateI18n } from 'state-shared';
+	import { stateModal, stateUi, stateUrlDerived, stateI18n, stateAuth } from 'state-shared';
 	import { page } from '$app/state';
 
 	import { setContext, getContext } from '../game/context';
@@ -107,7 +107,17 @@
 		// `LoadingOverlay` para que no dependa del ciclo de vida de ese
 		// overlay, que el ANIM LAB puede volver a abrir. Ver
 		// `game/ambientAudio.svelte.ts`.
-		startAmbientMusic();
+		// NO se arranca acá: `startAmbientMusic()` arma un reintento con el
+		// primer gesto del usuario, así que con un `rgs_url` inválido el click
+		// sobre la pantalla de error hubiera puesto la música a sonar. Se
+		// dispara abajo, recién cuando la autenticación salió bien.
+	});
+
+	// Cama de música: solo con sesión válida. `stateAuth` pasa a
+	// 'authenticated' en el onMount de <Authenticate>, unos ms después de
+	// este, así que no se pierde nada del arranque.
+	$effect(() => {
+		if (stateAuth.status === 'authenticated') startAmbientMusic();
 	});
 
 	// (Se removió la telemetría DEV que posteaba a http://127.0.0.1:9911/err:
@@ -145,23 +155,36 @@
 	</Authenticate>
 </GlobalStyle>
 
-{@render props.children()}
+<!-- GATE DE AUTENTICACIÓN — feedback Stake 16-09, punto 1.
+     "When the rgs_url is invalid [...] the game should not be playable".
 
-<!-- (TopBar eliminado 08-09: el HUD superior es ahora TopHud.svelte, dentro del
-     canvas Pixi y montado desde Game.svelte.) -->
-<BottomBar />
-<ReplayOverlay />
-<LoadingOverlay />
-<BuyBonusOverlay />
-<BuyConfirmOverlay />
-<AutoSpinOverlay />
-<SettingsOverlay />
-<MenuOverlay />
-<BetMenuOverlay />
+     Estos componentes viven FUERA de <Authenticate>, así que antes se montaban
+     igual cuando la autenticación fallaba: la BottomBar con su botón de SPIN y
+     sus controles de apuesta quedaba viva, y la pantalla de carga (z-index 200)
+     tapaba el modal de error (z-index 180) — el jugador veía LOADING y
+     "CLICK TO SKIP" como si todo estuviera bien.
 
-{#if import.meta.env.DEV}
-	<UiLab />
-	<AnimLab />
+     Con `failed` no se monta NADA: `<Authenticate>` renderiza la pantalla de
+     error en lugar del juego y este bloque entero queda afuera. -->
+{#if stateAuth.status !== 'failed'}
+	{@render props.children()}
+
+	<!-- (TopBar eliminado 08-09: el HUD superior es ahora TopHud.svelte, dentro del
+	     canvas Pixi y montado desde Game.svelte.) -->
+	<BottomBar />
+	<ReplayOverlay />
+	<LoadingOverlay />
+	<BuyBonusOverlay />
+	<BuyConfirmOverlay />
+	<AutoSpinOverlay />
+	<SettingsOverlay />
+	<MenuOverlay />
+	<BetMenuOverlay />
+
+	{#if import.meta.env.DEV}
+		<UiLab />
+		<AnimLab />
+	{/if}
 {/if}
 {/if}
 <style>

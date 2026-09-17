@@ -1,11 +1,15 @@
 <script lang="ts">
 	// PANTALLA DE CARGA / INTRO — overlay HTML a pantalla completa.
 	//
-	// Composición (drop 14-09, pedido del usuario): el fondo del pack
-	// `loading` (exterior KASH + panel interior vault), el TÍTULO arriba, la
+	// Composición (drop 14-09, pedido del usuario): un ÚNICO fondo a pantalla
+	// completa (el panel interior del vault, `bg_inner`), el TÍTULO arriba, la
 	// ventana animada del INTRO en el medio, y abajo el bate girando con el
 	// texto. Mientras los assets bajan dice LOADING; con todo listo pasa a
 	// CLICK TO SKIP y el click entra al juego.
+	//
+	// Hasta el 16-09 el fondo eran DOS capas: `bg_outer` cubriendo el viewport
+	// y `bg_inner` como panel recortado y centrado encima. El panel se eliminó
+	// (pedido del usuario) y `bg_inner` pasó a ser el único fondo, a `cover`.
 	//
 	// Esta pantalla es AHORA la única del arranque: `GameLoader.svelte` (el
 	// rectángulo negro con solo el bate) se eliminó. Era redundante —
@@ -127,13 +131,8 @@
 		class:load--out={closing}
 		onclick={dismiss}
 		aria-label={skipLabel}
-		style="background-image: url('assets/loading/bg_outer.jpg')"
+		style="background-image: url('assets/loading/bg_inner.jpg')"
 	>
-		<!-- Panel interior del vault: es el TELÓN de fondo de la composición.
-		     Los 4 elementos NO cuelgan de él sino del overlay, porque sus X/Y
-		     del laboratorio son fracciones del viewport. -->
-		<div class="load__panel" style="background-image: url('assets/loading/bg_inner.jpg')"></div>
-
 		<!-- TÍTULO — arriba (antes iba centrado en el panel). -->
 		<img
 			class="load__title"
@@ -198,11 +197,11 @@
 		padding: 0;
 		margin: 0;
 		cursor: pointer;
-		/* imagen via style inline (ruta relativa al documento — CDN subpath) */
+		/* imagen via style inline (ruta relativa al documento — CDN subpath).
+		   `cover` = el fondo llena SIEMPRE el viewport y recorta el sobrante,
+		   sin deformar: es lo que lo hace responsive en cualquier forma de
+		   pantalla. El color de atrás solo se ve mientras el jpg baja. */
 		background: #0d0c0a center / cover no-repeat;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		font-family: 'Neue Plak Extended', 'Europa', system-ui, sans-serif;
 		user-select: none;
 		/* telón: el overlay entero baja fuera de pantalla */
@@ -213,15 +212,6 @@
 		transform: translateY(102%);
 		pointer-events: none;
 		box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.55);
-	}
-	.load__panel {
-		position: relative;
-		z-index: 0;
-		width: min(96vw, 170vh);
-		height: min(92vh, 60vw);
-		border-radius: 18px;
-		background: center / cover no-repeat;
-		box-shadow: 0 0 40px rgba(0, 0, 0, 0.65);
 	}
 
 	/* Los 4 elementos del laboratorio comparten anclaje: `position: absolute`
@@ -294,15 +284,5 @@
 	.load__text--load {
 		letter-spacing: 8px;
 		text-indent: 8px;
-	}
-
-	/* Portrait — el panel de fondo a lo alto. El encuadre de los 4 elementos
-	   NO se corrige acá: cada bucket tiene su propio juego de valores en el UI
-	   LAB (los defaults son los de Desktop). */
-	@media (max-aspect-ratio: 1/1) {
-		.load__panel {
-			width: 94vw;
-			height: 90vh;
-		}
 	}
 </style>

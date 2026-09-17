@@ -102,6 +102,38 @@ símbolos altos antes de evaluar clusters.
    0 celdas convertibles — decidir contrato, retrigger con rampage) + regresión
    del checklist heredado + tabla de event IDs de replay por modo.
 
+## Auditoría de texto rasterizado (social mode) — 16-09
+
+`game/social.ts` reemplaza los términos restringidos en vivo, pero **solo llega a text nodes
+del DOM**. Quedan afuera los `<Text>` de Pixi (se resuelven con `socialLabel()` en el origen)
+y el texto horneado en imágenes (se tapa con covers CSS, o se cambia el asset).
+
+Esta tabla es el resultado de abrir y leer cada asset. **No re-derivarla en el próximo
+submit — actualizarla cuando entre arte nuevo.**
+
+| Asset | Texto horneado | Estado |
+|---|---|---|
+| `ui/bet_pill.png` | **BET** | cubierto — chip `PLAY`, `BottomBar.svelte` |
+| `buy/header.png` | **BUY BONUS** | cubierto — header HTML, `BuyBonusOverlay.svelte` |
+| `buy/card_*.png` | **N x BET** / **BUY** | cubierto — covers, `BuyBonusOverlay.svelte` |
+| `loading/intro.webp` | **CASH**, **BET** | ⛔ **sin resolver — depende de arte**, ver `REPORTE_ARTE_16-09.md` |
+| `ui/btn_spin/stop/turbo/auto.png` | SPIN · STOP · TURBO · AUTO | limpio |
+| `ui/dock.png`, `ui/Contenedor1.png` | (sin texto) | limpio |
+| `autospins/title.png` | AUTO SPINS · NUMBER OF ROUNDS | limpio |
+| `autospins/start.png` | START AUTOPLAY | limpio |
+| `autospins/opt_*.png`, `panel.png`, `close.png` | números · ∞ · X | limpio |
+| `sprites/wins/win_*.png` | SMALL/BIG/MEGA/MAX WIN | limpio |
+| `sprites/fs_intro_panel.webp` | FREE SPINS · TAP TO CONTINUE | limpio |
+| `sprites/fs_win_panel.webp` | FREE SPINS TOTAL WIN · TAP TO CONTINUE | limpio |
+
+Los `<Text>` de Pixi: el único con término restringido era el `BET` del panel de replay en
+`TopHud.svelte` (rechazo 16-09). Ahora los cuatro labels pasan por `socialLabel()`. El resto
+(`FREE SPIN`, `TUMBLE WIN`, `xN`, montos, nombres de símbolo) está limpio.
+
+⚠️ Los **atributos** (`aria-label`, `alt`, `title`) tampoco los ve el observer: el walker es
+`NodeFilter.SHOW_TEXT`. Los tres del pill de bet van por `socialLabel()`; el resto no tiene
+términos restringidos.
+
 ## Parámetros abiertos del GDD (defaults en uso)
 
 | Parámetro | Default | Afecta |

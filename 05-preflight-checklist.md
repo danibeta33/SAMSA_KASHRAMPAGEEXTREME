@@ -7,11 +7,37 @@ condiciones de reviewer (`--currency XEC --bet-levels 35 --default-bet 200000`) 
 - [ ] **SIN Stake Engine Loader**: ni el componente `LoaderStakeEngine` montado ni el
       `stake-engine-loader.gif` en `static/` (guideline jul-2026 "Game should not contain the
       Stake Engine Loader" — Kash Smash lo eliminó; el fork del template lo trae de vuelta ⚠).
-- [ ] Authenticate contra el RGS ok en launch; `rgs_url` inválido → error visible.
+- [ ] Authenticate contra el RGS ok en launch.
+
+## `rgs_url` inválido (rechazo 16-09, punto 1 — REPRODUCIR SIEMPRE)
+Test textual del reviewer: tomar la URL de launch y romper el parámetro, p.ej.
+`&rgs_url=sdasda:85:602`. Probar además: `&rgs_url=` vacío, `&rgs_url=example.com`
+(host que responde pero no es el RGS) y un host que traga la conexión (timeout).
+En los CUATRO casos, sobre el BUILD DE PRODUCCIÓN y con las devtools abiertas:
+- [ ] Se ve UNA pantalla: "SOMETHING WENT WRONG / Failed to fetch. / Please reload
+      the game to keep playing." Nada más.
+- [ ] CERO detalle técnico en pantalla: ni stack, ni nombre de clase de error, ni
+      URL, ni `sessionID`, ni JSON del RGS.
+- [ ] NO aparece la pantalla de carga, ni el logo animado, ni "CLICK TO SKIP".
+- [ ] NO se monta la barra inferior: sin botón de SPIN, sin +/− de apuesta, sin
+      menú, sin buy bonus. No hay nada clickeable.
+- [ ] No suena la música (ni al hacer click en la pantalla de error).
+- [ ] Consola en CERO: ni un `console.*`, ni un "Uncaught (in promise)".
+- [ ] El caso "host que no responde" resuelve en ≤20 s (timeout del rgs-fetcher),
+      no se queda cargando indefinidamente.
+- [ ] Con el `rgs_url` correcto, el juego arranca normal (no romper el camino feliz).
+
+Protegido en código por: `packages/rgs-fetcher` (normaliza todo fallo a un objeto
+plano sin stack + timeout), `Authenticate.svelte` (valida el `rgs_url` antes de la
+red, valida la respuesta y deja `stateAuth.status = 'failed'`),
+`FatalError.svelte` (la pantalla, sin prop de error), el gate de `+layout.svelte` y
+el plugin `stake-strip-console-on-build` de `packages/config-vite`.
+Verificado automáticamente por `pnpm verify` (corre solo dentro de `pnpm build`).
 
 ## Consola (motivo #1 de rechazo repetido)
 - [ ] `hello: false` en el init de Pixi.
-- [ ] Cero `console.log/debug/info/warn` sin gatear a `import.meta.env.DEV`.
+- [ ] Cero `console.*` EN EL BUILD (no alcanza con gatearlos a mano: `pnpm build`
+      los elimina y `tools/verify-build.mjs` falla si sobrevive alguno).
 - [ ] i18n compiler seteado en PROD (`setMessagesCompiler`, `game/i18nCompiler.ts`).
 - [ ] Loading NO deja entrar hasta `stateApp.loaded` (sin fallback por tiempo). Retry de assets ×3.
 - [ ] Consola en CERO probada con CDN LENTO (throttle de símbolos) — 0 "Sprite key not found".

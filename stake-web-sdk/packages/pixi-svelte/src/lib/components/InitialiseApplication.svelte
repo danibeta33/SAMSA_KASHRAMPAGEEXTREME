@@ -74,7 +74,11 @@
 			if (!initialised) await initialiseApplication();
 			initialised = true;
 		} catch (error) {
-			console.error(error);
+			// Mismo criterio que el warn de WebGPU de arriba: consola de prod en
+			// CERO es requisito de approval. Si el renderer no arranca el
+			// jugador ya ve la pantalla rota; el log no le agrega nada y el
+			// reviewer escanea la consola.
+			if (import.meta.env.DEV) console.error(error);
 		}
 	});
 

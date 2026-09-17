@@ -48,9 +48,13 @@ const getSpriteSheetFrames = (sheet: RawSpriteSheet): LoadedSpriteSheet => {
 	if (frameNames?.length) {
 		const ordered = frameNames.map((name) => textures[name]).filter(Boolean);
 		if (ordered.length === frameNames.length) return ordered;
-		console.warn(
-			`[assetLoad] "animations" del spriteSheet nombra ${frameNames.length} frames pero solo ${ordered.length} resolvieron a textura; se usa el orden de empaquetado.`,
-		);
+		// Gateado a DEV (consola de prod en CERO, requisito de approval): esto
+		// se dispara en una carga EXITOSA con un sheet raro, así que en prod
+		// ensuciaría la consola de una sesión que anda bien.
+		if (import.meta.env.DEV)
+			console.warn(
+				`[assetLoad] "animations" del spriteSheet nombra ${frameNames.length} frames pero solo ${ordered.length} resolvieron a textura; se usa el orden de empaquetado.`,
+			);
 	}
 	return Object.values(textures);
 };

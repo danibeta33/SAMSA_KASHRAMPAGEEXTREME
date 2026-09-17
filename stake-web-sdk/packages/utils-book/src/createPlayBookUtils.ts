@@ -21,7 +21,11 @@ export function createPlayBookUtils<TBookEventHandlerMap extends BookEventHandle
 			if (debug) console.log(bookEvent);
 			await bookEventHandler(bookEvent, bookEventContext);
 		} else {
-			console.error('Missing bookEventHandler in "bookEventHandlerMap" for: ', bookEvent);
+			// Gateado a DEV: consola de prod en CERO es requisito de approval.
+			// Un handler faltante se ve igual en pantalla (el evento no se
+			// anima) y ahí es donde hay que atacarlo, no en el log de prod.
+			if (import.meta.env.DEV)
+				console.error('Missing bookEventHandler in "bookEventHandlerMap" for: ', bookEvent);
 		}
 	};
 

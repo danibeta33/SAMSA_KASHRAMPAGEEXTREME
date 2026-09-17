@@ -12,9 +12,16 @@
 	import { boardShake } from '../game/boardShake.svelte';
 
 	import { GameVersion, Modals } from 'components-ui-html';
-	import { stateMeta, stateUrlDerived } from 'state-shared';
+	import { stateMeta, stateUrlDerived, type BetModeData } from 'state-shared';
 
 	import { getContext } from '../game/context';
+	import {
+		BET_MODES,
+		costLabel,
+		maxWinLabel,
+		rampageAsRate,
+		rtpLabel,
+	} from '../game/betModes';
 	import PaySprite from './PaySprite.svelte';
 
 	// TECHO del espacio de capas del canvas. Las celebraciones y la transición
@@ -22,6 +29,28 @@
 	// `stateTweak` porque no es un valor de ajuste sino el borde del rango que
 	// documentan los sliders de capa (ver `LAYER` en labMeta.ts).
 	const CELEBRATION_LAYER = 20;
+
+	// DISCLAIMER OFICIAL — copiado palabra por palabra del template de
+	// /docs/approval-guidelines/general-disclaimer. NO editar para "mejorarlo":
+	// el reviewer lo compara contra el template y cualquier desvío es rechazo
+	// (feedback 16-09, punto 4). Si Stake publica una versión nueva, se
+	// reemplaza este string entero.
+	//
+	// Nota social: el texto no contiene ningún término del diccionario de
+	// `game/social.ts` (`plays`, `wins`, `winnings`, `expected return` están
+	// permitidos; no hay `bet`/`pay`/`stake`), así que el MutationObserver lo
+	// deja intacto en social mode. Verificado en el QA de social.
+	const DISCLAIMER =
+		'Malfunction voids all wins and plays. A consistent internet connection is required. ' +
+		'In the event of a disconnection, reload the game to finish any uncompleted rounds. ' +
+		'The expected return is calculated over many plays. The game display is not ' +
+		'representative of any physical device and is for illustrative purposes only. ' +
+		'Winnings are settled according to the amount received from the Remote Game Server ' +
+		'and not from events within the web browser. TM and © 2026 Engine.';
+
+	// Va en su propio párrafo, FUERA del template. Intercalarlo rompería el
+	// diff del reviewer.
+	const STUDIO_COPYRIGHT = 'Copyright © Lucky Bastards Studio.';
 
 	// Override the shared bet-mode metadata so the BuyBonus modal lists ONLY
 	// the four modes the math actually supports: base + 3 buys
@@ -32,87 +61,43 @@
 	// (vault_crack, smash_mode, rage_mode — IDs internos heredados de KS1
 	// a propósito, ver plan KRE).
 	//
-	// TODO-KRE (Fase 2): títulos display, dialogs y tickers son los de KS1
-	// (placeholder — describen la mecánica vieja, que es la que corre hasta
-	// que la Fase 1 traiga los books con KASH RAMPAGE). Reescribir junto con
-	// las rules cuando el GDD cierre el copy.
+	// Los valores salen de `game/betModes.ts`, que es la fuente única que
+	// comparten este mapa, las dos tablas del modal de reglas y las cards del
+	// buy menu. Antes eran cuatro literales a mano acá y cuatro filas a mano
+	// en cada tabla: de esa duplicación salió el texto en español que se
+	// filtró a la tabla inglesa (feedback Stake 16-09, punto 5).
 	const NO_ASSETS = { icon: '', dialogImage: '', dialogVolatility: '', volatility: '', button: '' };
-	stateMeta.betModeMeta = {
-		BASE: {
-			mode: 'BASE',
-			costMultiplier: 1.0,
-			type: 'default',
-			parent: '',
-			children: '',
-			assets: NO_ASSETS,
-			text: {
-				title: 'BASE',
-				dialog: 'Classic cluster pays with tumble.',
-				button: '',
-				betAmountLabel: '',
-				tickerIdle: '',
-				tickerSpin: '',
-				bannerText: '',
-			},
-		},
-		VAULT_CRACK: {
-			mode: 'VAULT_CRACK',
-			costMultiplier: 100,
-			type: 'buy',
-			parent: '',
-			children: '',
-			assets: NO_ASSETS,
-			text: {
-				title: 'VAULT CRACK',
-				dialog:
-					'10 Free Spins. KASH RAMPAGE strikes about 1 in 6.6 spins.',
-				description: 'The measured way in.',
-				button: 'BUY',
-				betAmountLabel: '',
-				tickerIdle: 'GETTING READY',
-				tickerSpin: 'VAULT CRACK ACTIVE',
-				bannerText: '',
-			},
-		},
-		SMASH_MODE: {
-			mode: 'SMASH_MODE',
-			costMultiplier: 250,
-			type: 'buy',
-			parent: '',
-			children: '',
-			assets: NO_ASSETS,
-			text: {
-				title: 'SMASH MODE',
-				dialog:
-					'10 Free Spins. KASH RAMPAGE strikes about 1 in 4.1 spins.',
-				description: 'More rampages, more chaos.',
-				button: 'BUY',
-				betAmountLabel: '',
-				tickerIdle: 'GETTING READY',
-				tickerSpin: 'SMASH MODE ACTIVE',
-				bannerText: '',
-			},
-		},
-		RAGE_MODE: {
-			mode: 'RAGE_MODE',
-			costMultiplier: 500,
-			type: 'buy',
-			parent: '',
-			children: '',
-			assets: NO_ASSETS,
-			text: {
-				title: 'RAGE MODE',
-				dialog:
-					'10 Free Spins. KASH RAMPAGE strikes about 1 in 2.2 spins.',
-				description: 'Most rampages per spin. Total demolition.',
-				button: 'BUY',
-				betAmountLabel: '',
-				tickerIdle: 'GETTING READY',
-				tickerSpin: 'RAGE MODE ACTIVE',
-				bannerText: '',
-			},
-		},
-	};
+	stateMeta.betModeMeta = Object.fromEntries(
+		BET_MODES.map((mode): [string, BetModeData] => {
+			const isBuy = mode.freeSpins !== null;
+			return [
+				mode.key,
+				{
+					mode: mode.key,
+					costMultiplier: mode.costMultiplier,
+					maxWin: mode.maxWinX,
+					type: isBuy ? 'buy' : 'default',
+					parent: '',
+					children: '',
+					assets: NO_ASSETS,
+					text: {
+						title: mode.title,
+						// Versión corta de la descripción larga, para el overlay
+						// del buy: mismo dato, sin la prosa.
+						dialog: isBuy
+							? `${mode.freeSpins} Free Spins. KASH RAMPAGE strikes about ${rampageAsRate(mode)}.`
+							: 'Classic cluster pays with tumble.',
+						description: mode.description.en,
+						button: isBuy ? 'BUY' : '',
+						betAmountLabel: '',
+						tickerIdle: mode.tickerIdle,
+						tickerSpin: mode.tickerSpin,
+						bannerText: '',
+					},
+				},
+			];
+		}),
+	);
 	import EnableSound from './EnableSound.svelte';
 	import EnableGameActor from './EnableGameActor.svelte';
 	import ResumeBet from './ResumeBet.svelte';
@@ -293,17 +278,22 @@
 		-->
 		{#if stateUrlDerived.lang() === 'es'}
 			<div class="lb-doc">
+				<!-- Disclaimer oficial de Stake Engine, VERBATIM del template de
+				     /docs/approval-guidelines/general-disclaimer. El reviewer lo
+				     diffea contra el template (feedback 16-09, punto 4: subrayó
+				     nuestro "TM and © Stake Engine." contra su "TM and © 2026
+				     Engine."), así que:
+				       · va como UN párrafo, palabra por palabra;
+				       · la atribución del estudio va en un <p> APARTE, nunca
+				         intercalada en el texto del template;
+				       · en la rama ES se renderiza el MISMO inglés — "verbatim"
+				         y "traducido" son incompatibles, y `lang()` fuerza 'en'
+				         con social=true, así que esta rama es cortesía, no la
+				         superficie de cumplimiento. -->
 				<section class="lb-disclaimer">
 					<h2>Aviso legal</h2>
-					<ul>
-						<li>El malfuncionamiento anula todas las apuestas y ganancias.</li>
-						<li>Se requiere conexión a internet estable.</li>
-						<li>En caso de desconexión, recargá el juego para completar cualquier ronda inconclusa.</li>
-						<li>El retorno teórico al jugador (RTP) está calculado sobre un gran número de jugadas y no representa el resultado de ninguna sesión individual.</li>
-						<li>La pantalla del juego no representa ningún dispositivo físico y tiene únicamente fines ilustrativos.</li>
-						<li>Los resultados son determinados por el servidor (RGS), no por el navegador.</li>
-						<li>Copyright © Lucky Bastards Studio. TM and © Stake Engine.</li>
-					</ul>
+					<p>{DISCLAIMER}</p>
+					<p>{STUDIO_COPYRIGHT}</p>
 				</section>
 
 				<section>
@@ -338,40 +328,31 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr>
-								<td>BASE</td>
-								<td>1×</td>
-								<td>96.5%</td>
-								<td>5,000×</td>
-								<td>puede golpear en cualquier spin / can strike on any spin</td>
-							</tr>
-							<tr>
-								<td>VAULT CRACK</td>
-								<td>100×</td>
-								<td>96.5%</td>
-								<td>5,000×</td>
-								<td>≈ 1 / 6.6 spins</td>
-							</tr>
-							<tr>
-								<td>SMASH MODE</td>
-								<td>250×</td>
-								<td>96.5%</td>
-								<td>5,000×</td>
-								<td>≈ 1 / 4.1 spins</td>
-							</tr>
-							<tr>
-								<td>RAGE MODE</td>
-								<td>500×</td>
-								<td>96.2%</td>
-								<td>5,000×</td>
-								<td>≈ 1 / 2.2 spins</td>
-							</tr>
+							{#each BET_MODES as mode (mode.key)}
+								<tr>
+									<td>{mode.title}</td>
+									<td>{costLabel(mode)}</td>
+									<td>{rtpLabel(mode)}</td>
+									<td>{maxWinLabel(mode)}</td>
+									<td>{mode.rampage.es}</td>
+								</tr>
+							{/each}
 						</tbody>
 					</table>
 					<p>
 						Los 3 buy modes entran directo a 10 Free Spins. La frecuencia de KASH RAMPAGE de la
 					tabla aplica a cada Free Spin del modo.
 					</p>
+
+					<!-- Descripción por modo — requisito de approval (feedback
+					     Stake 16-09, punto 3: "Game Info contains a description
+					     for each available game mode"). -->
+					<dl class="lb-modes">
+						{#each BET_MODES as mode (mode.key)}
+							<dt>{mode.title}</dt>
+							<dd>{mode.description.es}</dd>
+						{/each}
+					</dl>
 				</section>
 
 				<section>
@@ -471,17 +452,11 @@
 			</div>
 		{:else}
 			<div class="lb-doc">
+				<!-- Ver la nota de la rama ES: mismo texto, mismo motivo. -->
 				<section class="lb-disclaimer">
 					<h2>Legal Disclaimer</h2>
-					<ul>
-						<li>Malfunction voids all bets and pays.</li>
-						<li>A stable internet connection is required.</li>
-						<li>In the event of a disconnection, reload the game to finish any uncompleted rounds.</li>
-						<li>The theoretical Return to Player (RTP) is calculated over many plays and does not represent the outcome of any individual session.</li>
-						<li>The game display is not representative of any physical device and is for illustrative purposes only.</li>
-						<li>Outcomes are determined by the server (RGS), not by the browser.</li>
-						<li>Copyright © Lucky Bastards Studio. TM and © Stake Engine.</li>
-					</ul>
+					<p>{DISCLAIMER}</p>
+					<p>{STUDIO_COPYRIGHT}</p>
 				</section>
 
 				<section>
@@ -516,40 +491,31 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr>
-								<td>BASE</td>
-								<td>1×</td>
-								<td>96.5%</td>
-								<td>5,000×</td>
-								<td>puede golpear en cualquier spin / can strike on any spin</td>
-							</tr>
-							<tr>
-								<td>VAULT CRACK</td>
-								<td>100×</td>
-								<td>96.5%</td>
-								<td>5,000×</td>
-								<td>≈ 1 / 6.6 spins</td>
-							</tr>
-							<tr>
-								<td>SMASH MODE</td>
-								<td>250×</td>
-								<td>96.5%</td>
-								<td>5,000×</td>
-								<td>≈ 1 / 4.1 spins</td>
-							</tr>
-							<tr>
-								<td>RAGE MODE</td>
-								<td>500×</td>
-								<td>96.2%</td>
-								<td>5,000×</td>
-								<td>≈ 1 / 2.2 spins</td>
-							</tr>
+							{#each BET_MODES as mode (mode.key)}
+								<tr>
+									<td>{mode.title}</td>
+									<td>{costLabel(mode)}</td>
+									<td>{rtpLabel(mode)}</td>
+									<td>{maxWinLabel(mode)}</td>
+									<td>{mode.rampage.en}</td>
+								</tr>
+							{/each}
 						</tbody>
 					</table>
 					<p>
 						All 3 buy modes enter directly into 10 Free Spins. The KASH RAMPAGE frequency in the
 					table applies to every Free Spin of the mode.
 					</p>
+
+					<!-- Per-mode description — approval requirement (Stake
+					     feedback 16-09, point 3: "Game Info contains a
+					     description for each available game mode"). -->
+					<dl class="lb-modes">
+						{#each BET_MODES as mode (mode.key)}
+							<dt>{mode.title}</dt>
+							<dd>{mode.description.en}</dd>
+						{/each}
+					</dl>
 				</section>
 
 				<section>
@@ -1036,6 +1002,25 @@
 	:global(.lb-table tbody td:first-child) {
 		color: #f6ef1b;
 		font-weight: 700;
+	}
+
+	/* Descripción por modo. Va como <dl> DEBAJO de la tabla y no como una 6ª
+	   columna: `.lb-table` es width:100% sin wrapper de scroll horizontal (el
+	   `.lb-pay-scroll` envuelve solo la paytable), así que una columna de prosa
+	   desbordaría en Mobile S 320px, que es viewport obligatorio del review.
+	   Un <dl> reflowea solo. */
+	:global(.lb-modes) {
+		margin: 0.75rem 0 0;
+	}
+	:global(.lb-modes dt) {
+		color: #f6ef1b;
+		font-weight: 900;
+		letter-spacing: 1px;
+		margin-top: 0.6rem;
+	}
+	:global(.lb-modes dd) {
+		margin: 0.15rem 0 0;
+		color: #e5e5e5;
 	}
 
 	:global(.lb-pay) {

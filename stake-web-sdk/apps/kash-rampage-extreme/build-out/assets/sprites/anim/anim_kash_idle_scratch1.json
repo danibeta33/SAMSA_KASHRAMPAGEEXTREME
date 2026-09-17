@@ -1,0 +1,271 @@
+{"frames": {
+
+"Kash_Huevos_00000.png":
+{
+	"frame": {"x":921,"y":446,"w":446,"h":922},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":271,"y":127,"w":446,"h":922},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00001.png":
+{
+	"frame": {"x":1845,"y":447,"w":446,"h":922},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":271,"y":127,"w":446,"h":922},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00002.png":
+{
+	"frame": {"x":2762,"y":1,"w":444,"h":922},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":268,"y":127,"w":444,"h":922},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00003.png":
+{
+	"frame": {"x":1840,"y":1,"w":443,"h":920},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":263,"y":127,"w":443,"h":920},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00004.png":
+{
+	"frame": {"x":2767,"y":895,"w":452,"h":917},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":253,"y":128,"w":452,"h":917},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00005.png":
+{
+	"frame": {"x":921,"y":1342,"w":461,"h":917},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":242,"y":128,"w":461,"h":917},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00006.png":
+{
+	"frame": {"x":1840,"y":1343,"w":464,"h":917},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":228,"y":128,"w":464,"h":917},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00007.png":
+{
+	"frame": {"x":2759,"y":1349,"w":473,"h":918},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":220,"y":127,"w":473,"h":918},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00008.png":
+{
+	"frame": {"x":2758,"y":1824,"w":492,"h":918},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":216,"y":127,"w":492,"h":918},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00009.png":
+{
+	"frame": {"x":1,"y":2278,"w":498,"h":918},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":216,"y":127,"w":498,"h":918},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00010.png":
+{
+	"frame": {"x":1840,"y":1809,"w":499,"h":916},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":216,"y":129,"w":499,"h":916},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00011.png":
+{
+	"frame": {"x":921,"y":2297,"w":500,"h":914},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":215,"y":131,"w":500,"h":914},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00012.png":
+{
+	"frame": {"x":1837,"y":2310,"w":500,"h":912},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":215,"y":133,"w":500,"h":912},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00013.png":
+{
+	"frame": {"x":2751,"y":2318,"w":500,"h":912},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":215,"y":133,"w":500,"h":912},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00014.png":
+{
+	"frame": {"x":1,"y":2778,"w":500,"h":911},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":215,"y":134,"w":500,"h":911},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00015.png":
+{
+	"frame": {"x":2738,"y":2820,"w":501,"h":911},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":214,"y":134,"w":501,"h":911},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00016.png":
+{
+	"frame": {"x":914,"y":2799,"w":501,"h":910},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":214,"y":135,"w":501,"h":910},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00017.png":
+{
+	"frame": {"x":1826,"y":2812,"w":501,"h":910},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":214,"y":135,"w":501,"h":910},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00018.png":
+{
+	"frame": {"x":1,"y":3280,"w":502,"h":910},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":213,"y":135,"w":502,"h":910},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00019.png":
+{
+	"frame": {"x":913,"y":3302,"w":504,"h":910},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":211,"y":135,"w":504,"h":910},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00020.png":
+{
+	"frame": {"x":1825,"y":3315,"w":507,"h":911},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":208,"y":134,"w":507,"h":911},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00021.png":
+{
+	"frame": {"x":2738,"y":3323,"w":507,"h":914},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":206,"y":131,"w":507,"h":914},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00022.png":
+{
+	"frame": {"x":921,"y":1805,"w":490,"h":917},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":209,"y":128,"w":490,"h":917},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00023.png":
+{
+	"frame": {"x":1,"y":1803,"w":473,"h":918},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":217,"y":127,"w":473,"h":918},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00024.png":
+{
+	"frame": {"x":1,"y":1341,"w":460,"h":918},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":231,"y":127,"w":460,"h":918},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00025.png":
+{
+	"frame": {"x":1,"y":890,"w":449,"h":918},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":244,"y":127,"w":449,"h":918},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00026.png":
+{
+	"frame": {"x":1,"y":1,"w":438,"h":917},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":258,"y":128,"w":438,"h":917},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00027.png":
+{
+	"frame": {"x":920,"y":1,"w":440,"h":918},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":266,"y":128,"w":440,"h":918},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00028.png":
+{
+	"frame": {"x":1,"y":443,"w":445,"h":918},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":272,"y":129,"w":445,"h":918},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00029.png":
+{
+	"frame": {"x":2769,"y":447,"w":446,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":275,"y":128,"w":446,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00030.png":
+{
+	"frame": {"x":921,"y":894,"w":446,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":275,"y":128,"w":446,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+},
+"Kash_Huevos_00031.png":
+{
+	"frame": {"x":1844,"y":895,"w":446,"h":921},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":275,"y":128,"w":446,"h":921},
+	"sourceSize": {"w":930,"h":1112}
+}},
+"animations": {
+	"Kash_Huevos": ["Kash_Huevos_00000.png","Kash_Huevos_00001.png","Kash_Huevos_00002.png","Kash_Huevos_00003.png","Kash_Huevos_00004.png","Kash_Huevos_00005.png","Kash_Huevos_00006.png","Kash_Huevos_00007.png","Kash_Huevos_00008.png","Kash_Huevos_00009.png","Kash_Huevos_00010.png","Kash_Huevos_00011.png","Kash_Huevos_00012.png","Kash_Huevos_00013.png","Kash_Huevos_00014.png","Kash_Huevos_00015.png","Kash_Huevos_00016.png","Kash_Huevos_00017.png","Kash_Huevos_00018.png","Kash_Huevos_00019.png","Kash_Huevos_00020.png","Kash_Huevos_00021.png","Kash_Huevos_00022.png","Kash_Huevos_00023.png","Kash_Huevos_00024.png","Kash_Huevos_00025.png","Kash_Huevos_00026.png","Kash_Huevos_00027.png","Kash_Huevos_00028.png","Kash_Huevos_00029.png","Kash_Huevos_00030.png","Kash_Huevos_00031.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "anim_kash_idle_scratch1.webp",
+	"format": "RGBA8888",
+	"size": {"w":3831,"h":3831},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:d1c0dd2e3291019bc70a3c5cf38e997b:47ad062757a250d21ac3bcfe035187e4:2af29577690e585d6e2029a7054ec323$"
+}
+}

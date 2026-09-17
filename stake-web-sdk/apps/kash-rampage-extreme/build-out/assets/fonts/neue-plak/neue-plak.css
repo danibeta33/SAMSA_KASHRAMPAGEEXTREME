@@ -1,0 +1,49 @@
+/* Neue Plak — brand typeface for Kash Smash (from Lucky Bastards style guide).
+ *
+ * Two families:
+ *   - "Neue Plak Extended"  → widened / display headers (KASH SMASH, BALANCE)
+ *   - "Neue Plak Text"      → text body variant (labels, small captions)
+ *
+ * Regular = 400, Black = 900, ExtraBlack = 950. Extended-Black is the default
+ * for the marquee brand row in TopBar; Extended-Regular for numeric values.
+ */
+
+@font-face {
+	font-family: 'Neue Plak Extended';
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url('./Neue Plak Extended Regular.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'Neue Plak Extended';
+	font-style: normal;
+	font-weight: 900;
+	font-display: swap;
+	src: url('./Neue Plak Extended Black.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'Neue Plak Extended';
+	font-style: normal;
+	font-weight: 950;
+	font-display: swap;
+	src: url('./Neue Plak Extended ExtraBlack.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'Neue Plak';
+	font-style: normal;
+	font-weight: 950;
+	font-display: swap;
+	src: url('./Neue Plak ExtraBlack.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'Neue Plak Text';
+	font-style: normal;
+	font-weight: 900;
+	font-display: swap;
+	src: url('./Neue Plak Text Black.ttf') format('truetype');
+}

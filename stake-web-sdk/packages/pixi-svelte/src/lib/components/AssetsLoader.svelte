@@ -60,7 +60,13 @@
 						// verdad (Assets cachea la promesa fallida por URL)
 						await PIXI.Assets.unload(loadSrc).catch(() => undefined);
 						if (attempt === MAX_ATTEMPTS) {
-							console.error(`[AssetsLoader] "${key}" failed after ${MAX_ATTEMPTS} attempts:`, error);
+							// Gateado a DEV: consola de prod en CERO es requisito de
+							// approval. Agotados los reintentos el loading nunca
+							// completa y el jugador se queda en la pantalla de carga
+							// — el log no cambia eso, solo ensucia la consola que
+							// escanea el reviewer.
+							if (import.meta.env.DEV)
+								console.error(`[AssetsLoader] "${key}" failed after ${MAX_ATTEMPTS} attempts:`, error);
 						} else {
 							await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
 						}

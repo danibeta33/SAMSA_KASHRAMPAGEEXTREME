@@ -24,7 +24,17 @@
 				// PLAY visible pero muerto. Error visible y sin botón.
 				stateModal.modal = {
 					name: 'error',
-					error: { error: 'REPLAY_NOT_FOUND', message: 'Replay round could not be loaded.' },
+					// `userMessage` es lo que ModalError muestra en PROD. Es el
+					// único canal: desde el feedback 16-09 el modal ya no
+					// imprime `message` ni `error` (podían traer el stack o la
+					// respuesta cruda del RGS), solo un genérico — salvo que el
+					// emisor marque explícitamente un texto apto para el
+					// jugador, como acá.
+					error: {
+						error: 'REPLAY_NOT_FOUND',
+						message: 'Replay round could not be loaded.',
+						userMessage: 'Replay round could not be loaded. Please reload the game.',
+					},
 				};
 			}
 			return;
