@@ -170,6 +170,8 @@ export const registerGameLabActions = (context: GameContext) => {
 		previewMarcoColumna: 'marcoColumna',
 		introHold: 'introHold',
 		introSpinner: 'introSpinner',
+		replayCard: 'replayCard',
+		replayLong: 'replayLong',
 	};
 
 	animInspector.configure({
@@ -245,6 +247,30 @@ export const registerGameLabActions = (context: GameContext) => {
 		label: 'Ícono de carga siempre visible',
 		category: 'intro',
 		order: 2,
+	});
+
+	// ── Card de BET REPLAY (rechazo Stake 17-09: "must not be scrollable") ──
+	// La card solo se monta con `?replay=true` Y con una ronda cargada del RGS,
+	// así que revisarla en los 7 viewports oficiales obligaba a armar una URL
+	// de replay a mano por cada tamaño. Estos toggles la dejan en pantalla en
+	// una sesión normal, quieta, para redimensionar la ventana y mirarla.
+	//
+	// "valores largos" es el que importa para el layout: llena la card con los
+	// strings más largos que puede recibir de verdad — modo de buy (nombre
+	// largo + coste ×100), moneda de 3 letras y un win de 7 cifras. Si entra
+	// así, entra siempre.
+	//
+	// El botón ▶ queda inerte mientras no haya una ronda real cargada.
+	animInspector.registerCategory('replay', { label: 'CARD DE BET REPLAY', order: 2.6 });
+	animInspector.registerToggle('replayCard', {
+		label: 'MOSTRAR la card de Play Replay 🎞️',
+		category: 'replay',
+		order: 0,
+	});
+	animInspector.registerToggle('replayLong', {
+		label: 'Valores largos (stress de layout)',
+		category: 'replay',
+		order: 1,
 	});
 
 	// ── Clips de Kash ─────────────────────────────────────────────────────

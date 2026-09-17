@@ -1178,6 +1178,13 @@ export const labPreview = $state({
 	marcoColumna: false,
 	introHold: false,
 	introSpinner: false,
+	// Card de Bet Replay: solo existe con ?replay=true, así que revisarla en los
+	// 7 viewports obligaba a armar una URL de replay a mano. `replayCard` la
+	// monta en una sesión normal y `replayLong` la llena con los strings más
+	// largos posibles (buy de 100×, moneda de 3 letras, win de 7 cifras), que
+	// es lo que rompe el layout.
+	replayCard: false,
+	replayLong: false,
 } as Record<string, boolean>);
 if (import.meta.env.DEV && typeof window !== 'undefined') {
 	(globalThis as Record<string, unknown>).__labPreview = labPreview;

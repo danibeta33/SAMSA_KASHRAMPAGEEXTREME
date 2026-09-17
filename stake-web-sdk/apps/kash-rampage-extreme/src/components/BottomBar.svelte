@@ -174,6 +174,63 @@
 		sfxGeneral();
 		stateModal.modal = { name: 'betMenuKash' };
 	};
+
+	// ── Fit del monto dentro del pill (rechazo Stake 17-09: "the bet field in
+	// the bet bar is not properly responsive") ──────────────────────────────
+	// El hueco central del pill es el 44% de su ancho (≈74px con los valores
+	// congelados del tweaker) y `.bb__pill-amount` era 13px fijos con
+	// `white-space: nowrap`: "GC 10000.00" mide ~110px y se derramaba sobre
+	// los botones − y + (el reviewer fotografió justo eso: la "G" comida por
+	// el − y el último 0 por el +). Es independiente de la resolución, porque
+	// el stack entero se escala con transform: scale() y la proporción entre
+	// texto y hueco nunca cambia. Peor con "SC 1,000,000.00".
+	//
+	// No se puede resolver con media queries (ver nota al pie del bloque de
+	// estilos: los
+	// px vienen inline del tweaker y pisan cualquier query), así que se mide.
+	// Mismo criterio que Contenedor1.svelte para los paneles Pixi, pero medido
+	// en vez de por cantidad de caracteres: el presupuesto de 11 chars de
+	// Contenedor1 está calibrado contra otro ancho.
+	//
+	// La medición se hace SIEMPRE a font-size fija (el `transform: scale` no
+	// afecta `scrollWidth`), así que no hay realimentación entre medir y
+	// aplicar.
+	const amountText = $derived(money(stateBet.betAmount));
+	let amountSlotEl = $state<HTMLElement | null>(null);
+	let amountTextEl = $state<HTMLElement | null>(null);
+	let amountFit = $state(1);
+
+	const measureAmountFit = () => {
+		if (!amountSlotEl || !amountTextEl) return;
+		// Anchos FRACCIONARIOS: clientWidth/scrollWidth son enteros y redondean
+		// hacia arriba, lo que dejaba el factor medio punto largo y el monto
+		// asomando ~0.5px sobre el botón +.
+		const available = amountSlotEl.getBoundingClientRect().width;
+		// El transform entra en getBoundingClientRect, así que se mide con la
+		// escala apagada para obtener el ancho natural del texto.
+		const previousTransform = amountTextEl.style.transform;
+		amountTextEl.style.transform = 'none';
+		const natural = amountTextEl.getBoundingClientRect().width;
+		amountTextEl.style.transform = previousTransform;
+		if (!available || !natural) return;
+		// Medio punto de colchón por la variación del rasterizado de fuentes.
+		amountFit = Math.min(1, Math.max(0, available - 0.5) / natural);
+	};
+
+	$effect(() => {
+		// Dependencias explícitas: el texto del monto y el ancho del pill.
+		amountText;
+		t.stackW;
+		t.pillW;
+		if (!amountSlotEl || !amountTextEl) return;
+		measureAmountFit();
+		// Neue Plak Extended carga tarde: medir con la fuente de fallback
+		// miente (es más angosta) y el monto volvía a desbordar al swapear.
+		document.fonts?.ready.then(measureAmountFit);
+		const observer = new ResizeObserver(measureAmountFit);
+		observer.observe(amountSlotEl);
+		return () => observer.disconnect();
+	});
 </script>
 
 <div class="bb" class:bb--hidden={!visible || loading}>
@@ -237,8 +294,8 @@
 				<span class="bb__pill-social">PLAY</span>
 			{/if}
 			<button class="bb__pill-minus" onclick={decrease} disabled={!isIdle} aria-label={socialLabel('Decrease bet')}></button>
-			<button class="bb__pill-center" onclick={openBetMenu} disabled={!isIdle} aria-label={socialLabel('Choose bet')}>
-				<span class="bb__pill-amount">{money(stateBet.betAmount)}</span>
+			<button bind:this={amountSlotEl} class="bb__pill-center" onclick={openBetMenu} disabled={!isIdle} aria-label={socialLabel('Choose bet')}>
+				<span bind:this={amountTextEl} class="bb__pill-amount" style="transform: scale({amountFit})">{amountText}</span>
 			</button>
 			<button class="bb__pill-plus" onclick={increase} disabled={!isIdle} aria-label={socialLabel('Increase bet')}></button>
 		</div>
@@ -473,6 +530,16 @@
 		font-variant-numeric: tabular-nums;
 		pointer-events: none;
 		white-space: nowrap;
+		/* Sin esto el span es un flex item encogible: el navegador lo achicaría
+		   al ancho del hueco y `scrollWidth` dejaría de reportar el ancho
+		   natural del texto, que es justo lo que hay que medir. */
+		flex: 0 0 auto;
+		/* El factor lo calcula measureAmountFit() midiendo este span contra el
+		   hueco del pill. Escala UNIFORME (no scaleX) para no deformar la
+		   tipografía; el `scrollWidth` que se mide es el del texto sin escalar,
+		   así que aplicar el transform no re-dispara la medición. */
+		transform-origin: center center;
+		will-change: transform;
 	}
 	.bb__dock {
 		position: relative;

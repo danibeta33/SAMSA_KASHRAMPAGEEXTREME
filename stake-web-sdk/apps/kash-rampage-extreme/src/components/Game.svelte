@@ -360,7 +360,7 @@
 					<table class="lb-table">
 						<thead>
 							<tr>
-								<th>Scatters (Gold Bar) en initial drop</th>
+								<th>Scatters (Gold Bar) en el board</th>
 								<th>Free Spins otorgados</th>
 							</tr>
 						</thead>
@@ -380,8 +380,9 @@
 						</tbody>
 					</table>
 					<p>
-						<strong>Retrigger</strong>: 3 o más Gold Bars en el initial drop de cualquier Free Spin
-						añaden <strong>+5 Free Spins</strong>. Sin límite de retriggers.
+						<strong>Retrigger</strong>: 3 o más Gold Bars en el board durante cualquier Free Spin
+						—contando las que bajan en los tumbles— añaden <strong>+5 Free Spins</strong>. Sin
+						límite de retriggers.
 					</p>
 				</section>
 
@@ -398,9 +399,10 @@
 				<section>
 					<h2>Scatter — Gold Bar</h2>
 					<p>
-						Las <strong>Gold Bars</strong> sólo se cuentan en el initial drop (antes de cualquier
-						tumble). <strong>No participan en clusters</strong> y no pagan por sí solas. Su único
-						rol es disparar los Free Spins.
+						Las <strong>Gold Bars</strong> cuentan donde sea que caigan durante el spin,
+						<strong>incluidos los símbolos que bajan en los tumbles</strong>.
+						<strong>No participan en clusters</strong> y no pagan por sí solas. Su único rol es
+						disparar los Free Spins.
 					</p>
 				</section>
 
@@ -523,7 +525,7 @@
 					<table class="lb-table">
 						<thead>
 							<tr>
-								<th>Scatters (Gold Bar) on initial drop</th>
+								<th>Scatters (Gold Bar) on the board</th>
 								<th>Free Spins awarded</th>
 							</tr>
 						</thead>
@@ -543,8 +545,9 @@
 						</tbody>
 					</table>
 					<p>
-						<strong>Retrigger</strong>: 3 or more Gold Bars on the initial drop of any Free Spin
-						award an extra <strong>+5 Free Spins</strong>. No retrigger cap.
+						<strong>Retrigger</strong>: 3 or more Gold Bars on the board during any Free Spin —
+						counting the ones that drop in during tumbles — award an extra
+						<strong>+5 Free Spins</strong>. No retrigger cap.
 					</p>
 				</section>
 
@@ -560,8 +563,9 @@
 				<section>
 					<h2>Scatter — Gold Bar</h2>
 					<p>
-						<strong>Gold Bars</strong> are only counted on the initial drop (before any tumble).
-						They <strong>do not participate in clusters</strong> and do not pay on their own. Their
+						<strong>Gold Bars</strong> count wherever they land during a spin,
+						<strong>including symbols that drop in during tumbles</strong>. They
+						<strong>do not participate in clusters</strong> and do not pay on their own. Their
 						sole role is to trigger Free Spins.
 					</p>
 				</section>
@@ -738,9 +742,9 @@
 						los clusters. No sustituye al Gold Bar.
 					</li>
 					<li>
-						<strong class="lb-sym-inline"><PaySprite name="scatterLuz" size="1.6rem" label="Scatter" />Gold Bar (Scatter)</strong> — solo cuenta para disparar Free Spins en el initial
-						drop. No participa en clusters. 4 = 10 FS, 5 = 15 FS, 6+ = 20 FS. 3+ durante FS = retrigger
-						+5 FS.
+						<strong class="lb-sym-inline"><PaySprite name="scatterLuz" size="1.6rem" label="Scatter" />Gold Bar (Scatter)</strong> — cuenta para disparar Free Spins caiga donde caiga,
+						incluidos los tumbles. No participa en clusters. 4 = 10 FS, 5 = 15 FS, 6+ = 20 FS. 3+
+						durante FS = retrigger +5 FS.
 					</li>
 				</ul>
 
@@ -893,9 +897,9 @@
 						clusters. Does not substitute for the Gold Bar.
 					</li>
 					<li>
-						<strong class="lb-sym-inline"><PaySprite name="scatterLuz" size="1.6rem" label="Scatter" />Gold Bar (Scatter)</strong> — only counts toward triggering Free Spins on the
-						initial drop. Does not participate in clusters. 4 = 10 FS, 5 = 15 FS, 6+ = 20 FS. 3+
-						during FS = retrigger +5 FS.
+						<strong class="lb-sym-inline"><PaySprite name="scatterLuz" size="1.6rem" label="Scatter" />Gold Bar (Scatter)</strong> — counts toward triggering Free Spins wherever it
+						lands, including during tumbles. Does not participate in clusters. 4 = 10 FS,
+						5 = 15 FS, 6+ = 20 FS. 3+ during FS = retrigger +5 FS.
 					</li>
 				</ul>
 

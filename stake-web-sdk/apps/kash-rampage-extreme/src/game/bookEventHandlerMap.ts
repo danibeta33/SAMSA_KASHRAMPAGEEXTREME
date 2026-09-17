@@ -76,6 +76,11 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		// pegado — el board entero corría el bonus a alpha 0.3 ("vacío").
 		stateWinHighlight.active = false;
 		eventEmitter.broadcast({ type: 'tumbleWinAmountReset' });
+		// El tumble multiplier arranca en x1 cada spin. La math lo resetea EN
+		// SILENCIO (game_executables.py:reset_tumble_mult no emite evento), así
+		// que el reset visual lo tiene que reponer el cliente acá o el widget
+		// queda pegado en el último escalón del spin anterior.
+		eventEmitter.broadcast({ type: 'globalMultiplierUpdate', multiplier: 1 });
 		const isBonusGame = checkIsMultipleRevealEvents({ bookEvents });
 		if (isBonusGame) {
 			eventEmitter.broadcast({ type: 'stopButtonEnable' });
@@ -138,10 +143,34 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 			await eventEmitter.broadcastAsync({
 				type: 'showClusterWinAmounts',
 				wins: bookEvent.wins.map((win) => {
+					// `win.win` es el campo AUTORITATIVO: es el que la math suma a
+					// updateTumbleWin/setTotalWin y el que sostiene el payoutMultiplier.
+					// Reconstruirlo como winWithoutMult × globalMult (como hacía el
+					// sample del SDK) no da lo mismo en el ~4.7% de los wins:
+					//   - float en el paytable: H3 match-5 paga 8.2 y 8.2*100 es
+					//     819.9999999999999 en IEEE754 → el engine serializa `win` 820
+					//     (redondeo) y `meta.winWithoutMult` 819 (truncado). Es el
+					//     "8.19 en la grilla vs 8.2 en Game Info" del feedback 17-09.
+					//   - wincap: `win` viene clipeado al tope y winWithoutMult no, así
+					//     que la etiqueta mostraba más de lo que el RGS acredita.
+					const mult = win.meta.globalMult;
+					// La etiqueta se dibuja como "monto ×N" (ClusterWinAmount), así que
+					// el monto sólo se puede derivar dividiendo por N. Eso cierra exacto
+					// en todos los books MENOS uno por modo: el del WINCAP, donde la math
+					// clipea `win` al tope (500000 = 5000×) con un globalMult de 12 que no
+					// lo divide. Sin este guard la ronda de max win —la que el reviewer
+					// SIEMPRE prueba (event IDs de win cap, checklist §7)— mostraba
+					// "416.66666667 x12": moneyWin formatea hasta 8 decimales, y además
+					// 416.67 × 12 = 5000.04 ≠ 5000.00 acreditado. Es exactamente la clase
+					// de mismatch que Stake rechazó en el punto 2.5.
+					// Con mult = 1 la etiqueta cae a `moneyWinFromBookAmount(result)` y
+					// muestra el total EXACTO. En una ronda capeada el "×N" ya no
+					// describe nada de todos modos: el premio dejó de ser monto × mult.
+					const labelClosesExact = mult > 0 && win.win % mult === 0;
 					return {
-						win: win.meta.winWithoutMult,
-						mult: win.meta.globalMult,
-						result: win.meta.winWithoutMult * win.meta.globalMult,
+						win: labelClosesExact ? win.win / mult : win.win,
+						mult: labelClosesExact ? mult : 1,
+						result: win.win,
 						reel: win.meta.overlay.reel,
 						row: win.meta.overlay.row,
 					};
@@ -347,17 +376,41 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		const lastFreeSpinTriggerEvent = findLastBookEvent('freeSpinTrigger' as const);
 		const lastUpdateFreeSpinEvent = findLastBookEvent('updateFreeSpin' as const);
 		const lastSetTotalWinEvent = findLastBookEvent('setTotalWin' as const);
-		const lastUpdateGlobalMultEvent = findLastBookEvent('updateGlobalMult' as const);
 
 		if (lastFreeSpinTriggerEvent) await playBookEvent(lastFreeSpinTriggerEvent, { bookEvents });
 		if (lastUpdateFreeSpinEvent) playBookEvent(lastUpdateFreeSpinEvent, { bookEvents });
 		if (lastSetTotalWinEvent) playBookEvent(lastSetTotalWinEvent, { bookEvents });
-		if (lastUpdateGlobalMultEvent) playBookEvent(lastUpdateGlobalMultEvent, { bookEvents });
+
+		// Tumble multiplier: el escalón se resetea en CADA spin, así que sólo
+		// vale el último applyTumbleMult posterior al último reveal. Si el corte
+		// cayó en el drop inicial (todavía sin cascadas), restaura X1.
+		// Se restaura el valor directo en vez de re-jugar el evento para no
+		// disparar la animación del badge en el medio del snapshot.
+		const lastRevealIndex = findLastBookEvent('reveal' as const)?.index ?? -1;
+		const lastApplyTumbleMultEvent = findLastBookEvent('applyTumbleMult' as const);
+		const resumedMult =
+			lastApplyTumbleMultEvent && lastApplyTumbleMultEvent.index > lastRevealIndex
+				? lastApplyTumbleMultEvent.tumbleMult
+				: 1;
+		if (resumedMult > 1) eventEmitter.broadcast({ type: 'globalMultiplierShow' });
+		eventEmitter.broadcast({ type: 'globalMultiplierUpdate', multiplier: resumedMult });
 	},
 	// ACTIVE — per-tumble multiplier from math game_events.py:apply_tumble_mult_event.
-	// No-op in wireframe (no per-symbol mult overlay yet); kept so the book
-	// stream doesn't stall on an unhandled type.
-	applyTumbleMult: async (_bookEvent: BookEventOfType<'applyTumbleMult'>) => {},
+	// Es el ÚNICO evento de multiplicador que emite esta math: `updateGlobalMult`
+	// (el del template cluster) no existe en kash_rampage_extreme. Mientras este
+	// handler fue un no-op, el widget TUMBLE del TopHud y el badge in-board se
+	// quedaban clavados en X1 aunque el multiplicador se aplicara bien en los
+	// pagos — el rechazo de Stake del 17-09.
+	// Timing: la math emite applyTumbleMult DESPUÉS del tumbleBoard y ANTES del
+	// winInfo siguiente, o sea justo cuando caen los símbolos nuevos, que es el
+	// beat en el que el escalón tiene que subir.
+	applyTumbleMult: async (bookEvent: BookEventOfType<'applyTumbleMult'>) => {
+		eventEmitter.broadcast({ type: 'globalMultiplierShow' });
+		await eventEmitter.broadcastAsync({
+			type: 'globalMultiplierUpdate',
+			multiplier: bookEvent.tumbleMult,
+		});
+	},
 	// ACTIVE — informational marker that the round capped at max win. No
 	// dedicated UI in wireframe; finalWin event drives the visible total.
 	wincap: async (_bookEvent: BookEventOfType<'wincap'>) => {},

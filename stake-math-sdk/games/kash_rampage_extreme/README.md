@@ -18,8 +18,10 @@ parámetros abiertos en `stake-web-sdk/apps/kash-rampage-extreme/HANDOFF.md`.
   H1-H3 ponderado) o Premium (15%, H4). Evento book `kashRampage` con
   `conversions` (posiciones con padding +1), emitido POST-reveal — lección N3:
   el reveal serializado ya debe contener el board convertido.
-- Wild (W) sustituye todo menos scatter; Scatter (S) no paga, 4+ en el drop
-  inicial dispara free spins, 3+ en free spin retriggerea (+5)
+- Wild (W) sustituye todo menos scatter; Scatter (S) no paga, 4+ en el board
+  dispara free spins, 3+ en free spin retriggerea (+5). El conteo es
+  POST-tumble (`check_fs_condition` corre después del loop de cascadas, ver
+  `gamestate.py`), o sea que los scatters que caen en un tumble SÍ cuentan
 - 4 bet modes: `base` (1x), `vault_crack` (100x), `smash_mode` (250x),
   `rage_mode` (500x). IDs internos heredados de KS1 a propósito — solo cambian
   los títulos display en el frontend.

@@ -89,6 +89,15 @@ class GameConfig(Config):
         # 4+S triggers FS; per GDD section 5.3: 4=10, 5=15, 6+=20 (template
         # original mapping kept here — drift inside Stake Engine acceptable).
         # Retrigger: 3+S inside FS → +5 spins.
+        # ⚠ El conteo es POST-TUMBLE: gamestate.py llama check_fs_condition()
+        # DESPUÉS del loop de cascadas (base en run_spin, FS dentro del loop),
+        # así que los scatters que caen en un tumble cuentan para el trigger y
+        # para el retrigger. Medido sobre los books publicados: el 26.6% de los
+        # retriggers de rage_mode llegan a 3+ recién gracias a las cascadas.
+        # Las reglas del cliente lo dicen así desde el feedback de Stake 17-09
+        # (antes decían "initial drop" y era falso). Si algún día se quisiera
+        # restringir al drop inicial hay que re-simular y re-optimizar los 4
+        # modos: cambia el RTP de los buys.
         # Cubrir hasta las 30 celdas del board: las reels cargadas de scatter
         # (WCAP, usadas por los sims forzados wincap/bigwin) pueden sacar 9+
         # scatters y el lookup por conteo exacto tiraba KeyError. 6+ = 20

@@ -85,18 +85,19 @@ Premium symbol (15% chance per cell).
 
 ### Free Spins
 
-Land **4 or more Gold Bars on the initial drop** to trigger Free Spins. Gold
-Bars are only counted on that initial drop, never after a tumble, and they do
-not pay on their own.
+Land **4 or more Gold Bars on the board** to trigger Free Spins. Gold Bars
+count wherever they land during the spin, including the ones that drop in
+during tumbles, and they do not pay on their own.
 
-| Gold Bars on initial drop | Free Spins awarded |
+| Gold Bars on the board | Free Spins awarded |
 |---|---|
 | 4 Scatters | 10 Free Spins |
 | 5 Scatters | 15 Free Spins |
 | 6+ Scatters | 20 Free Spins |
 
-**Retrigger:** 3 or more Gold Bars on the initial drop of any Free Spin award
-an extra **+5 Free Spins**, with no retrigger cap.
+**Retrigger:** 3 or more Gold Bars on the board during any Free Spin --
+counting the ones that drop in during tumbles -- award an extra **+5 Free
+Spins**, with no retrigger cap.
 
 ### Tumble Multiplier
 

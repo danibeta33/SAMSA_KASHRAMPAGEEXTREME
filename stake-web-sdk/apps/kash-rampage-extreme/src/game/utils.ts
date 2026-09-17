@@ -20,8 +20,14 @@ export const playBet = async (bet: Bet) => {
 };
 
 // resume bet
+// `applyTumbleMult` reemplaza a `updateGlobalMult`, que venía del template
+// cluster y esta math NO emite nunca: sin él, un bonus resumido a mitad de
+// cascada reponía el widget TUMBLE en X1. También hace falta `reveal` para
+// saber dónde arrancó el spin en curso (el escalón se resetea por spin, así
+// que sólo vale el último applyTumbleMult POSTERIOR al último reveal).
 const BOOK_EVENT_TYPES_TO_RESERVE_FOR_SNAPSHOT = [
-	'updateGlobalMult',
+	'reveal',
+	'applyTumbleMult',
 	'freeSpinTrigger',
 	'updateFreeSpin',
 	'setTotalWin',
